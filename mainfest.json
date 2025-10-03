@@ -1,11 +1,11 @@
 {
-  "name": "TCWR Dy-NASTY Fantasy Football League",
+  "name": "Rookie Draft Lottery",
   "short_name": "TCWR",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#1e3159",
   "theme_color": "#ffffff",
-  "description": "A fantasy football league app for TCWR.",
+  "description": "Worse to First",
   "icons": [
     {
       "src": "tcwr-192.PNG",

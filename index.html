@@ -575,10 +575,21 @@
     <div class="commissioner-tools">
         <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
         
-        <div id="commissionerLogin">
-            <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs">
-            <button id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
-        </div>
+       <div id="commissionerLogin">
+    <form id="commissionerLoginForm"> 
+        
+        <input type="password" 
+            id="commissionerPassword" 
+            placeholder="Enter Password" 
+            class="..." 
+            autocomplete="off">
+
+        <button id="unlockCommissionerBtn" type="submit"> 
+            Unlock Commissioner Tools
+        </button>
+        
+    </form>
+</div>
 
         <div id="commissionerPanel" class="hidden">
             <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
@@ -677,35 +688,26 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-
-// --- 4. COMMISSIONER UNLOCK LOGIC (ADDED HERE) ---
-// This function needs to be placed after the DOM elements it references are defined.
-function handleCommissionerUnlock() {
-    // Check the password against the constant defined at the top
-    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
-        // Show the full panel and hide the login elements
-        commissionerPanel.classList.remove('hidden');
-        commissionerLogin.classList.add('hidden'); // Hide the password input and button
-        showMessage("Commissioner tools unlocked!", "success");
-        console.log("Commissioner panel unlocked.");
-    } else {
-        // Show an error message
-        showMessage("Incorrect password. Please try again.", "error");
-    }
-    commissionerPasswordInput.value = ''; // Clear the input field after a check
+    function handleCommissionerUnlock(event) { 
+    event.preventDefault();
+    
+    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
+        commissionerPanel.classList.remove('hidden');
+        commissionerLogin.classList.add('hidden');
+        showMessage("Commissioner tools unlocked!", "success");
+        console.log("Commissioner panel unlocked.");
+    } else {
+        showMessage("Incorrect password. Please try again.", "error");
+    }
+    commissionerPasswordInput.value = ''; 
 }
 
-// Add event listener to the unlock button (This is also correctly placed)
 if (unlockCommissionerBtn) {
     unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
 }
 
-// --- 5. AUDIO PLAYBACK FUNCTION ---
 function playPickAudio(pickNumber) {
-    // Clear any previous timeout to ensure we don't stop the wrong audio
     clearTimeout(audioTimeout);
-
-    // Stop and reset all pick-specific audio to be safe
     [crowdShoutAudio, disappointmentAudio, cheeringAudio, crowdCheersAudio].forEach(audio => {
         if (audio) {
             audio.pause();
@@ -713,34 +715,28 @@ function playPickAudio(pickNumber) {
         }
     });
 
-    // Lower the background theme volume while a pick audio is playing
     if (espnAudio) {
         espnAudio.volume = 0.1;
     }
 
     let audioToPlay;
-
-    // The logic for which audio to play is now adjusted for the reverse draw.
-    // The lowest picks are drawn first, so cheering will be for the last draws.
-    if (pickNumber <= 4) { // This will play for picks 1 through 4
+    if (pickNumber <= 4) { 
         audioToPlay = cheeringAudio;
     } else if (pickNumber <= 7) {
         audioToPlay = disappointmentAudio;
-    } else if (pickNumber === 8) { // The first pick drawn gets the 8th overall pick
+    } else if (pickNumber === 8) { 
         audioToPlay = crowdShoutAudio;
     }
 
     if (audioToPlay) {
         audioToPlay.play().catch(e => console.error("Audio playback error:", e));
-        
-        // Use a timeout to stop the audio after 3 seconds
         audioTimeout = setTimeout(() => {
             audioToPlay.pause();
-            audioToPlay.currentTime = 0; // Reset for next time
+            audioToPlay.currentTime = 0;
             if (espnAudio) {
-                espnAudio.volume = 0.5; // Restore theme volume
+                espnAudio.volume = 0.5;
             }
-        }, 3000); // 3000 milliseconds = 3 seconds
+        }, 3000);
     }
 }
 
@@ -1343,7 +1339,6 @@ function handleFirstInteraction() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeDraftState();    
-    
     if (runFullDraftBtn) runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
     if (saveConfigBtn) saveConfigBtn.addEventListener('click', saveConfig);
     if (resetDraftBtn) resetDraftBtn.addEventListener('click', async () => {
@@ -1353,13 +1348,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage('Draft has been reset to its initial state. A new random draft can now be run.');
         }
     });
-
-    
-    // Add an event listener to the audio overlay to handle the first interaction
     if (audioOverlay) {
         audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
     }
-    // You can keep the keydown listener on the document if you want, but the click listener is now more specific
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
 </script>

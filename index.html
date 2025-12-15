@@ -573,26 +573,25 @@
             </ul>
     </div>
 
-    <div class="commissioner-tools">
-        <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
-        
-        <div id="commissionerLogin">
-            <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs">
-            <button id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
+   <div class="commissioner-tools">
+    <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
+    
+    <form id="commissionerLogin">
+        <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs">
+        <button type="button" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
+    </form>
+    <div id="commissionerPanel" class="hidden">
+        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
+        <div id="memberConfigInputs">
         </div>
-
-        <div id="commissionerPanel" class="hidden">
-            <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
-            <div id="memberConfigInputs">
-            </div>
-            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
-            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
-        </div>
+        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
+        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
     </div>
-        <div id="messageBox" class="message-box">
-        <p id="messageText"></p>
-        <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
-    </div>
+</div>
+<div id="messageBox" class="message-box">
+    <p id="messageText"></p>
+    <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
+</div>
 
 </div> <div id="audioOverlay" class="audio-overlay">
     <div class="overlay-content">
@@ -635,17 +634,13 @@
 
  
 <script type="module">
-// --- 1. AUDIO & UTILITY VARIABLES ---
-// Declare audio variables with 'let' so they can be initialized later on user interaction
 let espnAudio = null;
 let crowdShoutAudio = null;
 let disappointmentAudio = null;
 let cheeringAudio = null;
 let crowdCheersAudio = null;
-// Declare this variable to manage the timeout for stopping audio
 let audioTimeout;
 
-// --- 2. SUPABASE CONFIGURATION ---
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const COMMISSIONER_PASSWORD = 'Asher'; // This needs to be defined BEFORE it's used

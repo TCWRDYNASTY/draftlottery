@@ -373,7 +373,6 @@
         transform: none;
     }
 
-    /* Message Box Styling */
     .message-box {
         position: fixed;
         top: 50%;
@@ -498,7 +497,7 @@
 
 .audio-overlay.hidden {
     opacity: 0;
-    pointer-events: none; /* Make it unclickable when hidden */
+    pointer-events: none;
 }
 
 .overlay-content {
@@ -512,7 +511,7 @@
 }
 
 .hidden {
-    display: none !important; /* Use !important to ensure it overrides other display properties */
+    display: none !important;
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -630,7 +629,6 @@
     </div>
 </div>
 
- 
 <script type="module">
 let espnAudio = null;
 let crowdShoutAudio = null;
@@ -639,9 +637,9 @@ let cheeringAudio = null;
 let crowdCheersAudio = null;
 let audioTimeout;
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/module/index.js';
 
-const COMMISSIONER_PASSWORD = 'Asher'; // This needs to be defined BEFORE it's used
+const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 
@@ -650,13 +648,13 @@ const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- 3. STATE VARIABLES & DOM ELEMENTS ---
-let members = []; // This will be populated from Supabase
+let members = []; 
 let availableMembers = [];
 let draftOrder = [];
 let drawing = false;
 let pickCounter = 0;
 let isDraftSaved = false;
+
 
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
@@ -665,8 +663,6 @@ const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
 const resultsList = document.getElementById('resultsList');
 const teamOddsList = document.getElementById('teamOddsList');
 const audioOverlay = document.getElementById('audioOverlay');
-
-// These elements need to be defined before the unlock function uses them
 const commissionerLogin = document.getElementById('commissionerLogin');
 const commissionerPasswordInput = document.getElementById('commissionerPassword');
 const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
@@ -676,70 +672,51 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-
-// --- 4. COMMISSIONER UNLOCK LOGIC (ADDED HERE) ---
-// This function needs to be placed after the DOM elements it references are defined.
 function handleCommissionerUnlock() {
-    // Check the password against the constant defined at the top
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
-        // Show the full panel and hide the login elements
         commissionerPanel.classList.remove('hidden');
-        commissionerLogin.classList.add('hidden'); // Hide the password input and button
+        commissionerLogin.classList.add('hidden'); 
         showMessage("Commissioner tools unlocked!", "success");
         console.log("Commissioner panel unlocked.");
     } else {
-        // Show an error message
         showMessage("Incorrect password. Please try again.", "error");
     }
-    commissionerPasswordInput.value = ''; // Clear the input field after a check
+    commissionerPasswordInput.value = ''; 
 }
 
-// Add event listener to the unlock button (This is also correctly placed)
 if (unlockCommissionerBtn) {
     unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
 }
-
-// --- 5. AUDIO PLAYBACK FUNCTION ---
 function playPickAudio(pickNumber) {
-    // Clear any previous timeout to ensure we don't stop the wrong audio
     clearTimeout(audioTimeout);
-
-    // Stop and reset all pick-specific audio to be safe
     [crowdShoutAudio, disappointmentAudio, cheeringAudio, crowdCheersAudio].forEach(audio => {
         if (audio) {
             audio.pause();
             audio.currentTime = 0;
         }
     });
-
-    // Lower the background theme volume while a pick audio is playing
     if (espnAudio) {
         espnAudio.volume = 0.1;
     }
 
     let audioToPlay;
-
-    // The logic for which audio to play is now adjusted for the reverse draw.
-    // The lowest picks are drawn first, so cheering will be for the last draws.
-    if (pickNumber <= 4) { // This will play for picks 1 through 4
+    if (pickNumber <= 4) {
         audioToPlay = cheeringAudio;
     } else if (pickNumber <= 7) {
         audioToPlay = disappointmentAudio;
-    } else if (pickNumber === 8) { // The first pick drawn gets the 8th overall pick
+    } else if (pickNumber === 8) {
         audioToPlay = crowdShoutAudio;
     }
 
     if (audioToPlay) {
         audioToPlay.play().catch(e => console.error("Audio playback error:", e));
-        
-        // Use a timeout to stop the audio after 3 seconds
         audioTimeout = setTimeout(() => {
             audioToPlay.pause();
-            audioToPlay.currentTime = 0; // Reset for next time
+            audioToPlay.currentTime = 0; 
             if (espnAudio) {
-                espnAudio.volume = 0.5; // Restore theme volume
+                espnAudio.volume = 0.5;
             }
-        }, 3000); // 3000 milliseconds = 3 seconds
+        }, 3000);
     }
 }
 
@@ -1352,13 +1329,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage('Draft has been reset to its initial state. A new random draft can now be run.');
         }
     });
-
-    
-    // Add an event listener to the audio overlay to handle the first interaction
     if (audioOverlay) {
         audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
     }
-    // You can keep the keydown listener on the document if you want, but the click listener is now more specific
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
 </script>

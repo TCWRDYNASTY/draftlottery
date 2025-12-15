@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy Football Draft Lottery</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-
-   
-
     <style>
+
+
     :root {
         --primary-dark: #1e3159; /* Deep Blue */
         --accent-gold: #FFD700; /* Gold */
@@ -375,6 +375,7 @@
         transform: none;
     }
 
+    /* Message Box Styling */
     .message-box {
         position: fixed;
         top: 50%;
@@ -499,7 +500,7 @@
 
 .audio-overlay.hidden {
     opacity: 0;
-    pointer-events: none;
+    pointer-events: none; /* Make it unclickable when hidden */
 }
 
 .overlay-content {
@@ -513,7 +514,7 @@
 }
 
 .hidden {
-    display: none !important;
+    display: none !important; /* Use !important to ensure it overrides other display properties */
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -572,30 +573,31 @@
             </ul>
     </div>
 
-   <div class="commissioner-tools">
-    <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
-    
-    <form id="commissionerLogin">
-       <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs" autocomplete="off">
-        <button type="button" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
-    </form>
-    <div id="commissionerPanel" class="hidden">
-        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
-        <div id="memberConfigInputs">
+    <div class="commissioner-tools">
+        <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
+        
+        <div id="commissionerLogin">
+            <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs">
+            <button id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
         </div>
-        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
-        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
+
+        <div id="commissionerPanel" class="hidden">
+            <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
+            <div id="memberConfigInputs">
+            </div>
+            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
+            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
+        </div>
     </div>
-</div>
-<div id="messageBox" class="message-box">
-    <p id="messageText"></p>
-    <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
-</div>
+        <div id="messageBox" class="message-box">
+        <p id="messageText"></p>
+        <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
+    </div>
 
 </div> <div id="audioOverlay" class="audio-overlay">
     <div class="overlay-content">
         <div class="explanation-text" style="max-width: 800px; padding: 2rem; border-radius: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.7); text-align: center;">
-         <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 1rem; color: #FFD700; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);">
+            <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 1rem; color: #FFD700; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);">
                 How the Lottery Works: Reverse Order Reveal
             </h3>
             <p style="font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem;">
@@ -608,20 +610,15 @@
                 <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: bold;">This means:</p>
                 <ul style="list-style: disc; list-style-position: inside; padding-left: 1rem; font-size: 1rem;">
                     <li>
-                        <strong style="color: #FFD700;">Teams with the lowest odds of winning Pick #1</strong> have the highest chance of being drawn for the very first pick revealed... **Pick #8**.
+                        <strong style="color: #FFD700;">Teams with the highest odds</strong> have the highest chance of being drawn for the very first pick revealed... **Pick #8**.
                     </li>
                     <li>
-                        <strong style="color: #FFD700;">The Team with the highest odds of winning Pick #1</strong> is the one that is most likely to avoid being picked early, increasing their chances with every round.
+                        <strong style="color: #FFD700;">Teams with the lowest odds</strong> are long shots, but if they get lucky and avoid being picked early, their odds of winning a top pick like #1 increase with every round.
                     </li>
                 </ul>
             </div>
-            
-            <p style="font-size: 1.1rem; line-height: 1.5; margin-top: 1.5rem; font-weight: bold;">
-                <strong style="color: #FFD700;">The Last Team Standing Rule:</strong> The team that is **never drawn** throughout the entire process is automatically awarded the coveted **Pick #1** in the draft.
-            </p>
-            
             <p style="font-size: 1rem; margin-top: 1.5rem; font-style: italic;">
-                The suspense builds as the most likely teams for later picks are eliminated, guaranteeing the top pick for the Last Team Standing.
+                The suspense builds as the most likely teams are eliminated, leaving a shot at the jackpot for the long shots.
             </p>
         </div>
         
@@ -631,17 +628,22 @@
     </div>
 </div>
 
+ 
 <script type="module">
+// --- 1. AUDIO & UTILITY VARIABLES ---
+// Declare audio variables with 'let' so they can be initialized later on user interaction
 let espnAudio = null;
 let crowdShoutAudio = null;
 let disappointmentAudio = null;
 let cheeringAudio = null;
 let crowdCheersAudio = null;
+// Declare this variable to manage the timeout for stopping audio
 let audioTimeout;
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/module/index.js';
+// --- 2. SUPABASE CONFIGURATION ---
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const COMMISSIONER_PASSWORD = 'Asher'; 
+const COMMISSIONER_PASSWORD = 'Asher'; // This needs to be defined BEFORE it's used
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 
@@ -650,13 +652,13 @@ const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let members = []; 
+// --- 3. STATE VARIABLES & DOM ELEMENTS ---
+let members = []; // This will be populated from Supabase
 let availableMembers = [];
 let draftOrder = [];
 let drawing = false;
 let pickCounter = 0;
 let isDraftSaved = false;
-
 
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
@@ -665,6 +667,8 @@ const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
 const resultsList = document.getElementById('resultsList');
 const teamOddsList = document.getElementById('teamOddsList');
 const audioOverlay = document.getElementById('audioOverlay');
+
+// These elements need to be defined before the unlock function uses them
 const commissionerLogin = document.getElementById('commissionerLogin');
 const commissionerPasswordInput = document.getElementById('commissionerPassword');
 const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
@@ -674,51 +678,70 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
+
+// --- 4. COMMISSIONER UNLOCK LOGIC (ADDED HERE) ---
+// This function needs to be placed after the DOM elements it references are defined.
 function handleCommissionerUnlock() {
+    // Check the password against the constant defined at the top
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
+        // Show the full panel and hide the login elements
         commissionerPanel.classList.remove('hidden');
-        commissionerLogin.classList.add('hidden'); 
+        commissionerLogin.classList.add('hidden'); // Hide the password input and button
         showMessage("Commissioner tools unlocked!", "success");
         console.log("Commissioner panel unlocked.");
     } else {
+        // Show an error message
         showMessage("Incorrect password. Please try again.", "error");
     }
-    commissionerPasswordInput.value = ''; 
+    commissionerPasswordInput.value = ''; // Clear the input field after a check
 }
 
+// Add event listener to the unlock button (This is also correctly placed)
 if (unlockCommissionerBtn) {
     unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
 }
+
+// --- 5. AUDIO PLAYBACK FUNCTION ---
 function playPickAudio(pickNumber) {
+    // Clear any previous timeout to ensure we don't stop the wrong audio
     clearTimeout(audioTimeout);
+
+    // Stop and reset all pick-specific audio to be safe
     [crowdShoutAudio, disappointmentAudio, cheeringAudio, crowdCheersAudio].forEach(audio => {
         if (audio) {
             audio.pause();
             audio.currentTime = 0;
         }
     });
+
+    // Lower the background theme volume while a pick audio is playing
     if (espnAudio) {
         espnAudio.volume = 0.1;
     }
 
     let audioToPlay;
-    if (pickNumber <= 4) {
+
+    // The logic for which audio to play is now adjusted for the reverse draw.
+    // The lowest picks are drawn first, so cheering will be for the last draws.
+    if (pickNumber <= 4) { // This will play for picks 1 through 4
         audioToPlay = cheeringAudio;
     } else if (pickNumber <= 7) {
         audioToPlay = disappointmentAudio;
-    } else if (pickNumber === 8) {
+    } else if (pickNumber === 8) { // The first pick drawn gets the 8th overall pick
         audioToPlay = crowdShoutAudio;
     }
 
     if (audioToPlay) {
         audioToPlay.play().catch(e => console.error("Audio playback error:", e));
+        
+        // Use a timeout to stop the audio after 3 seconds
         audioTimeout = setTimeout(() => {
             audioToPlay.pause();
-            audioToPlay.currentTime = 0; 
+            audioToPlay.currentTime = 0; // Reset for next time
             if (espnAudio) {
-                espnAudio.volume = 0.5;
+                espnAudio.volume = 0.5; // Restore theme volume
             }
-        }, 3000);
+        }, 3000); // 3000 milliseconds = 3 seconds
     }
 }
 
@@ -1331,9 +1354,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage('Draft has been reset to its initial state. A new random draft can now be run.');
         }
     });
+
+    
+    // Add an event listener to the audio overlay to handle the first interaction
     if (audioOverlay) {
         audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
     }
+    // You can keep the keydown listener on the document if you want, but the click listener is now more specific
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
 </script>

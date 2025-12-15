@@ -644,12 +644,10 @@ let audioTimeout;
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const COMMISSIONER_PASSWORD = 'Asher'; // This needs to be defined BEFORE it's used
-const SUPABASE_URL = 'https://aznsmupnyyjtdwryaxos.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6bnNtdXBueXlqdGR3cnlheG9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTYxNTYsImV4cCI6MjA2NjQzMjE1Nn0.CGfUxS4wZZgVjdUtk_h14-i7zZXy8sZ6wtsiRFKUKpg';
-
+const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 const SUPABASE_TABLE_NAME = 'draft_configs';
 const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- 3. STATE VARIABLES & DOM ELEMENTS ---

@@ -574,8 +574,7 @@
     </div>
 
     <div class="commissioner-tools">
-        <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
-        
+        <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
     <form id="commissionerLogin">
 <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs" autocomplete="off">    
         <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
@@ -678,7 +677,7 @@ const commissionerLoginContainer = document.querySelector('.commissioner-tools')
     if (success) {
         showMessage("Configuration saved successfully!", "success");
     }
-}
+
 
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();

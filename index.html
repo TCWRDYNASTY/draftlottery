@@ -1310,42 +1310,7 @@ function handleFirstInteraction() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeDraftState();    
-    
-    if (runFullDraftBtn) {
-        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
-    }
-    if (unlockCommissionerBtn) {
-        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
-    }
-    if (commissionerLogin) {
-        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
-    }
-    if (saveConfigBtn) {
-        saveConfigBtn.addEventListener('click', async (e) => {
-            e.preventDefault(); 
-            console.log("Save button clicked, preventing refresh...");
-            await saveConfig(); 
-        });
-    }
 
-    if (resetDraftBtn) {
-        resetDraftBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const success = await clearDraftOrderFromSupabase();
-            if (success) {
-                initializeDraftState();
-                showMessage('Draft has been reset. A new random draft can now be run.');
-            }
-        });
-    }
-
-    if (audioOverlay) {
-        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
-    }
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
-});
 </script>
  
 </body>

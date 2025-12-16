@@ -1208,8 +1208,7 @@ async function runFullDraftSimulation() {
     while (pickCounter >= 1) {
         await performSingleDraw();
         pickCounter--; 
-    }
-    // --- END MODIFIED ---
+    }
     
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
@@ -1251,53 +1250,73 @@ function showMessage(message) {
 }
 
 function initializeMemberConfigInputs() {
-    if (!memberConfigInputs) return;
-    memberConfigInputs.innerHTML = '';
-    members.forEach(member => {
-        const div = document.createElement('div');
-        div.classList.add('input-group');
-        div.innerHTML = `
-            <label for="${member.id}-name">Team Name:</label>
-            <input type="text" id="${member.id}-name" value="${member.name}" placeholder="Team Name">
-            <label for="${member.id}-weight">Weight:</label>
-            <input type="number" id="${member.id}-weight" value="${member.weight}" min="1" max="100" class="w-20">
-        `;
-        memberConfigInputs.appendChild(div);
-    });
+    if (!memberConfigInputs) return;
+    memberConfigInputs.innerHTML = '';
+    
+    members.forEach(member => {
+        const div = document.createElement('div');
+        div.classList.add('input-group');
+        
+        // We use a cleaner ID structure to ensure the saveConfig function finds them
+        div.innerHTML = `
+            <div class="flex flex-col mb-2">
+                <label class="mb-1">Team Name:</label>
+                <input type="text" 
+                       id="name-${member.id}" 
+                       value="${member.name}" 
+                       class="admin-input">
+            </div>
+            <div class="flex flex-col mb-2">
+                <label class="mb-1">Weight:</label>
+                <input type="number" 
+                       id="weight-${member.id}" 
+                       value="${member.weight}" 
+                       min="1" max="100" 
+                       class="w-24 admin-input">
+            </div>
+        `;
+        memberConfigInputs.appendChild(div);
+    });
 }
 
 async function saveConfig() {
-    const newMembers = [];
-    let isValid = true;
-    members.forEach(member => {
-        const nameInput = document.getElementById(`${member.id}-name`);
-        const weightInput = document.getElementById(`${member.id}-weight`);
-        if (nameInput && weightInput) {
-            const newWeight = parseInt(weightInput.value, 10);
-            if (nameInput.value.trim() === '' || isNaN(newWeight) || newWeight <= 0) {
-                showMessage('All team names must not be empty and all weights must be positive numbers.');
-                isValid = false;
-                return;
-            }
-            newMembers.push({
-                name: nameInput.value.trim(),
-                weight: newWeight,
-                id: member.id,
-                originalWeightDisplay: `${newWeight}%`
-            });
-        }
-    });
+    const newMembers = [];
+    let isValid = true;
 
-    if (isValid && newMembers.length > 0) {
-        const success = await saveMembersToSupabase(newMembers);
-        if (success) {
-            members = newMembers;
-            showMessage(`Configuration saved! The draft is ready to be reset.`);
-            initializeDraftState();
-        }
-    } else if (newMembers.length === 0) {
-        showMessage('At least one team must be configured.');
-    }
+    members.forEach(member => {
+        // These now match the "name-ID" format exactly
+        const nameInput = document.getElementById(`name-${member.id}`);
+        const weightInput = document.getElementById(`weight-${member.id}`);
+
+        if (nameInput && weightInput) {
+            const newWeight = parseInt(weightInput.value, 10);
+            const newName = nameInput.value.trim();
+
+            if (newName === '' || isNaN(newWeight) || newWeight <= 0) {
+                showMessage('All team names must not be empty and all weights must be positive numbers.');
+                isValid = false;
+                return;
+            }
+
+            newMembers.push({
+                id: member.id, // Keeping the original ID is key for Supabase
+                name: newName,
+                weight: newWeight,
+                originalWeightDisplay: `${newWeight}%`
+            });
+        }
+    });
+
+    if (isValid && newMembers.length > 0) {
+        const success = await saveMembersToSupabase(newMembers);
+        if (success) {
+            members = newMembers; 
+            showMessage(`Configuration saved! The draft is ready.`);
+            initializeDraftState(); // This updates the odds list on your screen
+        }
+    } else if (newMembers.length === 0) {
+        showMessage('At least one team must be configured.');
+    }
 }
 
 window.addEventListener('resize', () => {

@@ -671,14 +671,6 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-
-    members = updatedMembers;
-    const success = await saveMembersToSupabase(members);
-    if (success) {
-        showMessage("Configuration saved successfully!", "success");
-    }
-
-
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
 

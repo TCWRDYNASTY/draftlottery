@@ -511,7 +511,33 @@
 .hidden {
     display: none !important; /* Use !important to ensure it overrides other display properties */
 }
-</style>
+
+#memberConfigInputs input {
+    background-color: #1a2a47 !important; /* Dark blue background */
+    color: #ffffff !important;            /* Pure white text */
+    border: 1px solid #FFD700 !important;  /* Gold border */
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    width: 100%; /* Helps with mobile layout */
+    max-width: 200px;
+}
+
+#memberConfigInputs label {
+    color: #FFD700 !important; /* Gold labels for Team/Weight */
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.input-group {
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+      
+    </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 

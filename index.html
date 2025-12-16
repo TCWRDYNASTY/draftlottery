@@ -674,24 +674,6 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-// 5. Functions
-async function saveConfig() {
-    console.log("Gathering data from inputs...");
-    const inputs = document.querySelectorAll('.member-config-item');
-    const updatedMembers = [];
-
-    inputs.forEach(inputGroup => {
-        const id = inputGroup.dataset.id;
-        const name = inputGroup.querySelector('.member-name-input').value;
-        const weight = parseInt(inputGroup.querySelector('.member-weight-input').value) || 0;
-
-        updatedMembers.push({
-            id: id,
-            name: name,
-            weight: weight,
-            originalWeightDisplay: weight
-        });
-    });
 
     members = updatedMembers;
     const success = await saveMembersToSupabase(members);
@@ -942,23 +924,19 @@ async function initializeDraftState() {
                 runFullDraftBtn.disabled = false;
             }
             if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
-            // --- MODIFIED: On a new run, start the pick counter from the total number of members ---
+       
             pickCounter = members.length;
-            // --- END MODIFIED ---
             availableMembers = members.map(member => ({ ...member }));
             populateBalls();
             displayTeamOdds();
             initializeResultsList();
         }
     } else {
-        // Scenario 3: No draft order is found, so initialize for a new random run
         console.log('No saved draft found. Setting up for a new random run.');
         isDraftSaved = false;
         availableMembers = members.map(member => ({ ...member }));
         draftOrder = [];
-        // --- MODIFIED: On a new run, start the pick counter from the total number of members ---
         pickCounter = members.length;
-        // --- END MODIFIED ---
         if (runFullDraftBtn) {
             runFullDraftBtn.textContent = 'Run Draft';
             runFullDraftBtn.disabled = false;

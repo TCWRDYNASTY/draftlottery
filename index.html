@@ -630,16 +630,10 @@
 
  
 <script type="module">
-let espnAudio = null;
-let crowdShoutAudio = null;
-let disappointmentAudio = null;
-let cheeringAudio = null;
-let crowdCheersAudio = null;
-let audioTimeout;
-
-// *** CHANGED THIS LINE ***
+// 1. Imports first
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// 2. Constants & Configuration
 const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
@@ -648,6 +642,7 @@ const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// 3. Global State (Variables)
 let members = []; 
 let availableMembers = [];
 let draftOrder = [];
@@ -655,6 +650,14 @@ let drawing = false;
 let pickCounter = 0;
 let isDraftSaved = false;
 
+let espnAudio = null;
+let crowdShoutAudio = null;
+let disappointmentAudio = null;
+let cheeringAudio = null;
+let crowdCheersAudio = null;
+let audioTimeout;
+
+// 4. DOM Elements (HTML references)
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
@@ -670,6 +673,32 @@ const memberConfigInputs = document.getElementById('memberConfigInputs');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+
+// 5. Functions
+async function saveConfig() {
+    console.log("Gathering data from inputs...");
+    const inputs = document.querySelectorAll('.member-config-item');
+    const updatedMembers = [];
+
+    inputs.forEach(inputGroup => {
+        const id = inputGroup.dataset.id;
+        const name = inputGroup.querySelector('.member-name-input').value;
+        const weight = parseInt(inputGroup.querySelector('.member-weight-input').value) || 0;
+
+        updatedMembers.push({
+            id: id,
+            name: name,
+            weight: weight,
+            originalWeightDisplay: weight
+        });
+    });
+
+    members = updatedMembers;
+    const success = await saveMembersToSupabase(members);
+    if (success) {
+        showMessage("Configuration saved successfully!", "success");
+    }
+}
 
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
@@ -977,9 +1006,7 @@ function updateUIFromCurrentState() {
                 oddsElement.classList.add('picked');
             }
         }
-        
-        // --- CORRECTED LOGIC for updating the result list ---
-        // Find the list item for the specific pick number
+    
         const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
         if (pickElement) {
             pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
@@ -991,13 +1018,9 @@ function updateUIFromCurrentState() {
 
 function populateBalls() {
     if (!lotteryMachine) return;
-
-    // --- CORRECTION 2: ONLY CLEAR THE MACHINE IF THERE ARE TEAMS TO DRAW ---
-    // This prevents the balls from disappearing after the final pick.
     if (availableMembers.length > 0) {
         lotteryMachine.innerHTML = '';
     }
-    // --- END CORRECTION 2 ---
 
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
@@ -1007,27 +1030,20 @@ function populateBalls() {
     if (runFullDraftBtn) runFullDraftBtn.disabled = false;
 
     const ballsToRender = [];
-    // --- CORRECTION 3: POPULATE BALLS BASED ON WEIGHT ---
-    // This creates a proportional number of balls for each team.
     availableMembers.forEach(member => {
         const weight = member.weight || 0; 
         for (let i = 0; i < weight; i++) {
             ballsToRender.push({ teamId: member.id });
         }
     });
-    // --- END CORRECTION 3 ---
-
-    // This block now only runs if the pool is empty, keeping the last balls in place.
     if (ballsToRender.length === 0 && pickCounter > 0) {
-        // If all picks are drawn, display a message.
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
         return;
     } else if (ballsToRender.length === 0 && pickCounter === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
         return;
     }
-    
-    // The rest of the logic remains the same, but now it operates on the weighted ball pool.
+
     const shuffledBalls = [...ballsToRender];
     for (let i = shuffledBalls.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -1059,23 +1075,15 @@ function populateBalls() {
 
         const ballWidth = ball.offsetWidth;
         const ballHeight = ball.offsetHeight;
-
-        // --- CORRECTION 4: Set initial random position for each ball ---
-        // This ensures they start in different locations and circulate throughout the machine.
         const randomX = Math.random() * (contentWidth - ballWidth);
         const randomY = Math.random() * (mixingAreaHeight - ballHeight);
 
         ball.style.left = `${randomX + contentXStart}px`;
         ball.style.top = `${randomY + contentYStart}px`;
-        // --- END CORRECTION 4 ---
-
-        // --- NEW CIRCULAR MOTION LOGIC ---
-        // Each ball gets a random radius and speed
-        const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); // Random radius within a range
-        const duration = Math.random() * 8 + 4; // Random duration between 4 and 12 seconds
-        const delay = Math.random() * -duration; // Random negative delay for staggered start
+        const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
+        const duration = Math.random() * 8 + 4; 
+        const delay = Math.random() * -duration; 
         
-        // Use CSS custom properties to pass values to the keyframes
         ball.style.setProperty('--circle-radius', `${radius}px`);
         ball.style.animationName = 'circle-motion';
         ball.style.animationDuration = `${duration}s`;
@@ -1121,8 +1129,6 @@ function drawWeightedMember() {
 
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
-
-    // --- CORRECTED: Use pickCounter directly for the label ---
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
@@ -1134,7 +1140,6 @@ async function performSingleDraw() {
     const drawnMember = drawWeightedMember();
 
     if (drawnMember) {
-        // --- NEW: Play the pick audio using the current pickCounter ---
         playPickAudio(pickCounter);
         
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
@@ -1172,13 +1177,9 @@ async function performSingleDraw() {
             drawnTeamNameDisplay.textContent = drawnMember.name;
             await new Promise(resolve => setTimeout(resolve, 1500));
         }
-
-        // --- CORRECTED: Use pickCounter for the result list update ---
         if (!isDraftSaved) {
             draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
         }
-        
-        // Find the correct list item using the data attribute
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
         if (pickElement) {
             pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
@@ -1210,19 +1211,15 @@ async function runFullDraftSimulation() {
 
     if (isDraftSaved) {
         if (resultsList) resultsList.style.display = 'none';
-        // --- MODIFIED: On replay, start the counter at the highest pick number ---
         pickCounter = members.length;
-        // --- END MODIFIED ---
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     } else {
         draftOrder = [];
     }
-
-    // --- MODIFIED: The loop now counts DOWN from the total number of members to 1 ---
     while (pickCounter >= 1) {
         await performSingleDraw();
-        pickCounter--; // Decrement the counter after each pick is drawn
+        pickCounter--; 
     }
     // --- END MODIFIED ---
     
@@ -1244,21 +1241,18 @@ async function runFullDraftSimulation() {
     if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 
-// --- MODIFIED: Use a data attribute to target the list items and create them in descending order ---
 function initializeResultsList() {
     if (!resultsList) return;
     resultsList.innerHTML = '';
-    // Create list items in descending order to match the drawing sequence (Pick 8, 7, 6...)
     for (let i = members.length; i >= 1; i--) {
         const li = document.createElement('li');
         li.innerHTML = `<span>Pick ${i}:</span> <span class="text-gray-400">Pending...</span>`;
         li.classList.add('bg-gray-700', 'text-gray-300');
-        // Add a data attribute to easily find this element later
         li.setAttribute('data-pick-num', i);
         resultsList.appendChild(li);
     }
 }
-// --- END MODIFIED ---
+
 
 function showMessage(message) {
     const messageBox = document.getElementById('messageBox');
@@ -1351,25 +1345,40 @@ function handleFirstInteraction() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeDraftState();    
-    
-    if (runFullDraftBtn) runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
-    if (saveConfigBtn) saveConfigBtn.addEventListener('click', saveConfig);
-    if (resetDraftBtn) resetDraftBtn.addEventListener('click', async () => {
-        const success = await clearDraftOrderFromSupabase();
-        if (success) {
-            initializeDraftState();
-            showMessage('Draft has been reset to its initial state. A new random draft can now be run.');
-        }
-    });
+    initializeDraftState();    
+    
+    if (runFullDraftBtn) {
+        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
+    }
+    if (unlockCommissionerBtn) {
+        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    }
+    if (commissionerLogin) {
+        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    }
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); 
+            console.log("Save button clicked, preventing refresh...");
+            await saveConfig(); 
+        });
+    }
 
-    
-    // Add an event listener to the audio overlay to handle the first interaction
-    if (audioOverlay) {
-        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
-    }
-    // You can keep the keydown listener on the document if you want, but the click listener is now more specific
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const success = await clearDraftOrderFromSupabase();
+            if (success) {
+                initializeDraftState();
+                showMessage('Draft has been reset. A new random draft can now be run.');
+            }
+        });
+    }
+
+    if (audioOverlay) {
+        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+    }
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
 </script>
  

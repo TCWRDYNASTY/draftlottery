@@ -633,7 +633,7 @@
 // 1. Imports first
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// 2. Constants & Configuration
+
 const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
@@ -642,7 +642,6 @@ const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 3. Global State (Variables)
 let members = []; 
 let availableMembers = [];
 let draftOrder = [];
@@ -657,7 +656,6 @@ let cheeringAudio = null;
 let crowdCheersAudio = null;
 let audioTimeout;
 
-// 4. DOM Elements (HTML references)
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
@@ -728,7 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
         audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
     }
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
-});
+
 
 
 function playPickAudio(pickNumber) {
@@ -764,7 +762,6 @@ function playPickAudio(pickNumber) {
     }
 }
 
-// --- 6. SUPABASE DATA LOGIC ---
 async function fetchMembersFromSupabase() {
     console.log('Fetching members from Supabase...');
     const { data, error } = await supabase

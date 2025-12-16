@@ -239,9 +239,8 @@
         cursor: default;
         transition: transform 0.8s ease-out, opacity 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, background 0.3s, border-color 0.3s, box-shadow 0.3s;
         z-index: 2;
-        /* --- ADDED ANIMATION PROPERTIES --- */
         animation-name: ballAgitation;
-        animation-duration: 2s; /* Adjust speed as needed */
+        animation-duration: 2s; 
         animation-timing-function: ease-in-out;
         animation-iteration-count: infinite;
     }
@@ -332,16 +331,14 @@
     }
     
     .drawn-ball-display .drawn-team-name {
-        font-size: 3rem;
+        font-size: 3.5rem;
         font-weight: 900;
         text-transform: uppercase;
         font-family: 'Bebas Neue', sans-serif;
-        text-shadow: 3px 3px 7px rgba(0, 0, 0, 0.7);
-        letter-spacing: 0.15em;
-        background: linear-gradient(90deg, #FFD700, #FFEF9F);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+        color: #FFD700;
+        text-shadow: 2px 2px 0px #000, rgba(0, 0, 0, 0.7);
+        letter-spacing: 0.1em;
+            }
 
     .btn {
         background: linear-gradient(90deg, #FFD700, #FFEF9F);
@@ -576,16 +573,17 @@
     <div class="commissioner-tools">
         <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
     <form id="commissionerLogin">
-<input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs" autocomplete="off">    
-        <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
+<input type="password" id="commissionerPassword" placeholder="Enter Password" 
+       class="p-3 rounded-md bg-gray-800 border-2 border-yellow-600 text-black placeholder-gray-400">
+
 </form>
 
         <div id="commissionerPanel" class="hidden">
             <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
             <div id="memberConfigInputs">
             </div>
-            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
-            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
+            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-black">Save Configuration</button>
+            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-black">Reset Draft</button>
         </div>
     </div>
         <div id="messageBox" class="message-box">

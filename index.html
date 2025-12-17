@@ -545,16 +545,21 @@
 <body>
 <div class="container">
 
-    <h1 class="text-5xl mb-8 tracking-wider uppercase"
-        style="
-            font-family: 'Bebas Neue', sans-serif;
-            color: #FFD700;
-            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9);
-            letter-spacing: 3px;
-        ">
-        TCWR DY-NASTY<br/>
-        Draft Lottery
-    </h1>
+   <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase"
+    style="
+        font-family: 'Bebas Neue', sans-serif;
+        color: #FFD700;
+        /* This adds a sharp black outline and a deeper drop shadow */
+        text-shadow: 
+            -1px -1px 0 #000,  
+             1px -1px 0 #000,
+            -1px  1px 0 #000,
+             1px  1px 0 #000,
+             4px 4px 10px rgba(0, 0, 0, 1);
+        letter-spacing: 0.1em;
+    ">
+    TCWR DY-NASTY Draft Lottery
+</h1>
 
     <div class="lottery-machine" id="lotteryMachine">
         <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>

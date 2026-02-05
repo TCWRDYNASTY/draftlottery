@@ -547,7 +547,22 @@
     padding-bottom: 15px;
     margin-bottom: 15px;
 }
-      
+
+#drawnTeamName {
+    font-size: 3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    animation: nameReveal 0.5s ease-out;
+}
+
+@keyframes nameReveal {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+        
     </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1014,82 +1029,94 @@ function updateUIFromCurrentState() {
 }
 
 function populateBalls() {
-    if (!lotteryMachine) return;
-    if (availableMembers.length > 0) {
-        lotteryMachine.innerHTML = '';
-    }
+    if (!lotteryMachine) return;
+    
+    // Clear the machine
+    lotteryMachine.innerHTML = '';
 
-    if (members.length === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
-        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
-        return;
-    }
-    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
 
-    const ballsToRender = [];
-    availableMembers.forEach(member => {
-        const weight = member.weight || 0; 
-        for (let i = 0; i < weight; i++) {
-            ballsToRender.push({ teamId: member.id });
-        }
-    });
-    if (ballsToRender.length === 0 && pickCounter > 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
-        return;
-    } else if (ballsToRender.length === 0 && pickCounter === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
-        return;
-    }
+    // 1. Image array
+    const bunnyImages = [
+        'badbunny.png', 'badbunny1.png', 'badbunny2.png', 'badbunny3.png', 
+        'badbunny4.png', 'badbunny6.png', 'badbunny7.png', 'badbunny9.png'
+    ];
 
-    const shuffledBalls = [...ballsToRender];
-    for (let i = shuffledBalls.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
-    }
+    // 2. Build the list of balls based on weight
+    const ballsToRender = [];
+    availableMembers.forEach(member => {
+        const weight = member.weight || 0; 
+        for (let i = 0; i < weight; i++) {
+            ballsToRender.push({ teamId: member.id });
+        }
+    });
 
-    const machineRect = lotteryMachine.getBoundingClientRect();
-    const borderWidth = parseFloat(getComputedStyle(lotteryMachine).borderLeftWidth);
-    const paddingTop = parseFloat(getComputedStyle(lotteryMachine).paddingTop);
-    const paddingBottom = parseFloat(getComputedStyle(lotteryMachine).paddingBottom);
-    const contentXStart = borderWidth + parseFloat(getComputedStyle(lotteryMachine).paddingLeft);
-    const contentYStart = borderWidth + paddingTop;
-    const contentWidth = machineRect.width - (2 * borderWidth) - (2 * parseFloat(getComputedStyle(lotteryMachine).paddingLeft));
-    const contentHeight = machineRect.height - (2 * borderWidth) - paddingTop - paddingBottom;
-    const mixingAreaHeight = contentHeight - 50;
+    if (ballsToRender.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams drawn!</div>';
+        return;
+    }
 
-    shuffledBalls.forEach((ballData, index) => {
-        const ball = document.createElement('div');
-        ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-bold', 'cursor-pointer');
-        ball.dataset.teamId = ballData.teamId;
+    // 3. Shuffle them
+    const shuffledBalls = [...ballsToRender];
+    for (let i = shuffledBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
+    }
 
-        const member = members.find(m => m.id === ballData.teamId);
-        if (member) {
-            ball.style.backgroundColor = member.color;
-            ball.style.color = '#fff';
-        }
+    // 4. Setup machine boundaries
+    const machineRect = lotteryMachine.getBoundingClientRect();
+    const borderWidth = parseFloat(getComputedStyle(lotteryMachine).borderLeftWidth) || 0;
+    const paddingLeft = parseFloat(getComputedStyle(lotteryMachine).paddingLeft) || 0;
+    const paddingTop = parseFloat(getComputedStyle(lotteryMachine).paddingTop) || 0;
+    
+    const contentWidth = machineRect.width - (2 * borderWidth) - (2 * paddingLeft);
+    const contentHeight = machineRect.height - (2 * borderWidth) - (2 * paddingTop);
+    const mixingAreaHeight = contentHeight - 50;
 
-        lotteryMachine.appendChild(ball);
+    // 5. Create the actual Ball elements
+    shuffledBalls.forEach((ballData, index) => {
+        const ball = document.createElement('div');
+        ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-bold', 'cursor-pointer');
+        ball.dataset.teamId = ballData.teamId;
 
-        const ballWidth = ball.offsetWidth;
-        const ballHeight = ball.offsetHeight;
-        const randomX = Math.random() * (contentWidth - ballWidth);
-        const randomY = Math.random() * (mixingAreaHeight - ballHeight);
+        // Find the team to assign the right image
+        const memberIndex = members.findIndex(m => m.id === ballData.teamId);
+        if (memberIndex !== -1) {
+            const imgUrl = bunnyImages[memberIndex % bunnyImages.length];
+            ball.style.backgroundImage = `url('${imgUrl}')`;
+            ball.style.backgroundSize = 'cover';
+            ball.style.backgroundPosition = 'center';
+            ball.style.color = '#fff'; // Text color for the name/number on the ball
+        }
 
-        ball.style.left = `${randomX + contentXStart}px`;
-        ball.style.top = `${randomY + contentYStart}px`;
-        const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
-        const duration = Math.random() * 8 + 4; 
-        const delay = Math.random() * -duration; 
-        
-        ball.style.setProperty('--circle-radius', `${radius}px`);
-        ball.style.animationName = 'circle-motion';
-        ball.style.animationDuration = `${duration}s`;
-        ball.style.animationDelay = `${delay}s`;
-        ball.style.animationIterationCount = 'infinite';
-        ball.style.animationTimingFunction = 'linear';
-    });
+        lotteryMachine.appendChild(ball);
+
+        // 6. Positioning and Animation
+        const ballWidth = 50; // Match your CSS width
+        const ballHeight = 50;
+        const randomX = Math.random() * (contentWidth - ballWidth);
+        const randomY = Math.random() * (mixingAreaHeight - ballHeight);
+
+        ball.style.left = `${randomX + borderWidth + paddingLeft}px`;
+        ball.style.top = `${randomY + borderWidth + paddingTop}px`;
+        
+        const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
+        const duration = Math.random() * 8 + 4; 
+        const delay = Math.random() * -duration; 
+        
+        ball.style.setProperty('--circle-radius', `${radius}px`);
+        ball.style.animationName = 'circle-motion';
+        ball.style.animationDuration = `${duration}s`;
+        ball.style.animationDelay = `${delay}s`;
+        ball.style.animationIterationCount = 'infinite';
+        ball.style.animationTimingFunction = 'linear';
+    });
 }
-
 function drawWeightedMember() {
     if (isDraftSaved && draftOrder.length > 0) {
         const pick = draftOrder.find(p => p.pick === pickCounter);
@@ -1125,76 +1152,83 @@ function drawWeightedMember() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
-    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-    drawnTeamNameDisplay.textContent = '';
-    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-        ball.style.animationPlayState = 'paused';
-    });
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
+    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    drawnTeamNameDisplay.textContent = '';
+    
+    // Pause all other balls
+    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+        ball.style.animationPlayState = 'paused';
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const drawnMember = drawWeightedMember();
+    const drawnMember = drawWeightedMember();
 
-    if (drawnMember) {
-        playPickAudio(pickCounter);
-        
-        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+    if (drawnMember) {
+        playPickAudio(pickCounter);
+        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
-        if (teamBalls.length > 0) {
-            const machineRect = lotteryMachine.getBoundingClientRect();
-            const targetX = (machineRect.width / 2);
-            const targetY = 10;
+        if (teamBalls.length > 0) {
+            const machineRect = lotteryMachine.getBoundingClientRect();
+            const targetX = (machineRect.width / 2);
+            const targetY = 10;
 
-            teamBalls.forEach(ballElement => {
-                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
-                ballElement.style.top = `${targetY}px`;
-                ballElement.classList.add('selected-for-shoot');
-            });
+            // Step 1: Move the winning balls to the "Shoot" position
+            teamBalls.forEach(ballElement => {
+                ballElement.style.animation = 'none'; // Stop the circular motion
+                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
+                ballElement.style.top = `${targetY}px`;
+                ballElement.classList.add('selected-for-shoot');
+            });
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Step 2: RELEASE the balls so they can fly out
+            teamBalls.forEach(ballElement => {
+                ballElement.classList.remove('selected-for-shoot');
+                
+                // IMPORTANT: Clear the JS positions so CSS .drawn can take over
+                ballElement.style.left = '';
+                ballElement.style.top = '';
+                
+                ballElement.classList.add('drawn');
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            teamBalls.forEach(ballElement => {
+                if (ballElement && ballElement.parentNode) {
+                    ballElement.remove();
+                }
+            });
+        }
 
-            teamBalls.forEach(ballElement => {
-                ballElement.classList.remove('selected-for-shoot');
-                ballElement.classList.add('drawn');
-            });
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            teamBalls.forEach(ballElement => {
-                if (ballElement && ballElement.parentNode) {
-                    ballElement.remove();
-                }
-            });
-        } else {
-            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            await new Promise(resolve => setTimeout(resolve, 1500));
-        }
-        if (!isDraftSaved) {
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
-        }
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-        if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
-            pickElement.classList.add('bg-green-500', 'text-white');
-        }
+        // Update the results list and odds
+        if (!isDraftSaved) {
+            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
+        }
+        
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
 
-        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
-        if (oddsElement) {
-            oddsElement.classList.add('picked');
-        }
-    
-        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-            ball.style.animationPlayState = 'running';
-        });
-    } else {
-        console.warn("No more members to draw during performSingleDraw.");
-    }
+        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
+        if (oddsElement) {
+            oddsElement.classList.add('picked');
+        }
+    
+        // Resume the rest of the balls
+        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+            ball.style.animationPlayState = 'running';
+        });
+    }
 }
 
 async function runFullDraftSimulation() {

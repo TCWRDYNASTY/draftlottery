@@ -254,35 +254,27 @@
     .ball:nth-child(6) { background-image: url('badbunny6.png'); }
     .ball:nth-child(7) { background-image: url('badbunny7.png'); }
     .ball:nth-child(8) { background-image: url('badbunny9.png'); }
-        
-    /* 1. Stop all shuffling animations when a ball is picked */
     .ball.selected-for-shoot, .ball.drawn {
         animation: none !important;
     }
 
-    /* 2. Style for the winner sitting in the "shoot" area */
-    .ball.selected-for-shoot {
-        /* We removed 'background' so the Photo shows! */
-        box-shadow: 0 0 30px var(--accent-gold), 0 0 10px #fff;
-        border: 2px solid var(--accent-gold);
-        z-index: 100; 
-        transform: scale(1.4); /* Make the photo pop */
-        transition: top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
-                    left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
-                    transform 0.3s ease;
-    }
+.ball.selected-for-shoot {
+    box-shadow: 0 0 30px var(--accent-gold), 0 0 10px #fff;
+    border: 2px solid var(--accent-gold);
+    z-index: 100; 
+    transform: scale(1.4); 
+    transition: top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                transform 0.3s ease;
+}
 
-    /* 3. The "Fly Out" animation */
-    .ball.drawn {
-        /* translateY pulls it UP out of the machine */
-        transform: translateY(-600px) scale(0) !important; 
-        opacity: 0;
-        transition: transform 1.2s ease-in, opacity 0.8s ease-out;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    /* 4. The container where the result name appears */
+.ball.drawn {
+    transform: translateY(-600px) scale(0) !important; 
+    opacity: 0 !important;
+    transition: transform 1.2s ease-in, opacity 0.8s ease-out !important;
+    pointer-events: none;
+    z-index: 1;
+}
     .drawn-ball-display {
         min-height: 120px;
         background-color: var(--section-bg);
@@ -1157,32 +1149,23 @@ function drawWeightedMember() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return; 
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';
-    
-    // Pause all other balls
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     });
-    
     await new Promise(resolve => setTimeout(resolve, 2000));
-
     const drawnMember = drawWeightedMember();
-
     if (drawnMember) {
         playPickAudio(pickCounter);
-        
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
-
         if (teamBalls.length > 0) {
             const machineRect = lotteryMachine.getBoundingClientRect();
             const targetX = (machineRect.width / 2);
-            const targetY = 10;
-
-            // Step 1: Move the winning balls to the "Shoot" position
+            const targetY = -40; 
             teamBalls.forEach(ballElement => {
-                ballElement.style.animation = 'none'; // Stop the circular motion
+                ballElement.style.animation = 'none'; 
                 ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
                 ballElement.style.top = `${targetY}px`;
                 ballElement.classList.add('selected-for-shoot');
@@ -1192,12 +1175,8 @@ async function performSingleDraw() {
             drawnTeamNameDisplay.textContent = drawnMember.name;
             
             await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Step 2: RELEASE the balls so they can fly out
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
-                
-                // IMPORTANT: Clear the JS positions so CSS .drawn can take over
                 ballElement.style.left = '';
                 ballElement.style.top = '';
                 
@@ -1211,8 +1190,6 @@ async function performSingleDraw() {
                 }
             });
         }
-
-        // Update the results list and odds
         if (!isDraftSaved) {
             draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
         }
@@ -1223,13 +1200,10 @@ async function performSingleDraw() {
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
-
         const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
         if (oddsElement) {
             oddsElement.classList.add('picked');
         }
-    
-        // Resume the rest of the balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });

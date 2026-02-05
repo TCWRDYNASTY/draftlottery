@@ -255,25 +255,34 @@
     .ball:nth-child(7) { background-image: url('badbunny7.png'); }
     .ball:nth-child(8) { background-image: url('badbunny9.png'); }
         
+    /* 1. Stop all shuffling animations when a ball is picked */
     .ball.selected-for-shoot, .ball.drawn {
-        animation: none !important; /* This is correct, it stops agitation when selected or drawn */
+        animation: none !important;
     }
 
+    /* 2. Style for the winner sitting in the "shoot" area */
     .ball.selected-for-shoot {
-        background: radial-gradient(circle at top left, #fff 0%, var(--accent-gold) 100%);
-        box-shadow: 0 0 25px var(--accent-gold), 0 5px 10px rgba(0,0,0,0.5);
-        z-index: 10;
-        transition: top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), background 0.3s, box-shadow 0.3s;
+        /* We removed 'background' so the Photo shows! */
+        box-shadow: 0 0 30px var(--accent-gold), 0 0 10px #fff;
+        border: 2px solid var(--accent-gold);
+        z-index: 100; 
+        transform: scale(1.4); /* Make the photo pop */
+        transition: top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                    left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), 
+                    transform 0.3s ease;
     }
 
+    /* 3. The "Fly Out" animation */
     .ball.drawn {
-        transform: translateY(-400px) scale(0.1);
+        /* translateY pulls it UP out of the machine */
+        transform: translateY(-600px) scale(0) !important; 
         opacity: 0;
-        transition: transform 1.5s ease-in, opacity 1.5s ease-out;
+        transition: transform 1.2s ease-in, opacity 0.8s ease-out;
         pointer-events: none;
         z-index: 1;
     }
 
+    /* 4. The container where the result name appears */
     .drawn-ball-display {
         min-height: 120px;
         background-color: var(--section-bg);
@@ -293,10 +302,7 @@
     .drawn-ball-display::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         border-radius: 1.5rem;
         border: 4px solid var(--accent-gold);
         opacity: 0.5;

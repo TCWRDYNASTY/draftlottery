@@ -223,29 +223,27 @@
         pointer-events: none;
     }
 
-/* BASE BALL STYLING (Shared by all 8 balls) */
-    .ball {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: 900;
-        color: #ffffff;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 1); 
-        font-size: 1.1rem;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
-        border: 2px solid var(--accent-gold);
-        background-size: cover;
-        background-position: center;
-        z-index: 2;
-        animation: ballAgitation 2s ease-in-out infinite;
-        transition: all 0.8s ease-out;
-    }
 
-   /* SPECIFIC IMAGES FOR EACH BALL (Using Local Files) */
+  .ball {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1); 
+    font-size: 1.1rem;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--accent-gold);
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+    transition: all 0.8s ease-out;
+}
+
     .ball:nth-child(1) { background-image: url('badbunny4.png'); }
     .ball:nth-child(2) { background-image: url('badbunny.png'); }
     .ball:nth-child(3) { background-image: url('badbunny1.png'); }
@@ -269,11 +267,10 @@
 }
 
 .ball.drawn {
-    transform: translateY(-600px) scale(0) !important; 
+    transform: scale(0) !important; 
     opacity: 0 !important;
-    transition: transform 1.2s ease-in, opacity 0.8s ease-out !important;
+    transition: transform 0.6s ease-in, opacity 0.4s ease-out !important;
     pointer-events: none;
-    z-index: 1;
 }
     .drawn-ball-display {
         min-height: 120px;
@@ -918,12 +915,8 @@ async function clearDraftOrderFromSupabase() {
     return true;
 }
 
-// --- 7. DRAFT LOGIC ---
 async function initializeDraftState() {
-    // Load members from Supabase first
     members = await fetchMembersFromSupabase();
-
-    // If no members are loaded, we can't run a draft.
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams and save the configuration.</div>';
         if (runFullDraftBtn) runFullDraftBtn.disabled = true;
@@ -1004,10 +997,8 @@ function displayTeamOdds() {
 }
 
 function updateUIFromCurrentState() {
-    initializeResultsList();
-    
+    initializeResultsList();    
     const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
-
     sortedDraftOrder.forEach(item => {
         const originalMember = members.find(m => m.name === item.member);
         if (originalMember) {
@@ -1028,24 +1019,17 @@ function updateUIFromCurrentState() {
 
 function populateBalls() {
     if (!lotteryMachine) return;
-    
-    // Clear the machine
     lotteryMachine.innerHTML = '';
-
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
         if (runFullDraftBtn) runFullDraftBtn.disabled = true;
         return;
     }
     if (runFullDraftBtn) runFullDraftBtn.disabled = false;
-
-    // 1. Image array
     const bunnyImages = [
         'badbunny.png', 'badbunny1.png', 'badbunny2.png', 'badbunny3.png', 
         'badbunny4.png', 'badbunny6.png', 'badbunny7.png', 'badbunny9.png'
     ];
-
-    // 2. Build the list of balls based on weight
     const ballsToRender = [];
     availableMembers.forEach(member => {
         const weight = member.weight || 0; 
@@ -1058,31 +1042,22 @@ function populateBalls() {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams drawn!</div>';
         return;
     }
-
-    // 3. Shuffle them
     const shuffledBalls = [...ballsToRender];
     for (let i = shuffledBalls.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
     }
-
-    // 4. Setup machine boundaries
     const machineRect = lotteryMachine.getBoundingClientRect();
     const borderWidth = parseFloat(getComputedStyle(lotteryMachine).borderLeftWidth) || 0;
     const paddingLeft = parseFloat(getComputedStyle(lotteryMachine).paddingLeft) || 0;
     const paddingTop = parseFloat(getComputedStyle(lotteryMachine).paddingTop) || 0;
-    
     const contentWidth = machineRect.width - (2 * borderWidth) - (2 * paddingLeft);
     const contentHeight = machineRect.height - (2 * borderWidth) - (2 * paddingTop);
     const mixingAreaHeight = contentHeight - 50;
-
-    // 5. Create the actual Ball elements
    shuffledBalls.forEach((ballData, index) => {
     const ball = document.createElement('div');
     ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-bold', 'cursor-pointer');
     ball.dataset.teamId = ballData.teamId;
-
-    // 1. Assign the Image
     const memberIndex = members.findIndex(m => m.id === ballData.teamId);
     if (memberIndex !== -1) {
         const imgUrl = bunnyImages[memberIndex % bunnyImages.length];
@@ -1093,82 +1068,94 @@ function populateBalls() {
     }
 
     lotteryMachine.appendChild(ball);
-
-    // 2. Setup Variables
     const ballWidth = 50;
     const ballHeight = 50;
     const randomX = Math.random() * (contentWidth - ballWidth);
     const randomY = Math.random() * (mixingAreaHeight - ballHeight);
-    
     const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
     const duration = Math.random() * 8 + 4; 
     const delay = Math.random() * -duration; 
-
-    // 3. Apply Positioning
     ball.style.left = `${randomX + borderWidth + paddingLeft}px`;
     ball.style.top = `${randomY + borderWidth + paddingTop}px`;
     ball.style.setProperty('--circle-radius', `${radius}px`);
-
-    // 4. Start Both Animations
     ball.style.animation = `circle-motion ${duration}s linear ${delay}s infinite, ballAgitation 0.3s ease-in-out infinite`;
 });
 }
     
 function drawWeightedMember() {
-    if (isDraftSaved && draftOrder.length > 0) {
-        const pick = draftOrder.find(p => p.pick === pickCounter);
-        if (pick) {
-            return {
-                id: members.find(m => m.name === pick.member)?.id,
-                name: pick.member,
-                originalWeightDisplay: pick.originalWeightDisplay
-            };
-        } else {
-            console.warn("Could not find next pick in saved draft order.");
-            return null;
-        }
-    }
-    
-    if (availableMembers.length === 0) {
-        return null;
-    }
+    if (isDraftSaved && draftOrder.length > 0) {
+        // Find the specific pick for the current counter (e.g., Pick #8)
+        const pick = draftOrder.find(p => p.pick === pickCounter);
+        if (pick) {
+            // CRITICAL REPLAY FIX: 
+            // We must find and remove this member from availableMembers 
+            // so their balls actually leave the machine during the replay.
+            const index = availableMembers.findIndex(m => m.name === pick.member);
+            if (index !== -1) {
+                availableMembers.splice(index, 1);
+            }
 
-    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
-    let randomWeight = Math.random() * totalWeight;
+            return {
+                id: members.find(m => m.name === pick.member)?.id,
+                name: pick.member,
+                originalWeightDisplay: pick.originalWeightDisplay
+            };
+        } else {
+            console.warn("Could not find next pick in saved draft order.");
+            return null;
+        }
+    }
+    
+    // STANDARD DRAW LOGIC (Fresh Run)
+    if (availableMembers.length === 0) {
+        return null;
+    }
 
-    for (let i = 0; i < availableMembers.length; i++) {
-        randomWeight -= availableMembers[i].weight;
-        if (randomWeight <= 0) {
-            const selectedMember = availableMembers[i];
-            availableMembers.splice(i, 1);
-            return selectedMember;
-        }
-    }
-    console.warn("Weighted draw failed to find a member. This should not happen if weights are positive.");
-    return availableMembers.pop();
+    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+
+    for (let i = 0; i < availableMembers.length; i++) {
+        randomWeight -= availableMembers[i].weight;
+        if (randomWeight <= 0) {
+            const selectedMember = availableMembers[i];
+            availableMembers.splice(i, 1); // Remove the winner from the pool
+            return selectedMember;
+        }
+    }
+    
+    console.warn("Weighted draw failed. Falling back to pop.");
+    return availableMembers.pop();
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return; 
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     });
+    
     await new Promise(resolve => setTimeout(resolve, 2000));
+    
     const drawnMember = drawWeightedMember();
+    
     if (drawnMember) {
         playPickAudio(pickCounter);
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+        
         if (teamBalls.length > 0) {
             const machineRect = lotteryMachine.getBoundingClientRect();
             const targetX = (machineRect.width / 2);
-            const targetY = -40; 
+            const targetY = 30; 
+
             teamBalls.forEach(ballElement => {
                 ballElement.style.animation = 'none'; 
+                ballElement.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                void ballElement.offsetWidth; 
                 ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
                 ballElement.style.top = `${targetY}px`;
                 ballElement.classList.add('selected-for-shoot');
+                ballElement.style.zIndex = "100";
             });
 
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1176,14 +1163,12 @@ async function performSingleDraw() {
             
             await new Promise(resolve => setTimeout(resolve, 1500));
             teamBalls.forEach(ballElement => {
-                ballElement.classList.remove('selected-for-shoot');
-                ballElement.style.left = '';
-                ballElement.style.top = '';
-                
+                ballElement.style.opacity = '0';
+                ballElement.style.transform = 'scale(2)';
                 ballElement.classList.add('drawn');
             });
             
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 800));
             teamBalls.forEach(ballElement => {
                 if (ballElement && ballElement.parentNode) {
                     ballElement.remove();
@@ -1191,7 +1176,11 @@ async function performSingleDraw() {
             });
         }
         if (!isDraftSaved) {
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
+            draftOrder.push({ 
+                pick: pickCounter, 
+                member: drawnMember.name, 
+                originalWeightDisplay: drawnMember.originalWeightDisplay 
+            });
         }
         
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
@@ -1200,6 +1189,7 @@ async function performSingleDraw() {
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
+        
         const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
         if (oddsElement) {
             oddsElement.classList.add('picked');
@@ -1211,43 +1201,48 @@ async function performSingleDraw() {
 }
 
 async function runFullDraftSimulation() {
-    if (drawing) return;
+    if (drawing) return;
 
-    drawing = true;
-    if (runFullDraftBtn) {
-        runFullDraftBtn.disabled = true;
-        runFullDraftBtn.textContent = 'Drawing in progress...';
-    }
+    drawing = true;
+    
+    // 1. ALWAYS set the pickCounter to the total number of teams
+    pickCounter = members.length;
 
-    if (isDraftSaved) {
-        if (resultsList) resultsList.style.display = 'none';
-        pickCounter = members.length;
-        availableMembers = members.map(member => ({ ...member }));
-        populateBalls();
-    } else {
-        draftOrder = [];
-    }
-    while (pickCounter >= 1) {
-        await performSingleDraw();
-        pickCounter--; 
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = true;
+        runFullDraftBtn.textContent = 'Drawing in progress...';
     }
-    
-    if (!isDraftSaved) {
-        await saveDraftOrderToSupabase(draftOrder);
-        isDraftSaved = true;
-    }
-    
-    sessionStorage.setItem('hasSeenDraftAnimation', 'true');
-
-    showResults();
-    lotteryMachine.innerHTML = '';
-    
-    drawing = false;
-    if (runFullDraftBtn) {
-        runFullDraftBtn.disabled = false;
-        runFullDraftBtn.textContent = 'Replay Draft Animation';
-    }
-    if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+    if (isDraftSaved) {
+        if (resultsList) resultsList.style.display = 'none';
+        document.querySelectorAll('.team-odds-list li').forEach(li => li.classList.remove('picked'));
+        
+        availableMembers = members.map(member => ({ ...member }));
+        populateBalls();
+        initializeResultsList(); 
+    } else {
+        draftOrder = [];
+        availableMembers = members.map(member => ({ ...member }));
+        initializeResultsList();
+    }
+    while (pickCounter >= 1) {
+        await performSingleDraw();
+        pickCounter--; 
+    }
+    if (!isDraftSaved) {
+        await saveDraftOrderToSupabase(draftOrder);
+        isDraftSaved = true;
+    }
+    
+    sessionStorage.setItem('hasSeenDraftAnimation', 'true');
+    showResults();
+    if (lotteryMachine) lotteryMachine.innerHTML = '';
+    
+    drawing = false;
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = false;
+        runFullDraftBtn.textContent = 'Replay Draft Animation';
+    }
+    if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 
 function initializeResultsList() {

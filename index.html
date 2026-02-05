@@ -175,13 +175,13 @@
         font-family: 'Bebas Neue', sans-serif;
     }
 
-    @keyframes ballAgitation {
-0% { transform: translate(0, 0) rotate(0deg); }
-20% { transform: translate(10px, -15px) rotate(10deg); } /* Move up slightly /
-40% { transform: translate(-12px, 10px) rotate(-15deg); } / Move down slightly /
-60% { transform: translate(8px, -10px) rotate(5deg); } / Move up again, less height /
-80% { transform: translate(-5px, 5px) rotate(-5deg); } / Move down again, less height */
-100% { transform: translate(0, 0) rotate(0deg); }
+@keyframes ballAgitation {
+    0% { margin-top: 0px; margin-left: 0px; rotate: 0deg; }
+    20% { margin-top: -15px; margin-left: 10px; rotate: 10deg; } 
+    40% { margin-top: 10px; margin-left: -12px; rotate: -15deg; } 
+    60% { margin-top: -10px; margin-left: 8px; rotate: 5deg; } 
+    80% { margin-top: 5px; margin-left: -5px; rotate: -5deg; } 
+    100% { margin-top: 0px; margin-left: 0px; rotate: 0deg; }
 }
 
     .lottery-machine {
@@ -1079,44 +1079,42 @@ function populateBalls() {
     const mixingAreaHeight = contentHeight - 50;
 
     // 5. Create the actual Ball elements
-    shuffledBalls.forEach((ballData, index) => {
-        const ball = document.createElement('div');
-        ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-bold', 'cursor-pointer');
-        ball.dataset.teamId = ballData.teamId;
+   shuffledBalls.forEach((ballData, index) => {
+    const ball = document.createElement('div');
+    ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center', 'font-bold', 'cursor-pointer');
+    ball.dataset.teamId = ballData.teamId;
 
-        // Find the team to assign the right image
-        const memberIndex = members.findIndex(m => m.id === ballData.teamId);
-        if (memberIndex !== -1) {
-            const imgUrl = bunnyImages[memberIndex % bunnyImages.length];
-            ball.style.backgroundImage = `url('${imgUrl}')`;
-            ball.style.backgroundSize = 'cover';
-            ball.style.backgroundPosition = 'center';
-            ball.style.color = '#fff'; // Text color for the name/number on the ball
-        }
+    // 1. Assign the Image
+    const memberIndex = members.findIndex(m => m.id === ballData.teamId);
+    if (memberIndex !== -1) {
+        const imgUrl = bunnyImages[memberIndex % bunnyImages.length];
+        ball.style.backgroundImage = `url('${imgUrl}')`;
+        ball.style.backgroundSize = 'cover';
+        ball.style.backgroundPosition = 'center';
+        ball.style.color = '#fff'; 
+    }
 
-        lotteryMachine.appendChild(ball);
+    lotteryMachine.appendChild(ball);
 
-        // 6. Positioning and Animation
-        const ballWidth = 50; // Match your CSS width
-        const ballHeight = 50;
-        const randomX = Math.random() * (contentWidth - ballWidth);
-        const randomY = Math.random() * (mixingAreaHeight - ballHeight);
+    // 2. Setup Variables
+    const ballWidth = 50;
+    const ballHeight = 50;
+    const randomX = Math.random() * (contentWidth - ballWidth);
+    const randomY = Math.random() * (mixingAreaHeight - ballHeight);
+    
+    const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
+    const duration = Math.random() * 8 + 4; 
+    const delay = Math.random() * -duration; 
 
-        ball.style.left = `${randomX + borderWidth + paddingLeft}px`;
-        ball.style.top = `${randomY + borderWidth + paddingTop}px`;
-        
-        const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8); 
-        const duration = Math.random() * 8 + 4; 
-        const delay = Math.random() * -duration; 
-        
-        ball.style.setProperty('--circle-radius', `${radius}px`);
-        ball.style.animationName = 'circle-motion';
-        ball.style.animationDuration = `${duration}s`;
-        ball.style.animationDelay = `${delay}s`;
-        ball.style.animationIterationCount = 'infinite';
-        ball.style.animationTimingFunction = 'linear';
-    });
-}
+    // 3. Apply Positioning
+    ball.style.left = `${randomX + borderWidth + paddingLeft}px`;
+    ball.style.top = `${randomY + borderWidth + paddingTop}px`;
+    ball.style.setProperty('--circle-radius', `${radius}px`);
+
+    // 4. Start Both Animations
+    ball.style.animation = `circle-motion ${duration}s linear ${delay}s infinite, ballAgitation 0.3s ease-in-out infinite`;
+});
+    
 function drawWeightedMember() {
     if (isDraftSaved && draftOrder.length > 0) {
         const pick = draftOrder.find(p => p.pick === pickCounter);

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy Football Draft Lottery</title>
@@ -184,6 +183,7 @@
 100% { transform: translate(0, 0) rotate(0deg); }
 }
 
+    /* The main lottery machine */
     .lottery-machine {
         position: relative;
         width: 80vw;
@@ -239,8 +239,9 @@
         cursor: default;
         transition: transform 0.8s ease-out, opacity 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, background 0.3s, border-color 0.3s, box-shadow 0.3s;
         z-index: 2;
+        /* --- ADDED ANIMATION PROPERTIES --- */
         animation-name: ballAgitation;
-        animation-duration: 2s; 
+        animation-duration: 2s; /* Adjust speed as needed */
         animation-timing-function: ease-in-out;
         animation-iteration-count: infinite;
     }
@@ -264,6 +265,7 @@
         z-index: 1;
     }
 
+    /* Display for the drawn ball */
     .drawn-ball-display {
         min-height: 120px;
         background-color: var(--section-bg);
@@ -330,14 +332,16 @@
     }
     
     .drawn-ball-display .drawn-team-name {
-        font-size: 3.5rem;
+        font-size: 3rem;
         font-weight: 900;
         text-transform: uppercase;
         font-family: 'Bebas Neue', sans-serif;
-        color: #FFD700;
-        text-shadow: 2px 2px 0px #000, rgba(0, 0, 0, 0.7);
-        letter-spacing: 0.1em;
-            }
+        text-shadow: 3px 3px 7px rgba(0, 0, 0, 0.7);
+        letter-spacing: 0.15em;
+        background: linear-gradient(90deg, #FFD700, #FFEF9F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
     .btn {
         background: linear-gradient(90deg, #FFD700, #FFEF9F);
@@ -512,47 +516,23 @@
 .hidden {
     display: none !important; /* Use !important to ensure it overrides other display properties */
 }
-
-#memberConfigInputs input {
-    background-color: #0f172a !important; /* Dark blue background */
-    color: #ffffff !important;            /* Pure white text */
-    border: 1px solid #FFD700 !important;  /* Gold border */
-    padding: 8px;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    width: 100%; /* Helps with mobile layout */
-    max-width: 200px;
-}
-
-#memberConfigInputs label {
-    color: #FFD700 !important; /* Gold labels for Team/Weight */
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
-    font-size: 0.85rem;
-}
-
-.input-group {
-    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-}
-      
-    </style>
+</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 <div class="container">
 
-   <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase"
-    style="
-        font-family: 'Bebas Neue', sans-serif;
-        color: #FFD700;
-        letter-spacing: 0.1em;
-    ">
-    TCWR DY-NASTY Draft Lottery
-</h1>
+    <h1 class="text-5xl mb-8 tracking-wider uppercase"
+        style="
+            font-family: 'Bebas Neue', sans-serif;
+            color: #FFD700;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9);
+            letter-spacing: 3px;
+        ">
+        TCWR DY-NASTY<br/>
+        Draft Lottery
+    </h1>
 
     <div class="lottery-machine" id="lotteryMachine">
         <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
@@ -593,24 +573,21 @@
             </ul>
     </div>
 
-<div class="commissioner-tools">
-    <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
+    <div class="commissioner-tools">
+        <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
     <form id="commissionerLogin">
-        <input type="password" id="commissionerPassword" placeholder="Enter Password" 
-               class="p-3 rounded-md bg-gray-900 border-2 border-yellow-600 text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500">
+<input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs" autocomplete="off">    
         <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
-    </form>
+</form>
 
-    <div id="commissionerPanel" class="hidden">
-        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below.</p>
-        
-        <div id="memberConfigInputs" class="space-y-2"></div>
-
-        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">Save Configuration</button>
-        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white font-bold">Reset Draft</button>
+        <div id="commissionerPanel" class="hidden">
+            <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
+            <div id="memberConfigInputs">
+            </div>
+            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
+            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
+        </div>
     </div>
-</div>
-
         <div id="messageBox" class="message-box">
         <p id="messageText"></p>
         <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
@@ -652,6 +629,7 @@
 
  
 <script type="module">
+// 1. Imports first
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 
@@ -660,6 +638,7 @@ const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 const SUPABASE_TABLE_NAME = 'draft_configs';
 const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let members = []; 
@@ -706,7 +685,6 @@ function handleCommissionerUnlock(e) {
     
     commissionerPasswordInput.value = ''; 
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     initializeDraftState();    
     if (runFullDraftBtn) {
@@ -739,7 +717,8 @@ document.addEventListener('DOMContentLoaded', () => {
         audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
     }
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
-}); 
+
+
 
 function playPickAudio(pickNumber) {
     clearTimeout(audioTimeout);
@@ -1207,7 +1186,8 @@ async function runFullDraftSimulation() {
     while (pickCounter >= 1) {
         await performSingleDraw();
         pickCounter--; 
-    }
+    }
+    // --- END MODIFIED ---
     
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
@@ -1249,73 +1229,53 @@ function showMessage(message) {
 }
 
 function initializeMemberConfigInputs() {
-    if (!memberConfigInputs) return;
-    memberConfigInputs.innerHTML = '';
-    
-    members.forEach(member => {
-        const div = document.createElement('div');
-        div.classList.add('input-group');
-        
-        // We use a cleaner ID structure to ensure the saveConfig function finds them
-        div.innerHTML = `
-            <div class="flex flex-col mb-2">
-                <label class="mb-1">Team Name:</label>
-                <input type="text" 
-                       id="name-${member.id}" 
-                       value="${member.name}" 
-                       class="admin-input">
-            </div>
-            <div class="flex flex-col mb-2">
-                <label class="mb-1">Weight:</label>
-                <input type="number" 
-                       id="weight-${member.id}" 
-                       value="${member.weight}" 
-                       min="1" max="100" 
-                       class="w-24 admin-input">
-            </div>
-        `;
-        memberConfigInputs.appendChild(div);
-    });
+    if (!memberConfigInputs) return;
+    memberConfigInputs.innerHTML = '';
+    members.forEach(member => {
+        const div = document.createElement('div');
+        div.classList.add('input-group');
+        div.innerHTML = `
+            <label for="${member.id}-name">Team Name:</label>
+            <input type="text" id="${member.id}-name" value="${member.name}" placeholder="Team Name">
+            <label for="${member.id}-weight">Weight:</label>
+            <input type="number" id="${member.id}-weight" value="${member.weight}" min="1" max="100" class="w-20">
+        `;
+        memberConfigInputs.appendChild(div);
+    });
 }
 
 async function saveConfig() {
-    const newMembers = [];
-    let isValid = true;
+    const newMembers = [];
+    let isValid = true;
+    members.forEach(member => {
+        const nameInput = document.getElementById(`${member.id}-name`);
+        const weightInput = document.getElementById(`${member.id}-weight`);
+        if (nameInput && weightInput) {
+            const newWeight = parseInt(weightInput.value, 10);
+            if (nameInput.value.trim() === '' || isNaN(newWeight) || newWeight <= 0) {
+                showMessage('All team names must not be empty and all weights must be positive numbers.');
+                isValid = false;
+                return;
+            }
+            newMembers.push({
+                name: nameInput.value.trim(),
+                weight: newWeight,
+                id: member.id,
+                originalWeightDisplay: `${newWeight}%`
+            });
+        }
+    });
 
-    members.forEach(member => {
-        // These now match the "name-ID" format exactly
-        const nameInput = document.getElementById(`name-${member.id}`);
-        const weightInput = document.getElementById(`weight-${member.id}`);
-
-        if (nameInput && weightInput) {
-            const newWeight = parseInt(weightInput.value, 10);
-            const newName = nameInput.value.trim();
-
-            if (newName === '' || isNaN(newWeight) || newWeight <= 0) {
-                showMessage('All team names must not be empty and all weights must be positive numbers.');
-                isValid = false;
-                return;
-            }
-
-            newMembers.push({
-                id: member.id, // Keeping the original ID is key for Supabase
-                name: newName,
-                weight: newWeight,
-                originalWeightDisplay: `${newWeight}%`
-            });
-        }
-    });
-
-    if (isValid && newMembers.length > 0) {
-        const success = await saveMembersToSupabase(newMembers);
-        if (success) {
-            members = newMembers; 
-            showMessage(`Configuration saved! The draft is ready.`);
-            initializeDraftState(); // This updates the odds list on your screen
-        }
-    } else if (newMembers.length === 0) {
-        showMessage('At least one team must be configured.');
-    }
+    if (isValid && newMembers.length > 0) {
+        const success = await saveMembersToSupabase(newMembers);
+        if (success) {
+            members = newMembers;
+            showMessage(`Configuration saved! The draft is ready to be reset.`);
+            initializeDraftState();
+        }
+    } else if (newMembers.length === 0) {
+        showMessage('At least one team must be configured.');
+    }
 }
 
 window.addEventListener('resize', () => {
@@ -1350,7 +1310,42 @@ function handleFirstInteraction() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDraftState();    
+    
+    if (runFullDraftBtn) {
+        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
+    }
+    if (unlockCommissionerBtn) {
+        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    }
+    if (commissionerLogin) {
+        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    }
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); 
+            console.log("Save button clicked, preventing refresh...");
+            await saveConfig(); 
+        });
+    }
 
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const success = await clearDraftOrderFromSupabase();
+            if (success) {
+                initializeDraftState();
+                showMessage('Draft has been reset. A new random draft can now be run.');
+            }
+        });
+    }
+
+    if (audioOverlay) {
+        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+    }
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+});
 </script>
  
 </body>

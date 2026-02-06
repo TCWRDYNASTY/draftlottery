@@ -1014,149 +1014,7 @@ function updateUIFromCurrentState() {
     });
 }
 
-async function performSingleDraw() {
 
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
-
-    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-
-    drawnTeamNameDisplay.textContent = '';
-
-    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-
-        ball.style.animationPlayState = 'paused';
-
-    });
-
-    
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-
-
-    const drawnMember = drawWeightedMember();
-
-
-
-    if (drawnMember) {
-
-        playPickAudio(pickCounter);
-
-        
-
-        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
-
-
-
-        if (teamBalls.length > 0) {
-
-            const machineRect = lotteryMachine.getBoundingClientRect();
-
-            const targetX = (machineRect.width / 2);
-
-            const targetY = 10;
-
-
-
-            teamBalls.forEach(ballElement => {
-
-                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
-
-                ballElement.style.top = `${targetY}px`;
-
-                ballElement.classList.add('selected-for-shoot');
-
-            });
-
-
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-
-
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-
-            
-
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-
-
-            teamBalls.forEach(ballElement => {
-
-                ballElement.classList.remove('selected-for-shoot');
-
-                ballElement.classList.add('drawn');
-
-            });
-
-            
-
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            teamBalls.forEach(ballElement => {
-
-                if (ballElement && ballElement.parentNode) {
-
-                    ballElement.remove();
-
-                }
-
-            });
-
-        } else {
-
-            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
-
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-        }
-
-        if (!isDraftSaved) {
-
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
-
-        }
-
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-
-        if (pickElement) {
-
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
-
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
-
-            pickElement.classList.add('bg-green-500', 'text-white');
-
-        }
-
-
-
-        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
-
-        if (oddsElement) {
-
-            oddsElement.classList.add('picked');
-
-        }
-
-    
-
-        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-
-            ball.style.animationPlayState = 'running';
-
-        });
-
-    } else {
-
-        console.warn("No more members to draw during performSingleDraw.");
-
-    }
-
-}
 
 function drawWeightedMember() {
     if (isDraftSaved && draftOrder.length > 0) {
@@ -1193,78 +1051,95 @@ function drawWeightedMember() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
-    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-    drawnTeamNameDisplay.textContent = '';
-    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-        ball.style.animationPlayState = 'paused';
-    });
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
+    
+    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    drawnTeamNameDisplay.textContent = '';
+    
+    // 1. Pause all other balls so the focus is on the draw
+    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+        ball.style.animationPlayState = 'paused';
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const drawnMember = drawWeightedMember();
+    const drawnMember = drawWeightedMember();
 
-    if (drawnMember) {
-        playPickAudio(pickCounter);
-        
-        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+    if (drawnMember) {
+        playPickAudio(pickCounter);
+        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
-        if (teamBalls.length > 0) {
-            const machineRect = lotteryMachine.getBoundingClientRect();
-            const targetX = (machineRect.width / 2);
-            const targetY = 10;
+        if (teamBalls.length > 0) {
+            const machineRect = lotteryMachine.getBoundingClientRect();
+            // This targets the top-center of the machine
+            const targetX = machineRect.width / 2;
+            const targetY = 20; 
 
-            teamBalls.forEach(ballElement => {
-                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
-                ballElement.style.top = `${targetY}px`;
-                ballElement.classList.add('selected-for-shoot');
-            });
+            teamBalls.forEach(ballElement => {
+                // 2. CRITICAL: Stop the background "mixing" animations 
+                // so the ball is free to move to the center
+                ballElement.style.animation = 'none'; 
+                
+                // Trigger a "reflow" so the browser registers the animation stop
+                void ballElement.offsetWidth; 
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+                // 3. Converge to the top-center
+                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
+                ballElement.style.top = `${targetY}px`;
+                
+                // 4. Turn gold (via the CSS class we updated)
+                ballElement.classList.add('selected-for-shoot');
+            });
 
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-            teamBalls.forEach(ballElement => {
-                ballElement.classList.remove('selected-for-shoot');
-                ballElement.classList.add('drawn');
-            });
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            teamBalls.forEach(ballElement => {
-                if (ballElement && ballElement.parentNode) {
-                    ballElement.remove();
-                }
-            });
-        } else {
-            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            await new Promise(resolve => setTimeout(resolve, 1500));
-        }
-        if (!isDraftSaved) {
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
-        }
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-        if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
-            pickElement.classList.add('bg-green-500', 'text-white');
-        }
+            // Show the team name on the screen
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
-        if (oddsElement) {
-            oddsElement.classList.add('picked');
-        }
-    
-        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-            ball.style.animationPlayState = 'running';
-        });
-    } else {
-        console.warn("No more members to draw during performSingleDraw.");
-    }
+            // 5. Shoot the balls upwards and out
+            teamBalls.forEach(ballElement => {
+                ballElement.classList.add('drawn');
+            });
+            
+            // Wait for the upward animation to finish before removing from HTML
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            teamBalls.forEach(ballElement => {
+                if (ballElement && ballElement.parentNode) {
+                    ballElement.remove();
+                }
+            });
+        } else {
+            console.warn(`No balls found for: ${drawnMember.name}.`);
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        // --- Save and UI Updates ---
+        if (!isDraftSaved) {
+            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
+        }
+
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+
+        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
+        if (oddsElement) {
+            oddsElement.classList.add('picked');
+        }
+    
+        // 6. Resume the remaining balls
+        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+            ball.style.animationPlayState = 'running';
+        });
+    }
 }
-
 async function runFullDraftSimulation() {
     if (drawing) return;
 

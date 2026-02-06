@@ -751,6 +751,20 @@ function populateBalls() {
     });
 }
 
+    function drawWeightedMember() {
+    if (isDraftSaved && draftOrder.length > 0) {
+        const pick = draftOrder.find(p => p.pick === pickCounter);
+        if (pick) {
+            const idx = availableMembers.findIndex(m => m.name === pick.member);
+            if (idx !== -1) availableMembers.splice(idx, 1);
+            
+            return {
+                id: members.find(m => m.name === pick.member)?.id,
+                name: pick.member,
+                originalWeightDisplay: pick.originalWeightDisplay
+            };
+        }
+    }
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;

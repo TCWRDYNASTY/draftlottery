@@ -783,43 +783,76 @@ function drawWeightedMember() {
 }
 
 async function performSingleDraw() {
-    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-    drawnTeamNameDisplay.textContent = '';
-    lotteryMachine.querySelectorAll('.ball').forEach(b => b.style.animationPlayState = 'paused');
-    
-    await new Promise(r => setTimeout(r, 2000));
-    const drawnMember = drawWeightedMember();
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
+    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    drawnTeamNameDisplay.textContent = '';
+    lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+        ball.style.animationPlayState = 'paused';
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    if (drawnMember) {
-        playPickAudio(pickCounter);
-        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+    const drawnMember = drawWeightedMember();
 
-        if (teamBalls.length > 0) {
-            const rect = lotteryMachine.getBoundingClientRect();
-            teamBalls.forEach(ball => {
-                ball.style.animation = 'none';
-                void ball.offsetWidth; 
-                ball.style.left = `${(rect.width / 2) - 25}px`;
-                ball.style.top = `20px`;
-                ball.classList.add('selected-for-shoot');
-            });
+    if (drawnMember) {
+        playPickAudio(pickCounter);
+        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
-            await new Promise(r => setTimeout(r, 1000));
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            await new Promise(r => setTimeout(r, 1500));
+        if (teamBalls.length > 0) {
+            const machineRect = lotteryMachine.getBoundingClientRect();
+            const targetX = (machineRect.width / 2);
+            const targetY = 10;
 
-            teamBalls.forEach(ball => ball.classList.add('drawn'));
-            await new Promise(r => setTimeout(r, 1500));
-            teamBalls.forEach(ball => ball.remove());
-        }
+            teamBalls.forEach(ballElement => {
+                ballElement.style.left = `${targetX - (ballElement.offsetWidth / 2)}px`;
+                ballElement.style.top = `${targetY}px`;
+                ballElement.classList.add('selected-for-shoot');
+            });
 
-        if (!isDraftSaved) {
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
-        }
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-        updateUIForPick(drawnMember);
-        lotteryMachine.querySelectorAll('.ball').forEach(b => b.style.animationPlayState = 'running');
-    }
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            teamBalls.forEach(ballElement => {
+                ballElement.classList.remove('selected-for-shoot');
+                ballElement.classList.add('drawn');
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            teamBalls.forEach(ballElement => {
+                if (ballElement && ballElement.parentNode) {
+                    ballElement.remove();
+                }
+            });
+        } else {
+            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+        if (!isDraftSaved) {
+            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
+        }
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+
+        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
+        if (oddsElement) {
+            oddsElement.classList.add('picked');
+        }
+    
+        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+            ball.style.animationPlayState = 'running';
+        });
+    } else {
+        console.warn("No more members to draw during performSingleDraw.");
+    }
 }
 
 async function runFullDraftSimulation() {

@@ -1382,19 +1382,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // You can keep the keydown listener on the document if you want, but the click listener is now more specific
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
-</script>
-   <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-              console.log('Service Worker registered!');
-            })
-            .catch(error => {
-              console.log('Service Worker registration failed:', error);
-            });
-        });
-      }
     </script>
 </body>
 </html>

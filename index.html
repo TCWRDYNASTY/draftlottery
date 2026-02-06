@@ -630,35 +630,31 @@
 
  
 <script type="module">
-// --- 1. AUDIO & UTILITY VARIABLES ---
-// Declare audio variables with 'let' so they can be initialized later on user interaction
-let espnAudio = null;
-let crowdShoutAudio = null;
-let disappointmentAudio = null;
-let cheeringAudio = null;
-let crowdCheersAudio = null;
-// Declare this variable to manage the timeout for stopping audio
-let audioTimeout;
 
-// --- 2. SUPABASE CONFIGURATION ---
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// --- Supabase ---
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const COMMISSIONER_PASSWORD = 'Asher'; // This needs to be defined BEFORE it's used
-const SUPABASE_URL = 'https://aznsmupnyyjtdwryaxos.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6bnNtdXBueXlqdGR3cnlheG9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTYxNTYsImV4cCI6MjA2NjQzMjE1Nn0.CGfUxS4wZZgVjdUtk_h14-i7zZXy8sZ6wtsiRFKUKpg';
 
+const COMMISSIONER_PASSWORD = 'Asher'; 
+const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 const SUPABASE_TABLE_NAME = 'draft_configs';
 const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- 3. STATE VARIABLES & DOM ELEMENTS ---
-let members = []; // This will be populated from Supabase
+let members = []; 
 let availableMembers = [];
 let draftOrder = [];
 let drawing = false;
 let pickCounter = 0;
 let isDraftSaved = false;
+
+let espnAudio = null;
+let crowdShoutAudio = null;
+let disappointmentAudio = null;
+let cheeringAudio = null;
+let crowdCheersAudio = null;
+let audioTimeout;
 
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
@@ -667,8 +663,6 @@ const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
 const resultsList = document.getElementById('resultsList');
 const teamOddsList = document.getElementById('teamOddsList');
 const audioOverlay = document.getElementById('audioOverlay');
-
-// These elements need to be defined before the unlock function uses them
 const commissionerLogin = document.getElementById('commissionerLogin');
 const commissionerPasswordInput = document.getElementById('commissionerPassword');
 const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
@@ -678,28 +672,53 @@ const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
+function handleCommissionerUnlock(e) {
+    if (e) e.preventDefault();
 
-// --- 4. COMMISSIONER UNLOCK LOGIC (ADDED HERE) ---
-// This function needs to be placed after the DOM elements it references are defined.
-function handleCommissionerUnlock() {
-    // Check the password against the constant defined at the top
-    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
-        // Show the full panel and hide the login elements
-        commissionerPanel.classList.remove('hidden');
-        commissionerLogin.classList.add('hidden'); // Hide the password input and button
-        showMessage("Commissioner tools unlocked!", "success");
-        console.log("Commissioner panel unlocked.");
-    } else {
-        // Show an error message
-        showMessage("Incorrect password. Please try again.", "error");
-    }
-    commissionerPasswordInput.value = ''; // Clear the input field after a check
+    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
+        commissionerPanel.classList.remove('hidden');
+        commissionerLogin.classList.add('hidden');
+        showMessage("Commissioner tools unlocked!", "success");
+        console.log("Commissioner panel unlocked.");
+    } else {
+        showMessage("Incorrect password. Please try again.", "error");
+    }
+    
+    commissionerPasswordInput.value = ''; 
 }
 
-// Add event listener to the unlock button (This is also correctly placed)
-if (unlockCommissionerBtn) {
-    unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDraftState();    
+    if (runFullDraftBtn) {
+        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
+    }
+    if (unlockCommissionerBtn) {
+        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    }
+    if (commissionerLogin) {
+        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    }
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await saveConfig(); 
+        });
+    }
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const success = await clearDraftOrderFromSupabase();
+            if (success) {
+                initializeDraftState();
+                showMessage('Draft has been reset. A new random draft can now be run.');
+            }
+        });
+    }
+
+    if (audioOverlay) {
+        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+    }
+   
 
 // --- 5. AUDIO PLAYBACK FUNCTION ---
 function playPickAudio(pickNumber) {

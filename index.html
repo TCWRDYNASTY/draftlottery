@@ -718,15 +718,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 });
 
-// --- CORE FUNCTIONS ---
-
 function populateBalls() {
     if (!lotteryMachine) return;
-    lotteryMachine.innerHTML = '';
-    
+    lotteryMachine.innerHTML = '';    
     const bunnyImages = ['badbunny.png', 'badbunny1.png', 'badbunny2.png', 'badbunny3.png', 'badbunny4.png', 'badbunny6.png', 'badbunny7.png', 'badbunny9.png'];
     const ballsToRender = [];
-
     availableMembers.forEach(member => {
         for (let i = 0; i < member.weight; i++) {
             ballsToRender.push({ teamId: member.id });
@@ -734,53 +730,25 @@ function populateBalls() {
     });
 
     const machineRect = lotteryMachine.getBoundingClientRect();
+    const maxRadius = (machineRect.width / 2) - 40; 
     ballsToRender.sort(() => Math.random() - 0.5).forEach((ballData, index) => {
         const ball = document.createElement('div');
         ball.classList.add('ball');
         ball.dataset.teamId = ballData.teamId;
-
         const memberIndex = members.findIndex(m => m.id === ballData.teamId);
-        ball.style.backgroundImage = `url('${bunnyImages[memberIndex % bunnyImages.length]}')`;
-        
+        ball.style.backgroundImage = `url('${bunnyImages[memberIndex % bunnyImages.length]}')`;    
         lotteryMachine.appendChild(ball);
-
-        const randomX = Math.random() * (machineRect.width - 50);
-        const randomY = Math.random() * (machineRect.height - 80);
-        ball.style.left = `${randomX}px`;
-        ball.style.top = `${randomY}px`;
-        ball.style.animation = `circle-motion ${Math.random() * 4 + 3}s linear infinite, ballAgitation 0.3s ease-in-out infinite`;
+        const randomRadius = Math.random() * maxRadius;
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * -5;
+        ball.style.setProperty('--circle-radius', `${randomRadius}px`);
+        ball.style.left = `calc(50% - 25px)`;
+        ball.style.top = `calc(50% - 25px)`;
+        ball.style.animation = `
+            circle-motion ${duration}s linear ${delay}s infinite, 
+            ballAgitation 0.3s ease-in-out infinite
+        `;
     });
-}
-
-function drawWeightedMember() {
-    if (isDraftSaved && draftOrder.length > 0) {
-        const pick = draftOrder.find(p => p.pick === pickCounter);
-        if (pick) {
-            // Remove from availableMembers so balls disappear in replay
-            const idx = availableMembers.findIndex(m => m.name === pick.member);
-            if (idx !== -1) availableMembers.splice(idx, 1);
-            
-            return {
-                id: members.find(m => m.name === pick.member)?.id,
-                name: pick.member,
-                originalWeightDisplay: pick.originalWeightDisplay
-            };
-        }
-    }
-    
-    if (availableMembers.length === 0) return null;
-    const totalWeight = availableMembers.reduce((sum, m) => sum + m.weight, 0);
-    let randomWeight = Math.random() * totalWeight;
-
-    for (let i = 0; i < availableMembers.length; i++) {
-        randomWeight -= availableMembers[i].weight;
-        if (randomWeight <= 0) {
-            const selected = availableMembers[i];
-            availableMembers.splice(i, 1);
-            return selected;
-        }
-    }
-    return availableMembers.pop();
 }
 
 async function performSingleDraw() {

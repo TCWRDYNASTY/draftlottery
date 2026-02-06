@@ -751,7 +751,7 @@ function populateBalls() {
     });
 }
 
-    function drawWeightedMember() {
+  function drawWeightedMember() {
     if (isDraftSaved && draftOrder.length > 0) {
         const pick = draftOrder.find(p => p.pick === pickCounter);
         if (pick) {
@@ -765,6 +765,21 @@ function populateBalls() {
             };
         }
     }
+
+    if (availableMembers.length === 0) return null;
+    const totalWeight = availableMembers.reduce((sum, m) => sum + (parseInt(m.weight) || 0), 0);
+    let randomWeight = Math.random() * totalWeight;
+    for (let i = 0; i < availableMembers.length; i++) {
+        const currentWeight = parseInt(availableMembers[i].weight) || 0;
+        randomWeight -= currentWeight;
+        if (randomWeight <= 0) {
+            const selected = availableMembers[i];
+            availableMembers.splice(i, 1);
+            return selected;
+        }
+    }
+    return availableMembers.pop();
+}
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
@@ -774,7 +789,6 @@ async function performSingleDraw() {
     });
     
     await new Promise(resolve => setTimeout(resolve, 2000));
-
     const drawnMember = drawWeightedMember();
 
     if (drawnMember) {
@@ -1030,6 +1044,7 @@ async function saveConfig() {
     await supabase.from(SUPABASE_TABLE_NAME).upsert(newMembers);
     location.reload();
 }
+
 </script>
  
 </body>

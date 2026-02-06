@@ -721,26 +721,40 @@ document.addEventListener('DOMContentLoaded', () => {
 function populateBalls() {
     if (!lotteryMachine) return;
     lotteryMachine.innerHTML = '';    
+    
     const bunnyImages = ['badbunny.png', 'badbunny1.png', 'badbunny2.png', 'badbunny3.png', 'badbunny4.png', 'badbunny6.png', 'badbunny7.png', 'badbunny9.png'];
     const ballsToRender = [];
+
+    console.log("Starting to populate balls. Available members:", availableMembers.length);
+
     availableMembers.forEach(member => {
-        for (let i = 0; i < member.weight; i++) {
+        // Force the weight to be a number. If it's 10%, we want 10 balls.
+        const weightValue = parseInt(member.weight);
+        
+        for (let i = 0; i < weightValue; i++) {
             ballsToRender.push({ teamId: member.id });
         }
     });
 
+    console.log("Total balls to create:", ballsToRender.length);
+
     const machineRect = lotteryMachine.getBoundingClientRect();
     const maxRadius = (machineRect.width / 2) - 40; 
-    ballsToRender.sort(() => Math.random() - 0.5).forEach((ballData, index) => {
+
+    ballsToRender.sort(() => Math.random() - 0.5).forEach((ballData) => {
         const ball = document.createElement('div');
         ball.classList.add('ball');
         ball.dataset.teamId = ballData.teamId;
+
         const memberIndex = members.findIndex(m => m.id === ballData.teamId);
         ball.style.backgroundImage = `url('${bunnyImages[memberIndex % bunnyImages.length]}')`;    
+        
         lotteryMachine.appendChild(ball);
+
         const randomRadius = Math.random() * maxRadius;
-        const duration = Math.random() * 3 + 2;
+        const duration = Math.random() * 2 + 1.5; // Made it slightly faster
         const delay = Math.random() * -5;
+
         ball.style.setProperty('--circle-radius', `${randomRadius}px`);
         ball.style.left = `calc(50% - 25px)`;
         ball.style.top = `calc(50% - 25px)`;

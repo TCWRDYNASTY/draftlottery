@@ -1024,7 +1024,11 @@ function populateBalls() {
         return;
     }
     if (runFullDraftBtn) runFullDraftBtn.disabled = false;
-
+  if (runFullDraftBtn) runFullDraftBtn.disabled = false;
+    const bunnyImages = [
+        'badbunny.png', 'badbunny1.png', 'badbunny2.png', 'badbunny3.png', 
+        'badbunny4.png', 'badbunny6.png', 'badbunny7.png', 'badbunny9.png'
+    ];
     const ballsToRender = [];
     availableMembers.forEach(member => {
         const weight = member.weight || 0; 

@@ -741,27 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 }); 
 
-async function loadDraftOrderFromSupabase() {
-    console.log('Checking for saved draft order...');
-    const { data, error } = await supabase
-        .from(SUPABASE_ORDERS_TABLE_NAME)
-        .select('order_data')
-        .order('order_data->>pick', { ascending: false });
-    
-    if (error) {
-        console.error('Error fetching draft order:', error);
-        return null;
-    }
-
-    if (data && data.length > 0) {
-        console.log('Draft order found in Supabase:', data);
-        return data.map(item => item.order_data);
-    }
-
-    console.log('No draft order found in the database.');
-    return null;
-}
-
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     

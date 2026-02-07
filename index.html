@@ -741,36 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleFirstInteraction, { once: true });
 }); 
 
-async function fetchMembersFromSupabase() {
-    console.log('Fetching members from Supabase...');
-    const { data, error } = await supabase
-        .from(SUPABASE_TABLE_NAME)
-        .select('id, members_data')
-        .order('members_data->>weight', { ascending: false });
-
-    if (error) {
-        console.error('Error fetching data from Supabase:', error);
-        showMessage('Error fetching data from the database. Check console for details.');
-        return [];
-    }
-
-    if (data && data.length > 0) {
-        console.log('Data fetched successfully:', data);
-        const members = data.map(item => ({
-            id: item.id,
-            name: item.members_data.name,
-            weight: item.members_data.weight,
-            originalWeightDisplay: item.members_data.originalWeightDisplay,
-            color: item.members_data.color 
-        }));
-        console.log('After mapping, members array:', members, 'Length:', members.length);
-        return members;
-    } else {
-        console.warn('No member data found in Supabase table.');
-        return [];
-    }
-}
-
 async function loadDraftOrderFromSupabase() {
     console.log('Checking for saved draft order...');
     const { data, error } = await supabase

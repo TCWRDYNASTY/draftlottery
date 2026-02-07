@@ -246,14 +246,18 @@
 .ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
 .ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
 
-
-.ball.selected-for-shoot {
+        .ball.selected-for-shoot {
     background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--accent-gold) 100%) !important;
     box-shadow: 0 0 40px var(--accent-gold), 0 0 15px #fff;
     z-index: 999; 
-    animation-duration: 0.1s; 
+    
+    /* 1. Remove the 0.1s animation */
+    animation: none !important; 
+    
+    /* 2. Add a smooth 2-second rise */
+    transition: top 2s ease-out, left 2s ease-out, transform 2s ease-out !important;
 }
-
+        
 .ball.drawn {
     transform: scale(0) !important;
     opacity: 0 !important;
@@ -649,12 +653,22 @@
         </p>
     </div>
 
+    <div id="winnerOverlay" class="hidden fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black bg-opacity-90 transition-all duration-500">
+    <h1 class="text-white text-6xl font-bold mb-8 animate-bounce">THE #1 PICK</h1>
+    <img id="winnerImage" src="https://media.pitchfork.com/photos/627532b6e32906ad78189679/1:1/w_450%2Cc_limit/Bad-Bunny.jpg" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-md">
+    <button onclick="closeWinnerOverlay()" class="mt-8 px-6 py-2 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Close</button>
+</div>
+    
 <script type="module">
 
-// --- Supabase ---
+const pickImages = {
+    14: 'url_to_image_14.jpg',
+    13: 'url_to_image_13.jpg',
+    // ... all the way down to 1
+    1: 'bad_bunny_winner.jpg' 
+};
+    
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-
 const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
@@ -1011,24 +1025,24 @@ async function runFullDraftSimulation() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
-    
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-    drawnTeamNameDisplay.textContent = '';
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
+    drawnTeamNameDisplay.textContent = '';   
+    await new Promise(resolve => setTimeout(resolve, 2000));   
     let drawnMember;
     if (isDraftSaved) {
         const savedPick = draftOrder.find(p => p.pick === pickCounter);
-        // This line was already good!
-        drawnMember = members.find(m => m.id === savedPick.teamId);
-        availableMembers = availableMembers.filter(m => m.id !== drawnMember.id);
-    } 
-    else {
+        if (savedPick) {
+            drawnMember = members.find(m => m.id === savedPick.teamId || m.name === savedPick.member);
+            if (drawnMember) {
+                availableMembers = availableMembers.filter(m => m.id !== drawnMember.id);
+            } else {
+                drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
+            }
+        }
+    } else {
         drawnMember = drawWeightedMember();
     }
-
     if (drawnMember) {
         playPickAudio(pickCounter);
         
@@ -1042,11 +1056,10 @@ async function performSingleDraw() {
                 ballElement.style.transform = 'translate(-50%, -50%) scale(1.2)';
                 ballElement.classList.add('selected-for-shoot');
             });
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
             drawnTeamNameDisplay.textContent = drawnMember.name;
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            showWinnerDrop(drawnMember.name, pickCounter); 
+            await new Promise(resolve => setTimeout(resolve, 3000));
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
                 ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
@@ -1055,42 +1068,33 @@ async function performSingleDraw() {
 
             await new Promise(resolve => setTimeout(resolve, 1000));
             teamBalls.forEach(ballElement => {
-                if (ballElement && ballElement.parentNode) {
-                    ballElement.remove();
-                }
+                if (ballElement && ballElement.parentNode) ballElement.remove();
             });
-        }      
-        else {
-            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
+        } else {
             drawnTeamNameDisplay.textContent = drawnMember.name;
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            showWinnerDrop(drawnMember.name, pickCounter);
+            await new Promise(resolve => setTimeout(resolve, 3000));
         }
-
-        // --- THE FIX IS HERE ---
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
-                teamId: drawnMember.id, // Now the ID is saved for future replays!
+                teamId: drawnMember.id, 
                 member: drawnMember.name, 
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
         if (pickElement) {
             pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
-
         const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
-        if (oddsElement) {
-            oddsElement.classList.add('picked');
-        }
-    } else {
-        console.warn("No more members to draw during performSingleDraw.");
-    }
+        if (oddsElement) oddsElement.classList.add('picked');
 
+    } else {
+        console.warn("No more members to draw.");
+    }
     pickCounter--; 
     if (currentPickLabel) {
         if (pickCounter >= 1) {
@@ -1101,41 +1105,36 @@ async function performSingleDraw() {
     }
 }
 
+    function showWinnerDrop(teamName, pickNumber) {
+    const overlay = document.getElementById('winnerOverlay');
+    const title = overlay.querySelector('h1');
+    const img = document.getElementById('winnerImage');
+    if (!overlay || !img) return;
+    title.innerText = `PICK #${pickNumber}: ${teamName}`;
+    img.src = pickImages[pickNumber] || 'default_bunny.jpg';
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+    }, 3000);
+}
+
 function drawWeightedMember() {
-if (isDraftSaved && draftOrder.length > 0) {
-        const pick = draftOrder.find(p => p.pick === pickCounter);
-        if (pick) {
-            const mIndex = availableMembers.findIndex(m => m.name === pick.member);
-            if (mIndex !== -1) {
-                return availableMembers.splice(mIndex, 1)[0]; // Pull it out of the hopper!
-            }
-            return members.find(m => m.name === pick.member);
-        }    
-
-
-else {
-            console.warn("Could not find next pick in saved draft order.");
-            return null;
-        }
-    }
-    
-    if (availableMembers.length === 0) {
-        return null;
-    }
-
-    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
-    let randomWeight = Math.random() * totalWeight;
-
-    for (let i = 0; i < availableMembers.length; i++) {
-        randomWeight -= availableMembers[i].weight;
-        if (randomWeight <= 0) {
-            const selectedMember = availableMembers[i];
-            availableMembers.splice(i, 1);
-            return selectedMember;
-        }
-    }
-    console.warn("Weighted draw failed to find a member. This should not happen if weights are positive.");
-    return availableMembers.pop();
+    if (availableMembers.length === 0) {
+        return null;
+    }
+    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+    for (let i = 0; i < availableMembers.length; i++) {
+        randomWeight -= availableMembers[i].weight;
+        if (randomWeight <= 0) {
+            const selectedMember = availableMembers[i];
+            availableMembers.splice(i, 1);
+            return selectedMember;
+        }
+    }    
+    return availableMembers.pop();
 }
 
 function showResults() {

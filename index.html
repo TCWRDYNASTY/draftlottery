@@ -831,7 +831,6 @@ async function clearDraftOrderFromSupabase() {
     sessionStorage.removeItem('hasSeenDraftAnimation');
     return true;
 }
-
 async function initializeDraftState() {
     members = await fetchMembersFromSupabase();
     if (members.length === 0) {

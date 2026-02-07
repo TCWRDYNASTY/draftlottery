@@ -182,7 +182,7 @@
     aspect-ratio: 1;
     border-radius: 50%;
     margin: 3rem auto;
-    overflow: hidden; 
+    overflow: visible !important;
     border: 15px solid #a0b3c8;
     background: radial-gradient(circle at center, #5b6d90, #2c3e59);
     box-shadow:
@@ -205,7 +205,7 @@
     border-radius: 20px 20px 0 0;
     border-bottom: 5px solid #a0b3c8;
     box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.8);
-    z-index: 10; 
+    z-index: 5;      
     pointer-events: none;
 }
     
@@ -249,10 +249,10 @@
 .ball.selected-for-shoot {
     animation: none !important; 
     transition: all 10s ease-in-out !important; 
-    top: 20px !important;
+    z-index: 9999 !important; 
+    top: -100px !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) scale(2) !important;
-    z-index: 9999 !important;
+    transform: translate(-50%, -50%) scale(2.5) !important;
 }
         
 .ball.drawn {
@@ -1022,9 +1022,12 @@ function playPickAudio(pick) {
 }
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    await new Promise(resolve => setTimeout(resolve, 10000));   
+    
+    // 1. SMALL PAUSE FOR SUSPENSE BEFORE THE BALL MOVES
+    await new Promise(resolve => setTimeout(resolve, 1500));    
     
     let drawnMember;
     if (isDraftSaved) {
@@ -1046,26 +1049,37 @@ async function performSingleDraw() {
         
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
-       if (teamBalls.length > 0) {
+        if (teamBalls.length > 0) {
+            // 2. STOP THE SHAKING IMMEDIATELY
             teamBalls.forEach(ballElement => {
-                ballElement.style.animation = 'none'; 
+                ballElement.style.animationName = 'none'; 
+                ballElement.style.animation = 'none';
                 ballElement.classList.add('selected-for-shoot');
-                void ballElement.offsetWidth;
+                void ballElement.offsetWidth; // Force the browser to notice the stop
             });
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            // 3. SHORT BREATH BEFORE THE SLOW CLIMB
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // 4. TRIGGER THE SLOW MOVEMENT (Set by your 10s CSS)
             teamBalls.forEach(ballElement => {
                 ballElement.style.left = '50%';
                 ballElement.style.top = '20px'; 
-                ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                ballElement.style.transform = 'translate(-50%, -50%) scale(2)';
             });
-            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            // 5. THE BIG WAIT (Match this to your CSS 10s crawl)
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            
+            // 6. REVEAL WINNER
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter); 
+            
             await new Promise(resolve => setTimeout(resolve, 4000));
+
+            // 7. CLEANUP
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
-                ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
                 ballElement.classList.add('drawn');
             });
 
@@ -1074,10 +1088,13 @@ async function performSingleDraw() {
                 if (ballElement && ballElement.parentNode) ballElement.remove();
             });
         } else {
+            // Fallback if no ball is found
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter);
             await new Promise(resolve => setTimeout(resolve, 4000));
         }
+
+        // ... rest of your save logic ...
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -1093,23 +1110,13 @@ async function performSingleDraw() {
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
-        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
-        if (oddsElement) oddsElement.classList.add('picked');
-
-    } else {
-        console.warn("No more members to draw.");
     }
 
     pickCounter--; 
     if (currentPickLabel) {
-        if (pickCounter >= 1) {
-            currentPickLabel.textContent = `Ready for Pick #${pickCounter}`;
-        } else {
-            currentPickLabel.textContent = "All Picks Revealed!";
-        }
+        currentPickLabel.textContent = pickCounter >= 1 ? `Ready for Pick #${pickCounter}` : "All Picks Revealed!";
     }
 }
-
     function showWinnerDrop(teamName, pickNumber) {
     const overlay = document.getElementById('winnerOverlay');
     const title = overlay.querySelector('h1');

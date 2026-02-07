@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy Football Draft Lottery</title>
@@ -10,17 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
+    <link rel="manifest" href="manifest.json">
     <style>
 
 
     :root {
-        --primary-dark: #1e3159; /* Deep Blue */
-        --accent-gold: #FFD700; /* Gold */
-        --light-text: #f0f4f8; /* Light gray for contrast */
-        --container-bg: #2a3d60; /* Slightly lighter blue for containers */
-        --section-bg: #3c5283; /* Muted blue for sections */
-        --highlight-blue: #6495ed; /* Cornflower blue */
+        --primary-dark: #1e3159; 
+        --accent-gold: #FFD700; 
+        --light-text: #f0f4f8; 
+        --container-bg: #2a3d60; 
+        --section-bg: #3c5283; 
+        --highlight-blue: #6495ed; 
     }
 
     body {
@@ -174,154 +175,122 @@
         font-family: 'Bebas Neue', sans-serif;
     }
 
-    @keyframes ballAgitation {
-0% { transform: translate(0, 0) rotate(0deg); }
-20% { transform: translate(10px, -15px) rotate(10deg); } /* Move up slightly /
-40% { transform: translate(-12px, 10px) rotate(-15deg); } / Move down slightly /
-60% { transform: translate(8px, -10px) rotate(5deg); } / Move up again, less height /
-80% { transform: translate(-5px, 5px) rotate(-5deg); } / Move down again, less height */
-100% { transform: translate(0, 0) rotate(0deg); }
+.lottery-machine {
+    position: relative;
+    width: 80vw;
+    max-width: 400px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    margin: 3rem auto;
+    overflow: hidden; 
+    border: 15px solid #a0b3c8;
+    background: radial-gradient(circle at center, #5b6d90, #2c3e59);
+    box-shadow:
+        0 0 50px rgba(255, 215, 0, 0.2),
+        inset 0 0 80px rgba(255, 255, 255, 0.1),
+        inset 0 0 120px rgba(0, 0, 0, 0.7);
+    display: block; 
+    z-index: 1;
 }
 
-    /* The main lottery machine */
-    .lottery-machine {
-        position: relative;
-        width: 80vw;
-        max-width: 400px;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        margin: 3rem auto;
-        overflow: hidden;
-        border: 15px solid #a0b3c8;
-        background: linear-gradient(180deg, #5b6d90, #2c3e59);
-        box-shadow:
-            0 0 50px rgba(255, 215, 0, 0.4),
-            inset 0 0 80px rgba(255, 255, 255, 0.3),
-            inset 0 0 120px rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 20px;
-        z-index: 0;
-    }
-
-    .lottery-machine::after {
-        content: '';
-        position: absolute;
-        top: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 150px;
-        height: 80px;
-        background: #121f3d;
-        border-radius: 50px 50px 0 0;
-        border-bottom: 10px solid #a0b3c8;
-        box-shadow: inset 0 -10px 25px rgba(0, 0, 0, 0.9);
-        z-index: 5;
-        pointer-events: none;
-    }
-
-    .ball {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f0f4f8 40%, #a0b3c8 80%, #778899 100%);
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: 900;
-        color: var(--primary-dark);
-        font-size: 1.1rem;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.8);
-        cursor: default;
-        transition: transform 0.8s ease-out, opacity 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, background 0.3s, border-color 0.3s, box-shadow 0.3s;
-        z-index: 2;
-        /* --- ADDED ANIMATION PROPERTIES --- */
-        animation-name: ballAgitation;
-        animation-duration: 2s; /* Adjust speed as needed */
-        animation-timing-function: ease-in-out;
-        animation-iteration-count: infinite;
-    }
-
-    .ball.selected-for-shoot, .ball.drawn {
-        animation: none !important; /* This is correct, it stops agitation when selected or drawn */
-    }
-
-    .ball.selected-for-shoot {
-        background: radial-gradient(circle at top left, #fff 0%, var(--accent-gold) 100%);
-        box-shadow: 0 0 25px var(--accent-gold), 0 5px 10px rgba(0,0,0,0.5);
-        z-index: 10;
-        transition: top 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), left 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), background 0.3s, box-shadow 0.3s;
-    }
-
-    .ball.drawn {
-        transform: translateY(-400px) scale(0.1);
-        opacity: 0;
-        transition: transform 1.5s ease-in, opacity 1.5s ease-out;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    /* Display for the drawn ball */
-    .drawn-ball-display {
-        min-height: 120px;
-        background-color: var(--section-bg);
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-        margin-top: 2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
-        border: 4px dashed var(--accent-gold);
-        position: relative;
-        overflow: hidden;
-    }
+.lottery-machine::after {
+    content: '';
+    position: absolute;
+    top: -10px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 60px;
+    background: #121f3d;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 5px solid #a0b3c8;
+    box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.8);
+    z-index: 10; 
+    pointer-events: none;
+}
     
-    .drawn-ball-display::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 1.5rem;
-        border: 4px solid var(--accent-gold);
-        opacity: 0.5;
-        animation: glowingBorder 1.5s infinite alternate ease-in-out;
-        pointer-events: none;
-    }
-
-    @keyframes glowingBorder {
-        from {
-            box-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold), 0 0 30px var(--accent-gold);
-            opacity: 0.5;
-        }
-        to {
-            box-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-gold), 0 0 60px var(--accent-gold);
-            opacity: 0.8;
-        }
-    }
-
-
-@keyframes bounce {
-    0%   { transform: translateY(0); }
-    50%  { transform: translateY(10px); } /* Adjust this value for bounce height */
-    100% { transform: translateY(0); }
+.ball {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    cursor: default;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+    font-size: 1.1rem;
+    border: 2px solid var(--accent-gold);
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.8);
+       transition: top 0.8s cubic-bezier(0.5, -0.5, 0.5, 1.5), 
+                left 0.8s cubic-bezier(0.5, -0.5, 0.5, 1.5), 
+                transform 0.5s ease, 
+                background 0.3s;
+    animation-name: ballAgitation;
+    animation-duration: 0.2s; /* Changed to 0.2s for constant high-energy movement */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
 
-@keyframes circle-motion {
-    0% {
-        transform: rotate(0deg) translateX(var(--circle-radius)) rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg) translateX(var(--circle-radius)) rotate(-360deg);
-    }
+.ball:nth-child(1) { background-image: url('badbunny4.png'); animation-delay: 0.0s; }
+.ball:nth-child(2) { background-image: url('badbunny.png');  animation-delay: 0.05s; }
+.ball:nth-child(3) { background-image: url('badbunny1.png'); animation-delay: 0.1s; }
+.ball:nth-child(4) { background-image: url('badbunny2.png'); animation-delay: 0.15s; }
+.ball:nth-child(5) { background-image: url('badbunny3.png'); animation-delay: 0.02s; }
+.ball:nth-child(6) { background-image: url('badbunny6.png'); animation-delay: 0.07s; }
+.ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
+.ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
+
+
+.ball.selected-for-shoot {
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--accent-gold) 100%) !important;
+    box-shadow: 0 0 40px var(--accent-gold), 0 0 15px #fff;
+    z-index: 999; 
+    animation-duration: 0.1s; 
 }
+
+.ball.drawn {
+    transform: scale(0) !important;
+    opacity: 0 !important;
+    transition: transform 0.6s ease-in, opacity 0.4s ease-out !important;
+    pointer-events: none;
+}
+
+.drawn-ball-display {
+    min-height: 120px;
+    background-color: var(--section-bg);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+    border: 4px solid rgba(255, 215, 0, 0.3); 
+    position: relative;
+}
+
+.drawn-ball-display::before {
+    content: '';
+    position: absolute;
+    top: -4px; 
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 1.5rem;
+    border: 4px solid var(--accent-gold);
+    opacity: 0.5;
+    animation: glowingBorder 1.5s infinite alternate ease-in-out;
+    pointer-events: none;
+    z-index: 1;
+}
+
     .drawn-ball-display .current-pick-label {
         font-size: 1.75rem;
         font-weight: bold;
@@ -332,16 +301,14 @@
     }
     
     .drawn-ball-display .drawn-team-name {
-        font-size: 3rem;
+        font-size: 3.5rem;
         font-weight: 900;
         text-transform: uppercase;
         font-family: 'Bebas Neue', sans-serif;
-        text-shadow: 3px 3px 7px rgba(0, 0, 0, 0.7);
-        letter-spacing: 0.15em;
-        background: linear-gradient(90deg, #FFD700, #FFEF9F);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+        color: #FFD700;
+        text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255, 215, 0, 0.6);
+        letter-spacing: 0.1em;
+            }
 
     .btn {
         background: linear-gradient(90deg, #FFD700, #FFEF9F);
@@ -471,9 +438,11 @@
 
 .picked {
     text-decoration: line-through;
-    text-decoration-color: red;
+    text-decoration-color: #ef4444;
     text-decoration-thickness: 6px;
     opacity: 0.5;
+    transition: all 0.8s ease-in-out;
+    filter: grayscale(80%);
 }
 
 .audio-overlay {
@@ -507,32 +476,83 @@
     animation: pulse 2s infinite ease-in-out;
 }
 
+.hidden {
+    display: none !important; /* Use !important to ensure it overrides other display properties */
+}
+
+#memberConfigInputs input {
+    background-color: #0f172a !important; /* Dark blue background */
+    color: #ffffff !important;            /* Pure white text */
+    border: 1px solid #FFD700 !important;  /* Gold border */
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    width: 100%; /* Helps with mobile layout */
+    max-width: 200px;
+}
+
+#memberConfigInputs label {
+    color: #FFD700 !important; /* Gold labels for Team/Weight */
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.input-group {
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+ 
+@keyframes ballAgitation {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(120px, -80px) rotate(90deg); } 
+    40% { transform: translate(-100px, 150px) rotate(180deg); }
+    60% { transform: translate(80px, -120px) rotate(270deg); }
+    80% { transform: translate(-130px, 50px) rotate(360deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+  @keyframes glowingBorder {
+        from {
+            box-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold), 0 0 30px var(--accent-gold);
+            opacity: 0.5;
+        }
+        to {
+            box-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-gold), 0 0 60px var(--accent-gold);
+            opacity: 0.8;
+        }
+    }
+
+
+@keyframes bounce {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(10px); } /* Adjust this value for bounce height */
+    100% { transform: translateY(0); }
+}
+
 @keyframes pulse {
     0% { transform: scale(1); opacity: 0.8; }
     50% { transform: scale(1.05); opacity: 1; }
     100% { transform: scale(1); opacity: 0.8; }
 }
 
-.hidden {
-    display: none !important; /* Use !important to ensure it overrides other display properties */
-}
-</style>
+    </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 <div class="container">
 
-    <h1 class="text-5xl mb-8 tracking-wider uppercase"
-        style="
-            font-family: 'Bebas Neue', sans-serif;
-            color: #FFD700;
-            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9);
-            letter-spacing: 3px;
-        ">
-        TCWR DY-NASTY<br/>
-        Draft Lottery
-    </h1>
+   <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase"
+    style="
+        font-family: 'Bebas Neue', sans-serif;
+        color: #FFD700;
+        letter-spacing: 0.1em;
+    ">
+    TCWR DY-NASTY Draft Lottery
+</h1>
 
     <div class="lottery-machine" id="lotteryMachine">
         <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
@@ -573,22 +593,24 @@
             </ul>
     </div>
 
-    <div class="commissioner-tools">
-        <h2 class="text-2xl font-bold mb-4 text-orange-300">Commissioner Tools</h2>
-        
-        <div id="commissionerLogin">
-            <input type="password" id="commissionerPassword" placeholder="Enter Password" class="p-3 rounded-md bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-xs">
-            <button id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
-        </div>
+<div class="commissioner-tools">
+    <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
+    <form id="commissionerLogin">
+        <input type="password" id="commissionerPassword" placeholder="Enter Password" 
+               class="p-3 rounded-md bg-gray-900 border-2 border-yellow-600 text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500">
+        <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
+    </form>
 
-        <div id="commissionerPanel" class="hidden">
-            <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below. The 'weight' determines the number of balls for each team. Total weight should ideally sum to 100.</p>
-            <div id="memberConfigInputs">
-            </div>
-            <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white">Save Configuration</button>
-            <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white">Reset Draft</button>
-        </div>
+    <div id="commissionerPanel" class="hidden">
+        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below.</p>
+        
+        <div id="memberConfigInputs" class="space-y-2"></div>
+
+        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">Save Configuration</button>
+        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white font-bold">Reset Draft</button>
     </div>
+</div>
+
         <div id="messageBox" class="message-box">
         <p id="messageText"></p>
         <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
@@ -622,16 +644,16 @@
             </p>
         </div>
         
-        <p style="margin-top: 2.5rem; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);" class="animate-pulse">
+<p style="margin-top: 2.5rem; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);" class="animate-pulse">
             Click anywhere to start the simulator!
         </p>
     </div>
-</div>
 
- 
 <script type="module">
+
 // --- Supabase ---
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 
 const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
@@ -668,307 +690,737 @@ const commissionerPanel = document.getElementById('commissionerPanel');
 const memberConfigInputs = document.getElementById('memberConfigInputs');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
+const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-// --- 1. COMMISSIONER LOGIC ---
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
+
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
         commissionerPanel.classList.remove('hidden');
         commissionerLogin.classList.add('hidden');
-        showMessage("Commissioner tools unlocked!");
+        showMessage("Commissioner tools unlocked!", "success");
+        console.log("Commissioner panel unlocked.");
     } else {
-        showMessage("Incorrect password. Please try again.");
+        showMessage("Incorrect password. Please try again.", "error");
     }
+    
     commissionerPasswordInput.value = ''; 
 }
 
-// --- 2. AUDIO PLAYBACK ---
-function playPickAudio(pickNumber) {
-    clearTimeout(audioTimeout);
-    [crowdShoutAudio, disappointmentAudio, cheeringAudio, crowdCheersAudio].forEach(audio => {
-        if (audio) {
-            audio.pause();
-            audio.currentTime = 0;
-        }
-    });
-
-    if (espnAudio) espnAudio.volume = 0.1;
-
-    let audioToPlay;
-    if (pickNumber <= 4) audioToPlay = cheeringAudio;
-    else if (pickNumber <= 7) audioToPlay = disappointmentAudio;
-    else if (pickNumber === 8) audioToPlay = crowdShoutAudio;
-
-    if (audioToPlay) {
-        audioToPlay.play().catch(e => console.error("Audio playback error:", e));
-        audioTimeout = setTimeout(() => {
-            audioToPlay.pause();
-            audioToPlay.currentTime = 0;
-            if (espnAudio) espnAudio.volume = 0.5;
-        }, 3000);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDraftState();    
+    if (runFullDraftBtn) {
+        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
     }
-}
+    if (unlockCommissionerBtn) {
+        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    }
+    if (commissionerLogin) {
+        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    }
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await saveConfig(); 
+        });
+    }
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const success = await clearDraftOrderFromSupabase();
+            if (success) {
+                initializeDraftState();
+                showMessage('Draft has been reset. A new random draft can now be run.');
+            }
+        });
+    }
 
-// --- 3. SUPABASE DATA LOGIC ---
+    if (audioOverlay) {
+        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+    }
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+}); 
+
 async function fetchMembersFromSupabase() {
-    const { data, error } = await supabase
-        .from(SUPABASE_TABLE_NAME)
-        .select('id, members_data')
-        .order('members_data->>weight', { ascending: false });
+    console.log('Fetching members from Supabase...');
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select('id, members_data')
+        .order('members_data->>weight', { ascending: false });
 
-    if (error) return [];
-    return data.map(item => ({
-        id: item.id,
-        name: item.members_data.name,
-        weight: item.members_data.weight,
-        originalWeightDisplay: item.members_data.originalWeightDisplay,
-        color: item.members_data.color 
-    }));
+    if (error) {
+        console.error('Error fetching data from Supabase:', error);
+        showMessage('Error fetching data from the database. Check console for details.');
+        return [];
+    }
+
+    if (data && data.length > 0) {
+        console.log('Data fetched successfully:', data);
+        const members = data.map(item => ({
+            id: item.id,
+            name: item.members_data.name,
+            weight: item.members_data.weight,
+            originalWeightDisplay: item.members_data.originalWeightDisplay,
+            color: item.members_data.color 
+        }));
+        console.log('After mapping, members array:', members, 'Length:', members.length);
+        return members;
+    } else {
+        console.warn('No member data found in Supabase table.');
+        return [];
+    }
 }
 
 async function loadDraftOrderFromSupabase() {
-    const { data, error } = await supabase
-        .from(SUPABASE_ORDERS_TABLE_NAME)
-        .select('order_data')
-        .order('order_data->>pick', { ascending: false });
-    
-    if (error || !data) return null;
-    return data.map(item => item.order_data);
+    console.log('Checking for saved draft order...');
+    const { data, error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select('order_data')
+        .order('order_data->>pick', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching draft order:', error);
+        return null;
+    }
+
+    if (data && data.length > 0) {
+        console.log('Draft order found in Supabase:', data);
+        return data.map(item => item.order_data);
+    }
+
+    console.log('No draft order found in the database.');
+    return null;
 }
 
 async function saveMembersToSupabase(newMembers) {
-    const formattedData = newMembers.map(member => ({
-        id: member.id,
-        members_data: {
-            name: member.name,
-            weight: member.weight,
-            originalWeightDisplay: member.originalWeightDisplay
-        }
-    }));
-    const { error } = await supabase.from(SUPABASE_TABLE_NAME).upsert(formattedData, { onConflict: 'id' });
-    return !error;
+    console.log('Saving configuration to Supabase...', newMembers);
+
+    const formattedData = newMembers.map(member => ({
+        id: member.id,
+        members_data: {
+            name: member.name,
+            weight: member.weight,
+            originalWeightDisplay: member.originalWeightDisplay
+        }
+    }));
+    
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+        showMessage('Error saving configuration to the database. Check console for details.');
+        return false;
+    }
+    console.log('Configuration saved successfully:', data);
+    return true;
 }
 
 async function saveDraftOrderToSupabase(draftOrder) {
-    const formattedData = draftOrder.map(pick => ({
-        id: `pick_${pick.pick}`,
-        order_data: {
-            pick: pick.pick,
-            member: pick.member,
-            originalWeightDisplay: pick.originalWeightDisplay
-        }
-    }));
-    const { error } = await supabase.from(SUPABASE_ORDERS_TABLE_NAME).upsert(formattedData, { onConflict: 'id' });
-    return !error;
+    console.log('Saving draft order to Supabase...', draftOrder);
+    
+    const formattedData = draftOrder.map(pick => ({
+        id: `pick_${pick.pick}`,
+        order_data: {
+            pick: pick.pick,
+            member: pick.member,
+            originalWeightDisplay: pick.originalWeightDisplay
+        }
+    }));
+
+    const { data, error } = await supabase
+        .from('draft_orders')
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving draft order to Supabase:', error);
+        return false;
+    }
+    console.log('Draft order saved successfully:', data);
+    return true;
 }
 
 async function clearDraftOrderFromSupabase() {
-    const { error } = await supabase.from(SUPABASE_ORDERS_TABLE_NAME).delete().not('id', 'is', null);
-    if (!error) sessionStorage.removeItem('hasSeenDraftAnimation');
-    return !error;
+    showMessage('Clearing old draft order from the database...');
+    // A more reliable way to delete all rows
+    const { error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .delete()
+        .not('id', 'is', null);
+    
+    if (error) {
+        console.error('Error clearing draft order:', error);
+        showMessage('Error clearing draft order. Check console.');
+        return false;
+    }
+    console.log('Draft order cleared successfully.');
+    // Clear the session storage flag on reset
+    sessionStorage.removeItem('hasSeenDraftAnimation');
+    return true;
 }
 
-// --- 4. DRAFT LOGIC ---
 async function initializeDraftState() {
-    members = await fetchMembersFromSupabase();
-    if (members.length === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
-        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
-        return;
-    }
+    members = await fetchMembersFromSupabase();
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams and save the configuration.</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
 
-    const savedDraftOrder = await loadDraftOrderFromSupabase();
-    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
+    const savedDraftOrder = await loadDraftOrderFromSupabase();
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
 
-    if (savedDraftOrder && savedDraftOrder.length > 0) {
-        isDraftSaved = true;
-        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
-        if (hasSeenAnimation) {
-            showResults();
-            if (runFullDraftBtn) runFullDraftBtn.textContent = 'Replay Draft Animation';
-        } else {
+    if (savedDraftOrder && savedDraftOrder.length > 0) {
+        isDraftSaved = true;
+        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
+        
+       if (hasSeenAnimation) {
+       console.log('Saved draft found, user has seen animation. Displaying results.');
+    showResults();
+    displayTeamOdds();
+            if (runFullDraftBtn) {
+                runFullDraftBtn.textContent = 'Replay Draft Animation';
+                runFullDraftBtn.disabled = false;
+            }
+            if (currentPickLabel) currentPickLabel.textContent = "Draft Complete! Click to Replay.";
             pickCounter = members.length;
             availableMembers = members.map(member => ({ ...member }));
-            setupNewRun();
+            populateBalls(); 
         }
-    } else {
-        isDraftSaved = false;
-        pickCounter = members.length;
-        availableMembers = members.map(member => ({ ...member }));
-        setupNewRun();
-    }
-    initializeMemberConfigInputs();
+        else {
+            console.log('Saved draft found, user has NOT seen animation. Setting up for first-time run.');
+            if (resultsList) resultsList.style.display = 'none';
+            if (runFullDraftBtn) {
+                runFullDraftBtn.textContent = 'Run Draft';
+                runFullDraftBtn.disabled = false;
+            }
+            if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
+       
+            pickCounter = members.length;
+            availableMembers = members.map(member => ({ ...member }));
+            populateBalls();
+            displayTeamOdds();
+            initializeResultsList();
+        }
+    } else {
+        console.log('No saved draft found. Setting up for a new random run.');
+        isDraftSaved = false;
+        availableMembers = members.map(member => ({ ...member }));
+        draftOrder = [];
+        pickCounter = members.length;
+        if (runFullDraftBtn) {
+            runFullDraftBtn.textContent = 'Run Draft';
+            runFullDraftBtn.disabled = false;
+        }
+        if (resultsList) resultsList.style.display = 'block';
+        initializeResultsList();
+        populateBalls();
+        displayTeamOdds();
+        drawnTeamNameDisplay.textContent = '...';
+        currentPickLabel.textContent = `Ready to Draw for Pick #${pickCounter}...`;
+    }
+    
+    initializeMemberConfigInputs();
+
+
 }
 
-function setupNewRun() {
-    if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
-    if (currentPickLabel) currentPickLabel.textContent = `Ready for Pick #${pickCounter}...`;
-    initializeResultsList();
-    populateBalls();
-    displayTeamOdds();
+function initializeMemberConfigInputs() {
+    if (!memberConfigInputs) return;
+    memberConfigInputs.innerHTML = '';
+    members.forEach(member => {
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-gray-800 rounded-lg border border-gray-700 flex flex-wrap gap-4 items-end mb-3';
+        div.innerHTML = `
+            <div class="flex flex-col flex-1 min-w-[200px]">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Team Name</label>
+                <input type="text" id="name-${member.id}" value="${member.name}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-24">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Math Weight</label>
+                <input type="number" id="weight-${member.id}" value="${member.weight}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-32">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Label (e.g. 10%)</label>
+                <input type="text" id="display-${member.id}" value="${member.originalWeightDisplay || ''}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+        `;
+        memberConfigInputs.appendChild(div);
+    });
 }
 
-function showResults() {
-    if (resultsList) resultsList.style.display = 'block';
-    updateUIFromCurrentState();
-    lotteryMachine.innerHTML = '';
+function initializeResultsList() {
+    if (!resultsList) return;
+    resultsList.innerHTML = '';
+    for (let i = members.length; i >= 1; i--) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>Pick ${i}:</span> <span class="text-gray-400">Pending...</span>`;
+        li.classList.add('bg-gray-700', 'text-gray-300');
+        li.setAttribute('data-pick-num', i);
+        resultsList.appendChild(li);
+    }
 }
 
 function populateBalls() {
-    if (!lotteryMachine || availableMembers.length === 0) return;
-    lotteryMachine.innerHTML = '';
+    if (!lotteryMachine) return;
+    if (availableMembers.length > 0) {
+        lotteryMachine.innerHTML = '';
+    }
 
-    const ballsToRender = [];
-    availableMembers.forEach(member => {
-        for (let i = 0; i < (member.weight || 0); i++) {
-            ballsToRender.push({ teamId: member.id });
-        }
-    });
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
 
-    ballsToRender.sort(() => Math.random() - 0.5).forEach(ballData => {
-        const ball = document.createElement('div');
-        ball.classList.add('ball', 'absolute', 'rounded-full', 'flex', 'items-center', 'justify-center');
-        ball.dataset.teamId = ballData.teamId;
-        const member = members.find(m => m.id === ballData.teamId);
-        if (member) ball.style.backgroundColor = member.color;
-        
-        lotteryMachine.appendChild(ball);
-        
-        const radius = Math.random() * 50 + 50;
-        ball.style.setProperty('--circle-radius', `${radius}px`);
-        ball.style.animation = `circle-motion ${Math.random() * 4 + 4}s linear infinite`;
-    });
-}
+    const ballsToRender = [];
+    availableMembers.forEach(member => {
+        const weight = member.weight || 0; 
+        for (let i = 0; i < weight; i++) {
+            ballsToRender.push({ teamId: member.id });
+        }
+    });
+    if (ballsToRender.length === 0 && pickCounter > 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
+        return;
+    } else if (ballsToRender.length === 0 && pickCounter === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
+        return;
+    }
 
-async function performSingleDraw() {
-    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
-    lotteryMachine.querySelectorAll('.ball').forEach(b => b.style.animationPlayState = 'paused');
-    await new Promise(r => setTimeout(r, 2000));
+    const shuffledBalls = [...ballsToRender];
+    for (let i = shuffledBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
+    }
 
-    const drawnMember = drawWeightedMember();
-    if (drawnMember) {
-        playPickAudio(pickCounter);
-        drawnTeamNameDisplay.textContent = drawnMember.name;
-        
-        if (!isDraftSaved) {
-            draftOrder.push({ pick: pickCounter, member: drawnMember.name, originalWeightDisplay: drawnMember.originalWeightDisplay });
-        }
+    shuffledBalls.forEach((ballData, index) => {
+    const ball = document.createElement('div');
+    ball.classList.add('ball');
+    ball.dataset.teamId = ballData.teamId;
 
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-        if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name}</span>`;
-            pickElement.className = 'bg-green-500 text-white p-2 rounded';
+    const member = members.find(m => m.id === ballData.teamId);
+    
+    if (member) {
+        ball.style.backgroundColor = member.color || 'var(--accent-gold)';
+        if (member.image) {
+            ball.style.backgroundImage = `url('${member.image}')`;
         }
     }
-    lotteryMachine.querySelectorAll('.ball').forEach(b => b.style.animationPlayState = 'running');
+
+    lotteryMachine.appendChild(ball);
+    ball.style.left = `calc(50% - 25px)`; 
+    ball.style.top = `calc(50% - 25px)`;
+    const randomDelay = Math.random() * -2; // Random offset up to 2 seconds
+    ball.style.animationDelay = `${randomDelay}s`;
+});
 }
 
-function drawWeightedMember() {
-    if (isDraftSaved) return members.find(m => m.name === draftOrder.find(p => p.pick === pickCounter)?.member);
-    const totalWeight = availableMembers.reduce((s, m) => s + m.weight, 0);
-    let r = Math.random() * totalWeight;
-    for (let i = 0; i < availableMembers.length; i++) {
-        r -= availableMembers[i].weight;
-        if (r <= 0) return availableMembers.splice(i, 1)[0];
-    }
+function handleFirstInteraction() {
+    if (!espnAudio) {
+        espnAudio = new Audio('Espnprimetime.m4a');
+        espnAudio.loop = true;
+        espnAudio.volume = 0.5;
+        crowdShoutAudio = new Audio('crowd-shouting-6325.mp3');
+        disappointmentAudio = new Audio('disappointment.mp3');
+        cheeringAudio = new Audio('cheering.mp3');
+        crowdCheersAudio = new Audio('crowd-cheers-312833.mp3');
+    }
+
+    espnAudio.play().then(() => {
+        console.log("ESPN Audio is now playing.");
+        espnAudio.muted = false;
+    }).catch(error => {
+        console.error("Failed to play ESPN audio:", error);
+    });
+    
+    if (audioOverlay) {
+        audioOverlay.classList.add('hidden');
+        setTimeout(() => {
+            audioOverlay.style.display = 'none';
+        }, 500);
+    }
 }
 
 async function runFullDraftSimulation() {
     if (drawing) return;
     drawing = true;
-    runFullDraftBtn.disabled = true;
+
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = true;
+        runFullDraftBtn.textContent = 'Drawing in progress...';
+    }
 
     if (isDraftSaved) {
+        if (resultsList) resultsList.style.display = 'none';
         pickCounter = members.length;
-        availableMembers = members.map(m => ({ ...m }));
+        availableMembers = members.map(member => ({ ...member }));
         populateBalls();
+    } else {
+        draftOrder = [];
+        pickCounter = members.length;
     }
-
     while (pickCounter >= 1) {
         await performSingleDraw();
-        pickCounter--;
+        await new Promise(resolve => setTimeout(resolve, 1200));
     }
-
-    if (!isDraftSaved) await saveDraftOrderToSupabase(draftOrder);
-    isDraftSaved = true;
+    if (!isDraftSaved) {
+        await saveDraftOrderToSupabase(draftOrder);
+        isDraftSaved = true;
+    }
+    
     sessionStorage.setItem('hasSeenDraftAnimation', 'true');
     showResults();
-    drawing = false;
-    runFullDraftBtn.disabled = false;
-    runFullDraftBtn.textContent = 'Replay Draft Animation';
-}
-
-// --- 5. INITIALIZATION & UI HELPERS ---
-function initializeResultsList() {
-    if (!resultsList) return;
-    resultsList.innerHTML = '';
-    for (let i = members.length; i >= 1; i--) {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>Pick ${i}:</span> <span class="text-gray-400">Pending...</span>`;
-        li.setAttribute('data-pick-num', i);
-        li.className = 'bg-gray-700 text-gray-300 p-2 mb-1 rounded';
-        resultsList.appendChild(li);
-    }
-}
-
-function initializeMemberConfigInputs() {
-    if (!memberConfigInputs) return;
-    memberConfigInputs.innerHTML = members.map(m => `
-        <div class="flex gap-2 mb-2">
-            <input type="text" id="${m.id}-name" value="${m.name}" class="p-1 border rounded">
-            <input type="number" id="${m.id}-weight" value="${m.weight}" class="w-16 p-1 border rounded">
-        </div>
-    `).join('');
-}
-
-function showMessage(msg) {
-    const box = document.getElementById('messageBox');
-    if (box) {
-        document.getElementById('messageText').innerText = msg;
-        box.style.display = 'flex';
-    }
-}
-
-function handleFirstInteraction() {
-    if (!espnAudio) {
-        espnAudio = new Audio('Espnprimetime.m4a');
-        espnAudio.loop = true;
-        espnAudio.volume = 0.5;
-        crowdShoutAudio = new Audio('crowd-shouting-6325.mp3');
-        disappointmentAudio = new Audio('disappointment.mp3');
-        cheeringAudio = new Audio('cheering.mp3');
-        crowdCheersAudio = new Audio('crowd-cheers-312833.mp3');
-    }
-    espnAudio.play().catch(() => {});
-    if (audioOverlay) audioOverlay.style.display = 'none';
-}
-
-// --- 6. EVENT LISTENERS ---
-document.addEventListener('DOMContentLoaded', () => {
-    initializeDraftState();
-
-    if (runFullDraftBtn) runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
-    if (unlockCommissionerBtn) unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
-    if (commissionerLogin) commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    lotteryMachine.innerHTML = '';
     
-    if (saveConfigBtn) {
-        saveConfigBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            // Logic to collect values from inputs and call saveMembersToSupabase
-            showMessage("Config saved!");
-        });
+    drawing = false;
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = false;
+        runFullDraftBtn.textContent = 'Replay Draft Animation';
+    }
+    if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+}
+
+async function performSingleDraw() {
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;
+    
+    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    drawnTeamNameDisplay.textContent = '';
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    let drawnMember;
+    if (isDraftSaved) {
+        const savedPick = draftOrder.find(p => p.pick === pickCounter);
+        // This line was already good!
+        drawnMember = members.find(m => m.id === savedPick.teamId);
+        availableMembers = availableMembers.filter(m => m.id !== drawnMember.id);
+    } 
+    else {
+        drawnMember = drawWeightedMember();
     }
 
-    if (resetDraftBtn) {
-        resetDraftBtn.addEventListener('click', async () => {
-            if (await clearDraftOrderFromSupabase()) initializeDraftState();
-        });
+    if (drawnMember) {
+        playPickAudio(pickCounter);
+        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+
+        if (teamBalls.length > 0) {
+            teamBalls.forEach(ballElement => {
+                ballElement.style.animation = 'none'; 
+                ballElement.style.left = '50%';
+                ballElement.style.top = '20px'; 
+                ballElement.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                ballElement.classList.add('selected-for-shoot');
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            teamBalls.forEach(ballElement => {
+                ballElement.classList.remove('selected-for-shoot');
+                ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
+                ballElement.classList.add('drawn');
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            teamBalls.forEach(ballElement => {
+                if (ballElement && ballElement.parentNode) {
+                    ballElement.remove();
+                }
+            });
+        }      
+        else {
+            console.warn(`Could not find visual balls for drawn member: ${drawnMember.name}.`);
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        // --- THE FIX IS HERE ---
+        if (!isDraftSaved) {
+            draftOrder.push({ 
+                pick: pickCounter, 
+                teamId: drawnMember.id, // Now the ID is saved for future replays!
+                member: drawnMember.name, 
+                originalWeightDisplay: drawnMember.originalWeightDisplay 
+            });
+        }
+
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+
+        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
+        if (oddsElement) {
+            oddsElement.classList.add('picked');
+        }
+    } else {
+        console.warn("No more members to draw during performSingleDraw.");
     }
 
-    if (audioOverlay) audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
-});
+    pickCounter--; 
+    if (currentPickLabel) {
+        if (pickCounter >= 1) {
+            currentPickLabel.textContent = `Ready for Pick #${pickCounter}`;
+        } else {
+            currentPickLabel.textContent = "All Picks Revealed!";
+        }
+    }
+}
+
+function drawWeightedMember() {
+if (isDraftSaved && draftOrder.length > 0) {
+        const pick = draftOrder.find(p => p.pick === pickCounter);
+        if (pick) {
+            const mIndex = availableMembers.findIndex(m => m.name === pick.member);
+            if (mIndex !== -1) {
+                return availableMembers.splice(mIndex, 1)[0]; // Pull it out of the hopper!
+            }
+            return members.find(m => m.name === pick.member);
+        }    
+
+
+else {
+            console.warn("Could not find next pick in saved draft order.");
+            return null;
+        }
+    }
+    
+    if (availableMembers.length === 0) {
+        return null;
+    }
+
+    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+
+    for (let i = 0; i < availableMembers.length; i++) {
+        randomWeight -= availableMembers[i].weight;
+        if (randomWeight <= 0) {
+            const selectedMember = availableMembers[i];
+            availableMembers.splice(i, 1);
+            return selectedMember;
+        }
+    }
+    console.warn("Weighted draw failed to find a member. This should not happen if weights are positive.");
+    return availableMembers.pop();
+}
+
+function showResults() {
+    if (resultsList) resultsList.style.display = 'block';
+    updateUIFromCurrentState();
+}
+
+function updateUIFromCurrentState() {
+    initializeResultsList();
+    const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
+    sortedDraftOrder.forEach(item => {
+        const originalMember = members.find(m => m.name === item.member);
+        if (originalMember) {
+            const oddsElement = teamOddsList.querySelector(`li[data-team-id="${originalMember.id}"]`);
+            if (oddsElement) {
+                oddsElement.classList.add('picked');
+            }
+        }
+    
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+    });
+}
+
+function displayTeamOdds() {
+    if (!teamOddsList) return;
+    teamOddsList.innerHTML = '';
+    const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
+
+    sortedMembers.forEach(member => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${member.name}:</span> <span>${member.originalWeightDisplay}</span>`;
+        li.setAttribute('data-team-id', member.id);
+        
+        // Pre-check if already picked (useful for page refreshes)
+        if (draftOrder.some(p => p.member === member.name)) {
+            li.classList.add('picked');
+        }
+        
+        teamOddsList.appendChild(li);
+    });
+}
+
+function showMessage(message) {
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+    if (messageBox && messageText) {
+        messageText.innerText = message;
+        messageBox.style.display = 'flex';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
+    }
+}
+
+async function saveConfig() {
+    const newMembers = [];
+    let isValid = true;
+
+    for (const member of members) {
+        const nameInput = document.getElementById(`name-${member.id}`);
+        const weightInput = document.getElementById(`weight-${member.id}`);
+        const displayInput = document.getElementById(`display-${member.id}`);
+
+        if (nameInput && weightInput && displayInput) {
+            const newWeight = parseInt(weightInput.value, 10);
+            const newName = nameInput.value.trim();
+            const newDisplay = displayInput.value.trim();
+            if (newName === '' || isNaN(newWeight) || newWeight <= 0) {
+                showMessage('All team names must not be empty and weights must be positive.');
+                isValid = false;
+                return;
+            }
+
+            newMembers.push({
+                id: member.id,
+                name: newName,
+                weight: newWeight,
+                originalWeightDisplay: newDisplay || `${newWeight}%`
+            });
+        }
+    }
+
+    if (isValid && newMembers.length > 0) {
+        const success = await saveMembersToSupabase(newMembers);
+        
+        if (success) {
+            members = newMembers; 
+            showMessage(`Configuration saved! The draft is ready.`);
+            initializeDraftState(); 
+        }
+    } else if (newMembers.length === 0) {
+        showMessage('At least one team must be configured.');
+    }
+}
+
+async function fetchMembersFromSupabase() {
+    console.log('Fetching members from Supabase...');
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select('id, members_data')
+        .order('members_data->>weight', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching data from Supabase:', error);
+        showMessage('Error fetching data from the database. Check console for details.');
+        return [];
+    }
+
+    if (data && data.length > 0) {
+        console.log('Data fetched successfully:', data);
+        const members = data.map(item => ({
+            id: item.id,
+            name: item.members_data.name,
+            weight: item.members_data.weight,
+            originalWeightDisplay: item.members_data.originalWeightDisplay,
+            color: item.members_data.color 
+        }));
+        console.log('After mapping, members array:', members, 'Length:', members.length);
+        return members;
+    } else {
+        console.warn('No member data found in Supabase table.');
+        return [];
+    }
+}
+
+async function saveMembersToSupabase(newMembers) {
+    console.log('Saving configuration to Supabase...', newMembers);
+
+    const formattedData = newMembers.map(member => ({
+        id: member.id,
+        members_data: {
+            name: member.name,
+            weight: member.weight,
+            originalWeightDisplay: member.originalWeightDisplay
+        }
+    }));
+    
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+        showMessage('Error saving configuration to the database. Check console for details.');
+        return false;
+    }
+    console.log('Configuration saved successfully:', data);
+    return true;
+}
+
+async function loadDraftOrderFromSupabase() {
+    console.log('Checking for saved draft order...');
+    const { data, error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select('order_data')
+        .order('order_data->>pick', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching draft order:', error);
+        return null;
+    }
+
+    if (data && data.length > 0) {
+        console.log('Draft order found in Supabase:', data);
+        return data.map(item => item.order_data);
+    }
+
+    console.log('No draft order found in the database.');
+    return null;
+}
+
+async function resetDraft() {
+    const confirmed = confirm("WARNING: This will delete the saved draft order from the database. This cannot be undone. Are you sure you want to reset for a new run?");
+    
+    if (!confirmed) return;
+
+    try {
+        const { error } = await supabase
+            .from('draft_order')
+            .delete()
+            .neq('id', 0); 
+
+        if (error) throw error;
+        sessionStorage.removeItem('hasSeenDraftAnimation');
+        draftOrder = [];
+        isDraftSaved = false;
+        showMessage("Draft has been reset! Ready for a new lottery.");
+        initializeDraftState();
+
+    } catch (err) {
+        console.error("Error during reset:", err);
+        showMessage("Error resetting draft. Check the console.");
+    }
+}
+
+document.getElementById('resetDraftBtn')?.addEventListener('click', resetDraft);
+document.getElementById('saveConfigBtn')?.addEventListener('click', saveConfig);
+document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDraftSimulation);
+
+initializeDraftState();
+
 </script>
- 
 </body>
 </html>

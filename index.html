@@ -246,13 +246,18 @@
 .ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
 .ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
 
+/* This class is added by JS to the ball we want to shoot up */
 .ball.selected-for-shoot {
+    /* 1. Kill the 'bounce' animation completely */
     animation: none !important; 
-    /* 5 seconds of movement */
-    transition: all 5s ease-in-out !important; 
+    
+    /* 2. Force a very slow movement (5 seconds) */
+    transition: top 5s ease-in-out, left 5s ease-in-out, transform 5s ease-in-out !important; 
+    
+    /* 3. The end position */
     top: 20px !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) scale(1.5) !important;
+    transform: translate(-50%, -50%) scale(2) !important;
     z-index: 9999 !important;
 }
         
@@ -660,10 +665,14 @@
 <script type="module">
 
 const pickImages = {
-    14: 'url_to_image_14.jpg',
-    13: 'url_to_image_13.jpg',
-    // ... all the way down to 1
-    1: 'bad_bunny_winner.jpg' 
+    8: 'badbunny9.png',
+    7: 'badbunny7.png',
+    6: 'badbunny6.png',
+    5: 'badbunny3.png',
+    4: 'badbunny2.png',
+    3: 'badbunny1.png',
+    2: 'badbunny.png',
+    1: 'badbunny4.png'
 };
     
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -678,7 +687,7 @@ let members = [];
 let availableMembers = [];
 let draftOrder = [];
 let drawing = false;
-let pickCounter = 0;
+let pickCounter = 8;
 let isDraftSaved = false;
 
 let espnAudio = null;
@@ -1062,26 +1071,34 @@ async function performSingleDraw() {
         
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
-        if (teamBalls.length > 0) {
+       if (teamBalls.length > 0) {
+            // 1. Prepare the ball (Stop animation, add the "Slow" class)
             teamBalls.forEach(ballElement => {
                 ballElement.style.animation = 'none'; 
-                ballElement.style.left = '50%';
-                ballElement.style.top = '20px'; 
-                ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
                 ballElement.classList.add('selected-for-shoot');
             });
 
-            // --- THE SLOW DOWN ---
-            // We wait 5 seconds here so the ball moves slowly to the top
+            // 2. THE SECRET SAUCE: Give the browser 50ms to realize the class changed
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // 3. Now apply the movement (This triggers the 5s transition)
+            teamBalls.forEach(ballElement => {
+                ballElement.style.left = '50%';
+                ballElement.style.top = '20px'; 
+                ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            });
+
+            // 4. Wait for the 5-second slow crawl to finish
             await new Promise(resolve => setTimeout(resolve, 5000));
             
-            // Now reveal the name and the Bad Bunny image
+            // 5. Reveal the name and image
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter); 
             
-            // Keep the image on screen for 4 seconds
+            // Wait while the Bad Bunny image is shown
             await new Promise(resolve => setTimeout(resolve, 4000));
 
+            // 6. Cleanup
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
                 ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 

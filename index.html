@@ -658,7 +658,7 @@
 
     <div id="winnerOverlay" class="hidden fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black bg-opacity-90 transition-all duration-500">
     <h1 class="text-white text-6xl font-bold mb-8 animate-bounce">THE #1 PICK</h1>
-    <img id="winnerImage" src="https://media.pitchfork.com/photos/627532b6e32906ad78189679/1:1/w_450%2Cc_limit/Bad-Bunny.jpg" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-md">
+   <img id="winnerImage" src="badbunny.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-md">
     <button onclick="closeWinnerOverlay()" class="mt-8 px-6 py-2 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Close</button>
 </div>
     
@@ -801,7 +801,6 @@ async function clearDraftOrderFromSupabase() {
         return false;
     }
     console.log('Draft order cleared successfully.');
-    // Clear the session storage flag on reset
     sessionStorage.removeItem('hasSeenDraftAnimation');
     return true;
 }
@@ -911,59 +910,56 @@ function initializeResultsList() {
 }
 
 function populateBalls() {
-    if (!lotteryMachine) return;
-    if (availableMembers.length > 0) {
-        lotteryMachine.innerHTML = '';
-    }
-
-    if (members.length === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
-        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
-        return;
-    }
-    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
-
-    const ballsToRender = [];
-    availableMembers.forEach(member => {
-        const weight = member.weight || 0; 
-        for (let i = 0; i < weight; i++) {
-            ballsToRender.push({ teamId: member.id });
-        }
-    });
-    if (ballsToRender.length === 0 && pickCounter > 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
-        return;
-    } else if (ballsToRender.length === 0 && pickCounter === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
-        return;
-    }
-
-    const shuffledBalls = [...ballsToRender];
-    for (let i = shuffledBalls.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
-    }
-
-    shuffledBalls.forEach((ballData, index) => {
-    const ball = document.createElement('div');
-    ball.classList.add('ball');
-    ball.dataset.teamId = ballData.teamId;
-
-    const member = members.find(m => m.id === ballData.teamId);
-    
-    if (member) {
-        ball.style.backgroundColor = member.color || 'var(--accent-gold)';
-        if (member.image) {
-            ball.style.backgroundImage = `url('${member.image}')`;
-        }
+    if (!lotteryMachine) return;
+    if (availableMembers.length > 0) {
+        lotteryMachine.innerHTML = '';
     }
 
-    lotteryMachine.appendChild(ball);
-    ball.style.left = `calc(50% - 25px)`; 
-    ball.style.top = `calc(50% - 25px)`;
-    const randomDelay = Math.random() * -2; // Random offset up to 2 seconds
-    ball.style.animationDelay = `${randomDelay}s`;
-});
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
+
+    const ballsToRender = [];
+    availableMembers.forEach(member => {
+        const weight = member.weight || 0; 
+        for (let i = 0; i < weight; i++) {
+            ballsToRender.push({ teamId: member.id });
+        }
+    });
+
+    if (ballsToRender.length === 0 && pickCounter > 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
+        return;
+    }
+
+    const shuffledBalls = [...ballsToRender];
+    for (let i = shuffledBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
+    }
+
+    shuffledBalls.forEach((ballData, index) => {
+        const ball = document.createElement('div');
+        ball.classList.add('ball');
+        ball.dataset.teamId = ballData.teamId;
+        ball.style.position = 'absolute'; 
+
+        const member = members.find(m => m.id === ballData.teamId); 
+        if (member) {
+            ball.style.backgroundColor = member.color || 'var(--accent-gold)';
+            if (member.image) {
+                ball.style.backgroundImage = `url('${member.image}')`;
+            }
+        }
+        lotteryMachine.appendChild(ball);
+        ball.style.left = `calc(50% - 25px)`; 
+        ball.style.top = `calc(50% - 25px)`;        
+        const randomDelay = Math.random() * -2; 
+        ball.style.animationDelay = `${randomDelay}s`;
+    });
 }
 
 function handleFirstInteraction() {
@@ -995,34 +991,31 @@ function handleFirstInteraction() {
 async function runFullDraftSimulation() {
     if (drawing) return;
     drawing = true;
-
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = true;
         runFullDraftBtn.textContent = 'Drawing in progress...';
     }
+    pickCounter = 8; 
 
     if (isDraftSaved) {
         if (resultsList) resultsList.style.display = 'none';
-        pickCounter = members.length;
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     } else {
         draftOrder = [];
-        pickCounter = members.length;
     }
     while (pickCounter >= 1) {
         await performSingleDraw();
+        // Brief pause between picks
         await new Promise(resolve => setTimeout(resolve, 1200));
     }
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
         isDraftSaved = true;
-    }
-    
+    }  
     sessionStorage.setItem('hasSeenDraftAnimation', 'true');
     showResults();
     lotteryMachine.innerHTML = '';
-    
     drawing = false;
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = false;
@@ -1044,11 +1037,8 @@ function playPickAudio(pick) {
 }
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
-    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    
-    // Initial pause while the machine "shuffles"
     await new Promise(resolve => setTimeout(resolve, 2000));   
     
     let drawnMember;

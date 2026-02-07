@@ -1,1 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:,">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Football Draft Lottery</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <style>
 
+
+    :root {
+        --primary-dark: #1e3159; 
+        --accent-gold: #FFD700; 
+        --light-text: #f0f4f8; 
+        --container-bg: #2a3d60; 
+        --section-bg: #3c5283; 
+        --highlight-blue: #6495ed; 
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--primary-dark); /* Using the deep blue for the body background */
+        color: var(--light-text);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem 1rem; /* Add padding for mobile screens */
+        box-sizing: border-box;
+        background-image:
+            radial-gradient(circle at 10% 90%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 90% 10%, rgba(255, 215, 0, 0.05) 0%, transparent 50%); /* Subtle gold particles in the background */
+    }
+
+    /* Main container for the lottery application */
+    .container {
+        background-color: #2a3d60; /* A slightly lighter shade of the blue */
+        border-radius: 2rem;
+        padding: 2.5rem;
+        box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            inset 0 0 30px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 100%;
+        max-width: 950px;
+        border: 4px solid var(--accent-gold);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Main headings */
+    h1, h2 {
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 0.1em;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        -webkit-text-stroke: 1px var(--primary-dark);
+    }
+    
+    /* Gradient for titles */
+    h1 {
+        font-size: 3.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, #FFD700, #FFEF9F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+        font-size: 2.5rem;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        color: var(--light-text);
+    }
+
+    .team-odds-section {
+        margin-top: 2rem;
+        background-color: var(--section-bg);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+        border: 2px solid var(--highlight-blue);
+        width: 100%;
+    }
+
+    .team-odds-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .team-odds-list li {
+        background-color: var(--container-bg);
+        color: var(--light-text);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 5px solid var(--accent-gold);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .team-odds-list li:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .team-odds-list li span:last-child {
+        color: var(--accent-gold);
+        font-weight: 900;
+        font-size: 1.1rem;
+    }
+
+    /* Results section */
+    .results-section {
+        margin-top: 2.5rem;
+        background-color: var(--section-bg);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+        border: 2px solid var(--highlight-blue);
+        width: 100%;
+    }
+
+    .results-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .results-list li {
+        background-color: var(--container-bg);
+        color: var(--light-text);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 5px solid var(--highlight-blue);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease;
+    }
+
+    .results-list li:hover {
+        transform: scale(1.03);
+    }
+
+    .results-list li span:first-child {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .results-list li span:last-child {
+        font-size: 1.4rem;
+        color: var(--accent-gold);
+        font-family: 'Bebas Neue', sans-serif;
+    }
+
+.lottery-machine {
+    position: relative;
+    width: 80vw;
+    max-width: 400px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    margin: 3rem auto;
+    overflow: hidden; 
+    border: 15px solid #a0b3c8;
+    background: radial-gradient(circle at center, #5b6d90, #2c3e59);
+    box-shadow:
+        0 0 50px rgba(255, 215, 0, 0.2),
+        inset 0 0 80px rgba(255, 255, 255, 0.1),
+        inset 0 0 120px rgba(0, 0, 0, 0.7);
+    display: block; 
+    z-index: 1;
+}
+
+.lottery-machine::after {
+    content: '';
+    position: absolute;
+    top: -10px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 60px;
+    background: #121f3d;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 5px solid #a0b3c8;
+    box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.8);
+    z-index: 10; 
+    pointer-events: none;
+}
+    
+.ball {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    cursor: default;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+    font-size: 1.1rem;
+    border: 2px solid var(--accent-gold);
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.8);
+       transition: top 0.8s cubic-bezier(0.5, -0.5, 0.5, 1.5), 
+                left 0.8s cubic-bezier(0.5, -0.5, 0.5, 1.5), 
+                transform 0.5s ease, 
+                background 0.3s;
+    animation-name: ballAgitation;
+    animation-duration: 0.2s; /* Changed to 0.2s for constant high-energy movement */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+.ball:nth-child(1) { background-image: url('badbunny4.png'); animation-delay: 0.0s; }
+.ball:nth-child(2) { background-image: url('badbunny.png');  animation-delay: 0.05s; }
+.ball:nth-child(3) { background-image: url('badbunny1.png'); animation-delay: 0.1s; }
+.ball:nth-child(4) { background-image: url('badbunny2.png'); animation-delay: 0.15s; }
+.ball:nth-child(5) { background-image: url('badbunny3.png'); animation-delay: 0.02s; }
+.ball:nth-child(6) { background-image: url('badbunny6.png'); animation-delay: 0.07s; }
+.ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
+.ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
+
+/* This class is added by JS to the ball we want to shoot up */
+.ball.selected-for-shoot {
+    /* 1. Kill the 'bounce' animation completely */
+    animation: none !important; 
+    
+    /* 2. Force a very slow movement (5 seconds) */
+    transition: top 5s ease-in-out, left 5s ease-in-out, transform 5s ease-in-out !important; 
+    
+    /* 3. The end position */
+    top: 20px !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(2) !important;
+    z-index: 9999 !important;
+}
+        
+.ball.drawn {
+    transform: scale(0) !important;
+    opacity: 0 !important;
+    transition: transform 0.6s ease-in, opacity 0.4s ease-out !important;
+    pointer-events: none;
+}
+
+.drawn-ball-display {
+    min-height: 120px;
+    background-color: var(--section-bg);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+    border: 4px solid rgba(255, 215, 0, 0.3); 
+    position: relative;
+}
+
+.drawn-ball-display::before {
+    content: '';
+    position: absolute;
+    top: -4px; 
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 1.5rem;
+    border: 4px solid var(--accent-gold);
+    opacity: 0.5;
+    animation: glowingBorder 1.5s infinite alternate ease-in-out;
+    pointer-events: none;
+    z-index: 1;
+}
+
+    .drawn-ball-display .current-pick-label {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: var(--light-text);
+        margin-bottom: 0.5rem;
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 0.1em;
+    }
+    
+    .drawn-ball-display .drawn-team-name {
+        font-size: 3.5rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        font-family: 'Bebas Neue', sans-serif;
+        color: #FFD700;
+        text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255, 215, 0, 0.6);
+        letter-spacing: 0.1em;
+            }
+
+    .btn {
+        background: linear-gradient(90deg, #FFD700, #FFEF9F);
+        color: var(--primary-dark);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-weight: 900;
+        font-size: 1.5rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        margin-top: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-family: 'Bebas Neue', sans-serif;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+    }
+
+    .btn:hover:not(:disabled) {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+        background: linear-gradient(90deg, #FFEF9F, #FFD700); /* Inverted gradient on hover */
+    }
+
+    .btn:disabled {
+        background: #6a748c;
+        color: #b0b8c8;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    /* Message Box Styling */
+    .message-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: var(--container-bg);
+        color: var(--light-text);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 350px;
+        text-align: center;
+        border: 3px solid var(--accent-gold);
+    }
+
+    .message-box button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: var(--highlight-blue);
+        color: var(--light-text);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .message-box button:hover {
+        background-color: #5a8bd4;
+        transform: translateY(-2px);
+    }
+
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2.5rem;
+        }
+        h2 {
+            font-size: 2rem;
+        }
+        .container {
+            padding: 1.5rem;
+        }
+        .drawn-ball-display .drawn-team-name {
+            font-size: 2.2rem;
+        }
+        .lottery-machine {
+            width: 75vw;
+            max-width: 300px;
+            margin: 2rem auto;
+        }
+        .ball {
+            width: 45px;
+            height: 45px;
+            font-size: 1rem;
+        }
+        .btn {
+            font-size: 1.3rem;
+            padding: 0.8rem 1.6rem;
+        }
+    }
+
+  @media (max-width: 480px) {
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .container {
+        padding: 1rem;
+        border-radius: 1.5rem;
+    }
+    .drawn-ball-display .drawn-team-name {
+        font-size: 1.8rem;
+    }
+    .team-odds-list,
+    .results-list {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    .lottery-machine {
+        width: 90vw;
+        min-height: 250px;
+    }
+}
+
+.picked {
+    text-decoration: line-through;
+    text-decoration-color: #ef4444;
+    text-decoration-thickness: 6px;
+    opacity: 0.5;
+    transition: all 0.8s ease-in-out;
+    filter: grayscale(80%);
+}
+
+.audio-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #FFD700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Make sure it's on top of everything */
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.audio-overlay.hidden {
+    opacity: 0;
+    pointer-events: none; /* Make it unclickable when hidden */
+}
+
+.overlay-content {
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.hidden {
+    display: none !important; /* Use !important to ensure it overrides other display properties */
+}
+
+#memberConfigInputs input {
+    background-color: #0f172a !important; /* Dark blue background */
+    color: #ffffff !important;            /* Pure white text */
+    border: 1px solid #FFD700 !important;  /* Gold border */
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    width: 100%; /* Helps with mobile layout */
+    max-width: 200px;
+}
+
+#memberConfigInputs label {
+    color: #FFD700 !important; /* Gold labels for Team/Weight */
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.input-group {
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+ 
+@keyframes ballAgitation {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(120px, -80px) rotate(90deg); } 
+    40% { transform: translate(-100px, 150px) rotate(180deg); }
+    60% { transform: translate(80px, -120px) rotate(270deg); }
+    80% { transform: translate(-130px, 50px) rotate(360deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+  @keyframes glowingBorder {
+        from {
+            box-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold), 0 0 30px var(--accent-gold);
+            opacity: 0.5;
+        }
+        to {
+            box-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-gold), 0 0 60px var(--accent-gold);
+            opacity: 0.8;
+        }
+    }
+
+
+@keyframes bounce {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(10px); } /* Adjust this value for bounce height */
+    100% { transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+<div class="container">
+
+   <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase"
+    style="
+        font-family: 'Bebas Neue', sans-serif;
+        color: #FFD700;
+        letter-spacing: 0.1em;
+    ">
+    TCWR DY-NASTY Draft Lottery
+</h1>
+
+    <div class="lottery-machine" id="lotteryMachine">
+        <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
+    </div>
+
+    <div class="drawn-ball-display" id="drawnBallDisplay">
+        <div class="current-pick-label" id="currentPickLabel">Ready to Draw for Pick #...</div>
+        <div class="drawn-team-name" id="drawnTeamName"></div>
+    </div>
+
+    <button class="btn" id="runFullDraftBtn">Run Draft</button>
+    
+    <div class="results-section">
+        <h2 class="text-4xl mb-6 tracking-wide uppercase"
+            style="
+                font-family: 'Bebas Neue', sans-serif;
+                color: #FFD700;
+                text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+                letter-spacing: 2px;
+            ">
+            Draft Order Results
+        </h2>
+        <ul class="results-list" id="resultsList">
+            </ul>
+    </div>
+
+    <div class="team-odds-section">
+        <h2 class="text-4xl mb-6 tracking-wide uppercase" 
+            style="
+                font-family: 'Bebas Neue', sans-serif;
+                color: #FFD700;
+                text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+                letter-spacing: 2px;
+            ">
+            Team Odds
+        </h2>
+        <ul id="teamOddsList" class="team-odds-list">
+            </ul>
+    </div>
+
+<div class="commissioner-tools">
+    <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
+    <form id="commissionerLogin">
+        <input type="password" id="commissionerPassword" placeholder="Enter Password" 
+               class="p-3 rounded-md bg-gray-900 border-2 border-yellow-600 text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500">
+        <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
+    </form>
+
+    <div id="commissionerPanel" class="hidden">
+        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below.</p>
+        
+        <div id="memberConfigInputs" class="space-y-2"></div>
+
+        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">Save Configuration</button>
+        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white font-bold">Reset Draft</button>
+    </div>
+</div>
+
+        <div id="messageBox" class="message-box">
+        <p id="messageText"></p>
+        <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
+    </div>
+
+</div> <div id="audioOverlay" class="audio-overlay">
+    <div class="overlay-content">
+        <div class="explanation-text" style="max-width: 800px; padding: 2rem; border-radius: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.7); text-align: center;">
+            <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 1rem; color: #FFD700; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);">
+                How the Lottery Works: Reverse Order Reveal
+            </h3>
+            <p style="font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                Our lottery builds suspense by revealing the draft order in reverse, from Pick #8 down to the highly anticipated Pick #1.
+                <br/><br/>
+                Here’s the key rule: Once a team is drawn from the machine, they are awarded the current pick and are **eliminated from all future draws**.
+            </p>
+            
+            <div style="text-align: left; margin: 0 auto; line-height: 1.6; max-width: 500px;">
+                <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: bold;">This means:</p>
+                <ul style="list-style: disc; list-style-position: inside; padding-left: 1rem; font-size: 1rem;">
+                    <li>
+                        <strong style="color: #FFD700;">Teams with the highest odds</strong> have the highest chance of being drawn for the very first pick revealed... **Pick #8**.
+                    </li>
+                    <li>
+                        <strong style="color: #FFD700;">Teams with the lowest odds</strong> are long shots, but if they get lucky and avoid being picked early, their odds of winning a top pick like #1 increase with every round.
+                    </li>
+                </ul>
+            </div>
+            <p style="font-size: 1rem; margin-top: 1.5rem; font-style: italic;">
+                The suspense builds as the most likely teams are eliminated, leaving a shot at the jackpot for the long shots.
+            </p>
+        </div>
+        
+<p style="margin-top: 2.5rem; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);" class="animate-pulse">
+            Click anywhere to start the simulator!
+        </p>
+    </div>
+
+    <div id="winnerOverlay" class="hidden fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black bg-opacity-90 transition-all duration-500">
+    <h1 class="text-white text-6xl font-bold mb-8 animate-bounce">THE #1 PICK</h1>
+   <img id="winnerImage" src="badbunny.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-md">
+    <button onclick="closeWinnerOverlay()" class="mt-8 px-6 py-2 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Close</button>
+</div>
+    
+<script type="module">
+
+const pickImages = {
+    8: 'badbunny9.png',
+    7: 'badbunny7.png',
+    6: 'badbunny6.png',
+    5: 'badbunny3.png',
+    4: 'badbunny2.png',
+    3: 'badbunny1.png',
+    2: 'badbunny.png',
+    1: 'badbunny4.png'
+};
+    
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const COMMISSIONER_PASSWORD = 'Asher'; 
+const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+const SUPABASE_TABLE_NAME = 'draft_configs';
+const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let members = []; 
+let availableMembers = [];
+let draftOrder = [];
+let drawing = false;
+let pickCounter = 8;
+let isDraftSaved = false;
+
+let espnAudio = null;
+let crowdShoutAudio = null;
+let disappointmentAudio = null;
+let cheeringAudio = null;
+let crowdCheersAudio = null;
+let audioTimeout;
+
+const lotteryMachine = document.getElementById('lotteryMachine');
+const runFullDraftBtn = document.getElementById('runFullDraftBtn');
+const currentPickLabel = document.getElementById('currentPickLabel');
+const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
+const resultsList = document.getElementById('resultsList');
+const teamOddsList = document.getElementById('teamOddsList');
+const audioOverlay = document.getElementById('audioOverlay');
+const commissionerLogin = document.getElementById('commissionerLogin');
+const commissionerPasswordInput = document.getElementById('commissionerPassword');
+const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
+const commissionerPanel = document.getElementById('commissionerPanel');
+const memberConfigInputs = document.getElementById('memberConfigInputs');
+const saveConfigBtn = document.getElementById('saveConfigBtn');
+const resetDraftBtn = document.getElementById('resetDraftBtn');
+const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+
+function handleCommissionerUnlock(e) {
+    if (e) e.preventDefault();
+
+    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
+        commissionerPanel.classList.remove('hidden');
+        commissionerLogin.classList.add('hidden');
+        showMessage("Commissioner tools unlocked!", "success");
+        console.log("Commissioner panel unlocked.");
+    } else {
+        showMessage("Incorrect password. Please try again.", "error");
+    }
+    
+    commissionerPasswordInput.value = ''; 
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDraftState();    
+    if (runFullDraftBtn) {
+        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
+    }
+    if (unlockCommissionerBtn) {
+        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    }
+    if (commissionerLogin) {
+        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    }
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await saveConfig(); 
+        });
+    }
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const success = await clearDraftOrderFromSupabase();
+            if (success) {
+                initializeDraftState();
+                showMessage('Draft has been reset. A new random draft can now be run.');
+            }
+        });
+    }
+
+    if (audioOverlay) {
+        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+    }
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+}); 
+
+async function saveDraftOrderToSupabase(draftOrder) {
+    console.log('Saving draft order to Supabase...', draftOrder);
+    
+    const formattedData = draftOrder.map(pick => ({
+        id: `pick_${pick.pick}`,
+        order_data: {
+            pick: pick.pick,
+            member: pick.member,
+            originalWeightDisplay: pick.originalWeightDisplay
+        }
+    }));
+
+    const { data, error } = await supabase
+        .from('draft_orders')
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving draft order to Supabase:', error);
+        return false;
+    }
+    console.log('Draft order saved successfully:', data);
+    return true;
+}
+
+async function clearDraftOrderFromSupabase() {
+    showMessage('Clearing old draft order from the database...');
+    // A more reliable way to delete all rows
+    const { error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .delete()
+        .not('id', 'is', null);
+    
+    if (error) {
+        console.error('Error clearing draft order:', error);
+        showMessage('Error clearing draft order. Check console.');
+        return false;
+    }
+    console.log('Draft order cleared successfully.');
+    sessionStorage.removeItem('hasSeenDraftAnimation');
+    return true;
+}
+async function initializeDraftState() {
+    members = await fetchMembersFromSupabase();
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams and save the configuration.</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+
+    const savedDraftOrder = await loadDraftOrderFromSupabase();
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
+
+    if (savedDraftOrder && savedDraftOrder.length > 0) {
+        isDraftSaved = true;
+        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
+        
+       if (hasSeenAnimation) {
+       console.log('Saved draft found, user has seen animation. Displaying results.');
+    showResults();
+    displayTeamOdds();
+            if (runFullDraftBtn) {
+                runFullDraftBtn.textContent = 'Replay Draft Animation';
+                runFullDraftBtn.disabled = false;
+            }
+            if (currentPickLabel) currentPickLabel.textContent = "Draft Complete! Click to Replay.";
+            pickCounter = members.length;
+            availableMembers = members.map(member => ({ ...member }));
+            populateBalls(); 
+        }
+        else {
+            console.log('Saved draft found, user has NOT seen animation. Setting up for first-time run.');
+            if (resultsList) resultsList.style.display = 'none';
+            if (runFullDraftBtn) {
+                runFullDraftBtn.textContent = 'Run Draft';
+                runFullDraftBtn.disabled = false;
+            }
+            if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
+       
+            pickCounter = members.length;
+            availableMembers = members.map(member => ({ ...member }));
+            populateBalls();
+            displayTeamOdds();
+            initializeResultsList();
+        }
+    } else {
+        console.log('No saved draft found. Setting up for a new random run.');
+        isDraftSaved = false;
+        availableMembers = members.map(member => ({ ...member }));
+        draftOrder = [];
+        pickCounter = members.length;
+        if (runFullDraftBtn) {
+            runFullDraftBtn.textContent = 'Run Draft';
+            runFullDraftBtn.disabled = false;
+        }
+        if (resultsList) resultsList.style.display = 'block';
+        initializeResultsList();
+        populateBalls();
+        displayTeamOdds();
+        drawnTeamNameDisplay.textContent = '...';
+        currentPickLabel.textContent = `Ready to Draw for Pick #${pickCounter}...`;
+    }
+    
+    initializeMemberConfigInputs();
+
+
+}
+
+function initializeMemberConfigInputs() {
+    if (!memberConfigInputs) return;
+    memberConfigInputs.innerHTML = '';
+    members.forEach(member => {
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-gray-800 rounded-lg border border-gray-700 flex flex-wrap gap-4 items-end mb-3';
+        div.innerHTML = `
+            <div class="flex flex-col flex-1 min-w-[200px]">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Team Name</label>
+                <input type="text" id="name-${member.id}" value="${member.name}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-24">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Math Weight</label>
+                <input type="number" id="weight-${member.id}" value="${member.weight}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-32">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Label (e.g. 10%)</label>
+                <input type="text" id="display-${member.id}" value="${member.originalWeightDisplay || ''}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+        `;
+        memberConfigInputs.appendChild(div);
+    });
+}
+
+function initializeResultsList() {
+    if (!resultsList) return;
+    resultsList.innerHTML = '';
+    for (let i = members.length; i >= 1; i--) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>Pick ${i}:</span> <span class="text-gray-400">Pending...</span>`;
+        li.classList.add('bg-gray-700', 'text-gray-300');
+        li.setAttribute('data-pick-num', i);
+        resultsList.appendChild(li);
+    }
+}
+
+function populateBalls() {
+    if (!lotteryMachine) return;
+    if (availableMembers.length > 0) {
+        lotteryMachine.innerHTML = '';
+    }
+
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
+
+    const ballsToRender = [];
+    availableMembers.forEach(member => {
+        const weight = member.weight || 0; 
+        for (let i = 0; i < weight; i++) {
+            ballsToRender.push({ teamId: member.id });
+        }
+    });
+
+    if (ballsToRender.length === 0 && pickCounter > 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
+        return;
+    }
+
+    const shuffledBalls = [...ballsToRender];
+    for (let i = shuffledBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
+    }
+
+    shuffledBalls.forEach((ballData, index) => {
+        const ball = document.createElement('div');
+        ball.classList.add('ball');
+        ball.dataset.teamId = ballData.teamId;
+        ball.style.position = 'absolute'; 
+
+        const member = members.find(m => m.id === ballData.teamId); 
+        if (member) {
+            ball.style.backgroundColor = member.color || 'var(--accent-gold)';
+            if (member.image) {
+                ball.style.backgroundImage = `url('${member.image}')`;
+            }
+        }
+        lotteryMachine.appendChild(ball);
+        ball.style.left = `calc(50% - 25px)`; 
+        ball.style.top = `calc(50% - 25px)`;        
+        const randomDelay = Math.random() * -2; 
+        ball.style.animationDelay = `${randomDelay}s`;
+    });
+}
+
+function handleFirstInteraction() {
+    if (!espnAudio) {
+        espnAudio = new Audio('Espnprimetime.m4a');
+        espnAudio.loop = true;
+        espnAudio.volume = 0.5;
+        crowdShoutAudio = new Audio('crowd-shouting-6325.mp3');
+        disappointmentAudio = new Audio('disappointment.mp3');
+        cheeringAudio = new Audio('cheering.mp3');
+        crowdCheersAudio = new Audio('crowd-cheers-312833.mp3');
+    }
+
+    espnAudio.play().then(() => {
+        console.log("ESPN Audio is now playing.");
+        espnAudio.muted = false;
+    }).catch(error => {
+        console.error("Failed to play ESPN audio:", error);
+    });
+    
+    if (audioOverlay) {
+        audioOverlay.classList.add('hidden');
+        setTimeout(() => {
+            audioOverlay.style.display = 'none';
+        }, 500);
+    }
+}
+
+async function runFullDraftSimulation() {
+    if (drawing) return;
+    drawing = true;
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = true;
+        runFullDraftBtn.textContent = 'Drawing in progress...';
+    }
+    pickCounter = 8; 
+
+    if (isDraftSaved) {
+        if (resultsList) resultsList.style.display = 'none';
+        availableMembers = members.map(member => ({ ...member }));
+        populateBalls();
+    } else {
+        draftOrder = [];
+    }
+    while (pickCounter >= 1) {
+        await performSingleDraw();
+        // Brief pause between picks
+        await new Promise(resolve => setTimeout(resolve, 1200));
+    }
+    if (!isDraftSaved) {
+        await saveDraftOrderToSupabase(draftOrder);
+        isDraftSaved = true;
+    }  
+    sessionStorage.setItem('hasSeenDraftAnimation', 'true');
+    showResults();
+    lotteryMachine.innerHTML = '';
+    drawing = false;
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = false;
+        runFullDraftBtn.textContent = 'Replay Draft Animation';
+    }
+    if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+}
+
+function playPickAudio(pick) {
+    if (pick === 1) {
+        if (espnAudio) { espnAudio.pause(); espnAudio.currentTime = 0; }
+        console.log("Playing Winner Audio for #1!");
+    } else {
+        if (crowdShoutAudio) {
+            crowdShoutAudio.currentTime = 0;
+            crowdShoutAudio.play().catch(e => console.log("Audio play blocked", e));
+        }
+    }
+}
+async function performSingleDraw() {
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    drawnTeamNameDisplay.textContent = '';   
+    await new Promise(resolve => setTimeout(resolve, 2000));   
+    
+    let drawnMember;
+    if (isDraftSaved) {
+        const savedPick = draftOrder.find(p => p.pick === pickCounter);
+        if (savedPick) {
+            drawnMember = members.find(m => m.id === savedPick.teamId || m.name === savedPick.member);
+            if (drawnMember) {
+                availableMembers = availableMembers.filter(m => m.id !== drawnMember.id);
+            } else {
+                drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
+            }
+        }
+    } else {
+        drawnMember = drawWeightedMember();
+    }
+
+    if (drawnMember) {
+        playPickAudio(pickCounter);
+        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
+
+       if (teamBalls.length > 0) {
+            // 1. Prepare the ball (Stop animation, add the "Slow" class)
+            teamBalls.forEach(ballElement => {
+                ballElement.style.animation = 'none'; 
+                ballElement.classList.add('selected-for-shoot');
+            });
+
+            // 2. THE SECRET SAUCE: Give the browser 50ms to realize the class changed
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // 3. Now apply the movement (This triggers the 5s transition)
+            teamBalls.forEach(ballElement => {
+                ballElement.style.left = '50%';
+                ballElement.style.top = '20px'; 
+                ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            });
+
+            // 4. Wait for the 5-second slow crawl to finish
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            // 5. Reveal the name and image
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            showWinnerDrop(drawnMember.name, pickCounter); 
+            
+            // Wait while the Bad Bunny image is shown
+            await new Promise(resolve => setTimeout(resolve, 4000));
+
+            // 6. Cleanup
+            teamBalls.forEach(ballElement => {
+                ballElement.classList.remove('selected-for-shoot');
+                ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
+                ballElement.classList.add('drawn');
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            teamBalls.forEach(ballElement => {
+                if (ballElement && ballElement.parentNode) ballElement.remove();
+            });
+        } else {
+            drawnTeamNameDisplay.textContent = drawnMember.name;
+            showWinnerDrop(drawnMember.name, pickCounter);
+            await new Promise(resolve => setTimeout(resolve, 4000));
+        }
+
+        // Save data logic
+        if (!isDraftSaved) {
+            draftOrder.push({ 
+                pick: pickCounter, 
+                teamId: drawnMember.id, 
+                member: drawnMember.name, 
+                originalWeightDisplay: drawnMember.originalWeightDisplay 
+            });
+        }
+
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+        const oddsElement = teamOddsList.querySelector(`li[data-team-id="${drawnMember.id}"]`);
+        if (oddsElement) oddsElement.classList.add('picked');
+
+    } else {
+        console.warn("No more members to draw.");
+    }
+
+    pickCounter--; 
+    if (currentPickLabel) {
+        if (pickCounter >= 1) {
+            currentPickLabel.textContent = `Ready for Pick #${pickCounter}`;
+        } else {
+            currentPickLabel.textContent = "All Picks Revealed!";
+        }
+    }
+}
+
+    function showWinnerDrop(teamName, pickNumber) {
+    const overlay = document.getElementById('winnerOverlay');
+    const title = overlay.querySelector('h1');
+    const img = document.getElementById('winnerImage');
+    if (!overlay || !img) return;
+    title.innerText = `PICK #${pickNumber}: ${teamName}`;
+    img.src = pickImages[pickNumber] || 'default_bunny.jpg';
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+    }, 4000);
+}
+
+function drawWeightedMember() {
+    if (availableMembers.length === 0) {
+        return null;
+    }
+    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+    for (let i = 0; i < availableMembers.length; i++) {
+        randomWeight -= availableMembers[i].weight;
+        if (randomWeight <= 0) {
+            const selectedMember = availableMembers[i];
+            availableMembers.splice(i, 1);
+            return selectedMember;
+        }
+    }    
+    return availableMembers.pop();
+}
+
+function showResults() {
+    if (resultsList) resultsList.style.display = 'block';
+    updateUIFromCurrentState();
+}
+
+function updateUIFromCurrentState() {
+    initializeResultsList();
+    const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
+    sortedDraftOrder.forEach(item => {
+        const originalMember = members.find(m => m.name === item.member);
+        if (originalMember) {
+            const oddsElement = teamOddsList.querySelector(`li[data-team-id="${originalMember.id}"]`);
+            if (oddsElement) {
+                oddsElement.classList.add('picked');
+            }
+        }
+    
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+    });
+}
+
+function displayTeamOdds() {
+    if (!teamOddsList) return;
+    teamOddsList.innerHTML = '';
+    const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
+
+    sortedMembers.forEach(member => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${member.name}:</span> <span>${member.originalWeightDisplay}</span>`;
+        li.setAttribute('data-team-id', member.id);
+        
+        // Pre-check if already picked (useful for page refreshes)
+        if (draftOrder.some(p => p.member === member.name)) {
+            li.classList.add('picked');
+        }
+        
+        teamOddsList.appendChild(li);
+    });
+}
+
+function showMessage(message) {
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+    if (messageBox && messageText) {
+        messageText.innerText = message;
+        messageBox.style.display = 'flex';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
+    }
+}
+
+async function saveConfig() {
+    const newMembers = [];
+    let isValid = true;
+
+    for (const member of members) {
+        const nameInput = document.getElementById(`name-${member.id}`);
+        const weightInput = document.getElementById(`weight-${member.id}`);
+        const displayInput = document.getElementById(`display-${member.id}`);
+
+        if (nameInput && weightInput && displayInput) {
+            const newWeight = parseInt(weightInput.value, 10);
+            const newName = nameInput.value.trim();
+            const newDisplay = displayInput.value.trim();
+            if (newName === '' || isNaN(newWeight) || newWeight <= 0) {
+                showMessage('All team names must not be empty and weights must be positive.');
+                isValid = false;
+                return;
+            }
+
+            newMembers.push({
+                id: member.id,
+                name: newName,
+                weight: newWeight,
+                originalWeightDisplay: newDisplay || `${newWeight}%`
+            });
+        }
+    }
+
+    if (isValid && newMembers.length > 0) {
+        const success = await saveMembersToSupabase(newMembers);
+        
+        if (success) {
+            members = newMembers; 
+            showMessage(`Configuration saved! The draft is ready.`);
+            initializeDraftState(); 
+        }
+    } else if (newMembers.length === 0) {
+        showMessage('At least one team must be configured.');
+    }
+}
+
+async function fetchMembersFromSupabase() {
+    console.log('Fetching members from Supabase...');
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select('id, members_data')
+        .order('members_data->>weight', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching data from Supabase:', error);
+        showMessage('Error fetching data from the database. Check console for details.');
+        return [];
+    }
+
+    if (data && data.length > 0) {
+        console.log('Data fetched successfully:', data);
+        const members = data.map(item => ({
+            id: item.id,
+            name: item.members_data.name,
+            weight: item.members_data.weight,
+            originalWeightDisplay: item.members_data.originalWeightDisplay,
+            color: item.members_data.color 
+        }));
+        console.log('After mapping, members array:', members, 'Length:', members.length);
+        return members;
+    } else {
+        console.warn('No member data found in Supabase table.');
+        return [];
+    }
+}
+
+async function saveMembersToSupabase(newMembers) {
+    console.log('Saving configuration to Supabase...', newMembers);
+
+    const formattedData = newMembers.map(member => ({
+        id: member.id,
+        members_data: {
+            name: member.name,
+            weight: member.weight,
+            originalWeightDisplay: member.originalWeightDisplay
+        }
+    }));
+    
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+        showMessage('Error saving configuration to the database. Check console for details.');
+        return false;
+    }
+    console.log('Configuration saved successfully:', data);
+    return true;
+}
+
+async function loadDraftOrderFromSupabase() {
+    console.log('Checking for saved draft order...');
+    const { data, error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select('order_data')
+        .order('order_data->>pick', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching draft order:', error);
+        return null;
+    }
+
+    if (data && data.length > 0) {
+        console.log('Draft order found in Supabase:', data);
+        return data.map(item => item.order_data);
+    }
+
+    console.log('No draft order found in the database.');
+    return null;
+}
+
+async function resetDraft() {
+    const confirmed = confirm("WARNING: This will delete the saved draft order from the database. This cannot be undone. Are you sure you want to reset for a new run?");
+    
+    if (!confirmed) return;
+
+    try {
+        const { error } = await supabase
+            .from('draft_order')
+            .delete()
+            .neq('id', 0); 
+
+        if (error) throw error;
+        sessionStorage.removeItem('hasSeenDraftAnimation');
+        draftOrder = [];
+        isDraftSaved = false;
+        showMessage("Draft has been reset! Ready for a new lottery.");
+        initializeDraftState();
+
+    } catch (err) {
+        console.error("Error during reset:", err);
+        showMessage("Error resetting draft. Check the console.");
+    }
+}
+
+document.getElementById('resetDraftBtn')?.addEventListener('click', resetDraft);
+document.getElementById('saveConfigBtn')?.addEventListener('click', saveConfig);
+document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDraftSimulation);
+
+initializeDraftState();
+
+</script>
+</body>
+</html>

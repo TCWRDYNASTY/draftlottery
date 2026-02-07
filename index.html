@@ -246,15 +246,9 @@
 .ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
 .ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
 
-/* This class is added by JS to the ball we want to shoot up */
 .ball.selected-for-shoot {
-    /* 1. Kill the 'bounce' animation completely */
     animation: none !important; 
-    
-    /* 2. Force a very slow movement (5 seconds) */
-    transition: top 5s ease-in-out, left 5s ease-in-out, transform 5s ease-in-out !important; 
-    
-    /* 3. The end position */
+    transition: all 10s ease-in-out !important; 
     top: 20px !important;
     left: 50% !important;
     transform: translate(-50%, -50%) scale(2) !important;
@@ -348,8 +342,6 @@
         box-shadow: none;
         transform: none;
     }
-
-    /* Message Box Styling */
     .message-box {
         position: fixed;
         top: 50%;
@@ -369,7 +361,6 @@
         text-align: center;
         border: 3px solid var(--accent-gold);
     }
-
     .message-box button {
         margin-top: 20px;
         padding: 10px 20px;
@@ -387,8 +378,6 @@
         background-color: #5a8bd4;
         transform: translateY(-2px);
     }
-
-
     @media (max-width: 768px) {
         h1 {
             font-size: 2.5rem;
@@ -473,33 +462,31 @@
     box-sizing: border-box;
     transition: opacity 0.5s ease-in-out;
 }
-
 .audio-overlay.hidden {
     opacity: 0;
-    pointer-events: none; /* Make it unclickable when hidden */
+    pointer-events: none;
 }
-
 .overlay-content {
     animation: pulse 2s infinite ease-in-out;
 }
 
 .hidden {
-    display: none !important; /* Use !important to ensure it overrides other display properties */
+    display: none !important; 
 }
 
 #memberConfigInputs input {
-    background-color: #0f172a !important; /* Dark blue background */
-    color: #ffffff !important;            /* Pure white text */
-    border: 1px solid #FFD700 !important;  /* Gold border */
+    background-color: #0f172a !important;
+    color: #ffffff !important; 
+    border: 1px solid #FFD700 !important; 
     padding: 8px;
     border-radius: 6px;
     margin-bottom: 10px;
-    width: 100%; /* Helps with mobile layout */
+    width: 100%;
     max-width: 200px;
 }
 
 #memberConfigInputs label {
-    color: #FFD700 !important; /* Gold labels for Team/Weight */
+    color: #FFD700 !important;
     font-weight: bold;
     display: block;
     margin-top: 10px;
@@ -531,8 +518,6 @@
             opacity: 0.8;
         }
     }
-
-
 @keyframes bounce {
     0%   { transform: translateY(0); }
     50%  { transform: translateY(10px); } /* Adjust this value for bounce height */
@@ -544,9 +529,9 @@
     50% { transform: scale(1.05); opacity: 1; }
     100% { transform: scale(1); opacity: 0.8; }
 }
-
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -1039,7 +1024,7 @@ async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    await new Promise(resolve => setTimeout(resolve, 2000));   
+    await new Promise(resolve => setTimeout(resolve, 10000));   
     
     let drawnMember;
     if (isDraftSaved) {
@@ -1062,33 +1047,22 @@ async function performSingleDraw() {
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${drawnMember.id}"]`);
 
        if (teamBalls.length > 0) {
-            // 1. Prepare the ball (Stop animation, add the "Slow" class)
             teamBalls.forEach(ballElement => {
                 ballElement.style.animation = 'none'; 
                 ballElement.classList.add('selected-for-shoot');
+                void ballElement.offsetWidth;
             });
 
-            // 2. THE SECRET SAUCE: Give the browser 50ms to realize the class changed
             await new Promise(resolve => setTimeout(resolve, 50));
-
-            // 3. Now apply the movement (This triggers the 5s transition)
             teamBalls.forEach(ballElement => {
                 ballElement.style.left = '50%';
                 ballElement.style.top = '20px'; 
                 ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
             });
-
-            // 4. Wait for the 5-second slow crawl to finish
             await new Promise(resolve => setTimeout(resolve, 5000));
-            
-            // 5. Reveal the name and image
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter); 
-            
-            // Wait while the Bad Bunny image is shown
             await new Promise(resolve => setTimeout(resolve, 4000));
-
-            // 6. Cleanup
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
                 ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
@@ -1104,8 +1078,6 @@ async function performSingleDraw() {
             showWinnerDrop(drawnMember.name, pickCounter);
             await new Promise(resolve => setTimeout(resolve, 4000));
         }
-
-        // Save data logic
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 

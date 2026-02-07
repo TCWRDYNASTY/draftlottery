@@ -762,32 +762,6 @@ async function loadDraftOrderFromSupabase() {
     return null;
 }
 
-async function saveMembersToSupabase(newMembers) {
-    console.log('Saving configuration to Supabase...', newMembers);
-
-    const formattedData = newMembers.map(member => ({
-        id: member.id,
-        members_data: {
-            name: member.name,
-            weight: member.weight,
-            originalWeightDisplay: member.originalWeightDisplay
-        }
-    }));
-    
-    const { data, error } = await supabase
-        .from(SUPABASE_TABLE_NAME)
-        .upsert(formattedData, { onConflict: 'id' })
-        .select();
-
-    if (error) {
-        console.error('Error saving data to Supabase:', error);
-        showMessage('Error saving configuration to the database. Check console for details.');
-        return false;
-    }
-    console.log('Configuration saved successfully:', data);
-    return true;
-}
-
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     

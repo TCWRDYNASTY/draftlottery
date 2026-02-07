@@ -246,16 +246,14 @@
 .ball:nth-child(7) { background-image: url('badbunny7.png'); animation-delay: 0.12s; }
 .ball:nth-child(8) { background-image: url('badbunny9.png'); animation-delay: 0.17s; }
 
-        .ball.selected-for-shoot {
-    background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--accent-gold) 100%) !important;
-    box-shadow: 0 0 40px var(--accent-gold), 0 0 15px #fff;
-    z-index: 999; 
-    
-    /* 1. Remove the 0.1s animation */
+.ball.selected-for-shoot {
     animation: none !important; 
-    
-    /* 2. Add a smooth 2-second rise */
-    transition: top 2s ease-out, left 2s ease-out, transform 2s ease-out !important;
+    /* 5 seconds of movement */
+    transition: all 5s ease-in-out !important; 
+    top: 20px !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1.5) !important;
+    z-index: 9999 !important;
 }
         
 .ball.drawn {
@@ -1024,11 +1022,26 @@ async function runFullDraftSimulation() {
     if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 
+function playPickAudio(pick) {
+    if (pick === 1) {
+        if (espnAudio) { espnAudio.pause(); espnAudio.currentTime = 0; }
+        console.log("Playing Winner Audio for #1!");
+    } else {
+        if (crowdShoutAudio) {
+            crowdShoutAudio.currentTime = 0;
+            crowdShoutAudio.play().catch(e => console.log("Audio play blocked", e));
+        }
+    }
+}
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
+    
+    // Initial pause while the machine "shuffles"
     await new Promise(resolve => setTimeout(resolve, 2000));   
+    
     let drawnMember;
     if (isDraftSaved) {
         const savedPick = draftOrder.find(p => p.pick === pickCounter);
@@ -1043,6 +1056,7 @@ async function performSingleDraw() {
     } else {
         drawnMember = drawWeightedMember();
     }
+
     if (drawnMember) {
         playPickAudio(pickCounter);
         
@@ -1053,13 +1067,21 @@ async function performSingleDraw() {
                 ballElement.style.animation = 'none'; 
                 ballElement.style.left = '50%';
                 ballElement.style.top = '20px'; 
-                ballElement.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                ballElement.style.transform = 'translate(-50%, -50%) scale(1.5)';
                 ballElement.classList.add('selected-for-shoot');
             });
-            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // --- THE SLOW DOWN ---
+            // We wait 5 seconds here so the ball moves slowly to the top
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            // Now reveal the name and the Bad Bunny image
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter); 
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Keep the image on screen for 4 seconds
+            await new Promise(resolve => setTimeout(resolve, 4000));
+
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
                 ballElement.style.transform = 'translate(-50%, -50%) scale(0)'; 
@@ -1073,8 +1095,10 @@ async function performSingleDraw() {
         } else {
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter);
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(resolve, 4000));
         }
+
+        // Save data logic
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -1083,6 +1107,7 @@ async function performSingleDraw() {
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
+
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
         if (pickElement) {
             pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
@@ -1095,6 +1120,7 @@ async function performSingleDraw() {
     } else {
         console.warn("No more members to draw.");
     }
+
     pickCounter--; 
     if (currentPickLabel) {
         if (pickCounter >= 1) {

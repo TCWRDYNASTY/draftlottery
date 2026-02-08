@@ -13,8 +13,6 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <style>
-
-
     :root {
         --primary-dark: #1e3159; 
         --accent-gold: #FFD700; 
@@ -26,23 +24,22 @@
 
     body {
         font-family: 'Inter', sans-serif;
-        background-color: var(--primary-dark); /* Using the deep blue for the body background */
+        background-color: var(--primary-dark);
         color: var(--light-text);
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         margin: 0;
-        padding: 2rem 1rem; /* Add padding for mobile screens */
+        padding: 2rem 1rem;
         box-sizing: border-box;
         background-image:
             radial-gradient(circle at 10% 90%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 90% 10%, rgba(255, 215, 0, 0.05) 0%, transparent 50%); /* Subtle gold particles in the background */
+            radial-gradient(circle at 90% 10%, rgba(255, 215, 0, 0.05) 0%, transparent 50%); 
     }
 
-    /* Main container for the lottery application */
     .container {
-        background-color: #2a3d60; /* A slightly lighter shade of the blue */
+        background-color: #2a3d60; 
         border-radius: 2rem;
         padding: 2.5rem;
         box-shadow:
@@ -56,16 +53,12 @@
         flex-direction: column;
         align-items: center;
     }
-
-    /* Main headings */
     h1, h2 {
         font-family: 'Bebas Neue', sans-serif;
         letter-spacing: 0.1em;
         text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         -webkit-text-stroke: 1px var(--primary-dark);
     }
-    
-    /* Gradient for titles */
     h1 {
         font-size: 3.5rem;
         margin-bottom: 0.5rem;
@@ -318,14 +311,14 @@
     z-index: 200;
     box-shadow: 0 0 30px gold, 0 0 60px gold;
 }
+.ball.vanish {
+    animation: vanishPop 0.7s ease forwards;
+}
+        
 @keyframes vanishPop {
     0%   { transform: translate(-50%, -50%) scale(2.6); opacity: 1; }
     60%  { transform: translate(-50%, -50%) scale(3.2); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-}
-
-.ball.vanish {
-    animation: vanishPop 0.7s ease forwards;
 }
 
     .btn {
@@ -911,18 +904,16 @@ function initializeResultsList() {
         resultsList.appendChild(li);
     }
 }
-
 function populateBalls() {
     if (!lotteryMachine) return;
-    if (availableMembers.length > 0) {
-        lotteryMachine.innerHTML = '';
-    }
+    lotteryMachine.innerHTML = '';
 
     if (members.length === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams.</div>';
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
         if (runFullDraftBtn) runFullDraftBtn.disabled = true;
         return;
     }
+    
     if (runFullDraftBtn) runFullDraftBtn.disabled = false;
 
     const ballsToRender = [];
@@ -979,7 +970,6 @@ const contentWidth = lotteryMachine.clientWidth;
         ball.style.animationTimingFunction = 'linear';
     });
 }
-
 function handleFirstInteraction() {
     if (!espnAudio) {
         espnAudio = new Audio('Espnprimetime.m4a');
@@ -1060,68 +1050,49 @@ async function performSingleDraw() {
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
-    await new Promise(resolve => setTimeout(resolve, 1500));      
+    await new Promise(resolve => setTimeout(resolve, 1500));          
     let drawnMember;
-   if (isDraftSaved) {
-    const savedPick = draftOrder.find(p => p.pick === pickCounter);
 
-    if (savedPick) {
-        drawnMember = members.find(
-            m => String(m.id) === String(savedPick.teamId) || m.name === savedPick.member
-        );
-
-        if (drawnMember) {
-            availableMembers = availableMembers.filter(
-                m => String(m.id) !== String(drawnMember.id)
+    if (isDraftSaved) {
+        const savedPick = draftOrder.find(p => p.pick === pickCounter);
+        if (savedPick) {
+            drawnMember = members.find(
+                m => String(m.id) === String(savedPick.teamId) || m.name === savedPick.member
             );
-        } else {
-            drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
         }
-    }else {
+    } else {
         drawnMember = drawWeightedMember();
     }
-   } else {
-    drawnMember = drawWeightedMember();
-}
+
     if (drawnMember) {
+        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
         playPickAudio(pickCounter);
-        
+        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
 
-const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
-
-if (teamBalls.length > 0) {
-    teamBalls.forEach(ball => ball.style.animationPlayState = 'paused');
-    await new Promise(r => setTimeout(r, 200));
-    teamBalls.forEach(ball => {
-        ball.classList.add('converging');
-        ball.style.left = '50%';
-        ball.style.top = '50%';
-        ball.style.transform = 'translate(-50%, -50%) scale(1)';
-    });
-
-    await new Promise(r => setTimeout(r, 900));
-    const mainBall = teamBalls[0];
-
-    for (let i = 1; i < teamBalls.length; i++) {
-        teamBalls[i].remove();
-    }
-    mainBall.classList.add('merged');
-
-    await new Promise(r => setTimeout(r, 1200));
-    mainBall.classList.add('vanish');
-
-    await new Promise(r => setTimeout(r, 800));
-}     
-            teamBalls.forEach(ballElement => {
-                if (ballElement && ballElement.parentNode) {
-                    ballElement.remove();
-                }
+        if (teamBalls.length > 0) {
+            teamBalls.forEach(ball => {
+                ball.classList.add('converging');
+                ball.style.left = '50%';
+                ball.style.top = '50%';
+                ball.style.transform = 'translate(-50%, -50%)';
             });
-        } else {
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            showWinnerDrop(drawnMember.name, pickCounter);
-            await new Promise(resolve => setTimeout(resolve, 4000));
+
+            await new Promise(r => setTimeout(r, 900));
+            for (let i = 1; i < teamBalls.length; i++) {
+                teamBalls[i].remove();
+            }
+            
+            const mainBall = teamBalls[0];
+            mainBall.classList.add('merged');
+
+            await new Promise(r => setTimeout(r, 1200));
+            mainBall.classList.add('vanish');
+            await new Promise(r => setTimeout(r, 800));
+            mainBall.remove();
         }
+        drawnTeamNameDisplay.textContent = drawnMember.name;
+        showWinnerDrop(drawnMember.name, pickCounter);
+        
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -1130,20 +1101,23 @@ if (teamBalls.length > 0) {
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
         if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay})</span>`;
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay || ''})</span>`;
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
+
+        await new Promise(resolve => setTimeout(resolve, 8500));
     }
-pickCounter--;
-if (pickCounter >= 1) {
-    populateBalls();
+
+    pickCounter--;
+    if (pickCounter >= 1) {
+        populateBalls();
+    }
 }
 
     function showWinnerDrop(teamName, pickNumber) {
@@ -1158,7 +1132,7 @@ if (pickCounter >= 1) {
     setTimeout(() => {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
-    }, 4000);
+    }, 8000);
 }
 
 function drawWeightedMember() {

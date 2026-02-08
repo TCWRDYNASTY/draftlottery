@@ -464,8 +464,6 @@ let draftOrder = [];
 let drawing = false;
 let pickCounter = 8;
 let isDraftSaved = false;
-
-// --- ELEMENT DECLARATIONS ---
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
@@ -479,11 +477,8 @@ const commissionerPanel = document.getElementById('commissionerPanel');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
-
-// --- COMMISSIONER LOGIC ---
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
-    // Ensure COMMISSIONER_PASSWORD is defined globally
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
         commissionerPanel.classList.remove('hidden');
         commissionerLogin.classList.add('hidden');
@@ -495,11 +490,8 @@ function handleCommissionerUnlock(e) {
     commissionerPasswordInput.value = ''; 
 }
 
-// --- CONSOLIDATED DOMCONTENTLOADED ---
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("Initializing Draft Room...");
-
-    // 1. Run initialization - NOTE: initializeDraftState usually calls populateBalls & initializeResultsList
     if (typeof initializeDraftState === 'function') {
         await initializeDraftState();
     } else {
@@ -507,8 +499,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof fetchDraftState === 'function') await fetchDraftState();
         if (typeof populateBalls === 'function') populateBalls();
     }
-
-    // 2. Commissioner Listeners (Keep these as they are)
     if (unlockCommissionerBtn) unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
     if (commissionerLogin) commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
     
@@ -531,7 +521,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-  // 3. Automated Opening Sequence
     const introOverlay = document.getElementById('introOverlay');
     const startDraftBtn = document.getElementById('startDraftBtn'); // Target a specific button
     const curtains = document.getElementById('curtainWrapper');
@@ -539,23 +528,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (introOverlay && startDraftBtn) {
         startDraftBtn.addEventListener('click', function(e) {
-            // Prevent the click from triggering anything else
             e.stopPropagation();
-
             if (audio) audio.play().catch(e => console.log("Audio blocked", e));
-            
-            // Fade the overlay
             introOverlay.style.transition = 'opacity 0.6s ease';
             introOverlay.style.opacity = '0';
             introOverlay.style.pointerEvents = 'none';
 
             setTimeout(() => {
-                introOverlay.style.display = 'none'; 
-                
+                introOverlay.style.display = 'none';        
                 if (curtains) {
                     curtains.classList.add('open'); 
-                    
-                    // --- THE AUTO-START ---
                     setTimeout(() => {
                         console.log("Curtains open. Automatically starting draft simulation...");
                         if (typeof runFullDraftSimulation === 'function') {
@@ -613,7 +595,6 @@ async function clearDraftOrderFromSupabase() {
 }
 
 async function initializeDraftState() {
-    // 1. Fetch data
     members = await fetchMembersFromSupabase();
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
@@ -621,8 +602,6 @@ async function initializeDraftState() {
         return;
     }
 
-    // --- NEW: PRELOAD PICK IMAGES ---
-    // This fetches images in the background so they appear instantly during the draw
     if (typeof pickImages !== 'undefined') {
         Object.values(pickImages).forEach(src => {
             const img = new Image();
@@ -633,8 +612,6 @@ async function initializeDraftState() {
 
     const savedDraftOrder = await loadDraftOrderFromSupabase();
     const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
-
-    // 2. Setup the UI slots (MUST happen before the draft starts)
     initializeResultsList(); 
     displayTeamOdds();
     initializeMemberConfigInputs();
@@ -645,12 +622,11 @@ async function initializeDraftState() {
         
         if (hasSeenAnimation) {
             console.log('Saved draft found, showing final results.');
-            showResults(); // Shows the list and fills it via updateUIFromCurrentState
+            showResults();
             if (runFullDraftBtn) runFullDraftBtn.textContent = 'Replay Draft Animation';
             if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
         } else {
             console.log('Saved draft found, preparing for FIRST reveal.');
-            // Ensure the list is visible so the green boxes can appear
             if (resultsList) resultsList.style.display = 'grid'; 
             if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
             if (currentPickLabel) currentPickLabel.textContent = "THE WINNER IS!";
@@ -662,8 +638,6 @@ async function initializeDraftState() {
         if (resultsList) resultsList.style.display = 'grid';
         if (currentPickLabel) currentPickLabel.textContent = `Ready for Pick #${members.length}...`;
     }
-    
-    // 3. Prepare the balls for the machine
     pickCounter = members.length;
     availableMembers = members.map(member => ({ ...member }));
     populateBalls();
@@ -698,20 +672,11 @@ function initializeMemberConfigInputs() {
 
 function initializeResultsList() {
     if (!resultsList) return;
-    
-    // Clear the list so we don't double-up if the function is called twice
     resultsList.innerHTML = '';
-    
-    // Create slots from the highest pick down to 1
     for (let i = members.length; i >= 1; i--) {
         const li = document.createElement('li');
-        
-        // This MUST match the querySelector in performSingleDraw
         li.setAttribute('data-pick-num', i); 
-        
-        // Classes: Added Flex for alignment and transition for the smooth color change
         li.className = 'flex justify-between items-center p-4 mb-3 bg-gray-700 text-gray-400 rounded-xl border-l-4 border-gray-600 opacity-50 transition-all duration-500 shadow-md';
-        
         li.innerHTML = `
             <span class="font-mono font-bold">PICK #${i}:</span> 
             <span class="italic text-sm tracking-wide">Pending...</span>
@@ -726,7 +691,6 @@ function populateBalls() {
 
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
-        // Check if button exists before trying to disable it
         if (typeof runFullDraftBtn !== 'undefined' && runFullDraftBtn) {
             runFullDraftBtn.disabled = true;
         }
@@ -762,9 +726,6 @@ function populateBalls() {
     shuffledBalls.forEach((ballData, index) => {
         const ball = document.createElement('div');
         ball.classList.add('ball');
-        
-        // --- ID STANDARDIZATION ---
-        // We use String() to ensure comparisons in performSingleDraw never fail due to type mismatch
         const teamIdStr = String(ballData.teamId);
         ball.dataset.teamId = teamIdStr;
         ball.setAttribute('data-id', teamIdStr); 
@@ -780,8 +741,6 @@ function populateBalls() {
         }
 
         lotteryMachine.appendChild(ball);
-
-        // Position and Animation Logic
         const ballWidth = ball.offsetWidth || 50; 
         const ballHeight = ball.offsetHeight || 50;
         const randomX = Math.random() * (contentWidth - ballWidth);
@@ -814,25 +773,15 @@ async function runFullDraftSimulation() {
         runFullDraftBtn.disabled = true;
         runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
     }
-    
-    // Set pickCounter to the number of members (e.g., 8)
     pickCounter = members.length; 
-    
-    // IMPORTANT: Removed the resultsList.innerHTML = '' line.
-    // This allows performSingleDraw to find the placeholders created by initializeResultsList.
-
     if (isDraftSaved) {
-        // Prepare for replay
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     } else {
         draftOrder = [];
-        // Ensure balls are ready for a fresh draft
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     }
-
-    // Audio-synced reveal timestamps
     const timestamps = [22, 54, 86, 118, 151, 183, 215, 250];
     
     for (let i = 0; i < timestamps.length; i++) {
@@ -844,12 +793,8 @@ async function runFullDraftSimulation() {
             // Safety break if audio is stopped
             if (audio.paused && audio.currentTime > 0) break; 
         }
-        
-        // Triggers the animation and updates the existing UI slot
         await performSingleDraw();
     }
-
-    // Finalize state and save to database if this is a new draft
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
         isDraftSaved = true;
@@ -892,7 +837,6 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        // 1. Logic for removing the member and animating the ball
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
         
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
@@ -914,8 +858,6 @@ async function performSingleDraw() {
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
         }
-
-        // 2. Display winner and update draft state
         drawnTeamNameDisplay.textContent = drawnMember.name;
         if (typeof showWinnerDrop === 'function') showWinnerDrop(drawnMember.name, pickCounter);
 
@@ -947,7 +889,7 @@ async function performSingleDraw() {
             const waitTime = (pickCounter === 1) ? 2000 : 8500;
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
-    } // <--- THIS WAS MISSING: Closes the "if (drawnMember)" block
+    } 
 
     pickCounter--; 
     if (pickCounter >= 1) {
@@ -968,56 +910,25 @@ async function performSingleDraw() {
         }, 1500); 
     }
 } 
-    function showWinnerDrop(teamName, pickNum) {
+  function showWinnerDrop(teamName, pickNum) {
     const overlay = document.getElementById('winnerOverlay');
-    const winnerNameDisplay = document.getElementById('finalWinnerName');
     const winnerImage = document.getElementById('winnerImage');
-    const title = overlay.querySelector('h1'); 
+    const winnerNameDisplay = document.getElementById('finalWinnerName');
+    const title = overlay?.querySelector('h1');
 
-    if (!overlay) return;
-
-    // 1. Hide the overlay completely while we prep
-    overlay.style.display = 'none';
-    overlay.classList.add('hidden');
-    overlay.style.opacity = '0'; // Start invisible to prevent the "flash"
-
-    // 2. Prep Text Content
+    if (!overlay || !winnerImage || !winnerNameDisplay) return;
+    const newSrc = pickImages[pickNum] || 'hotdog1.png';
+    winnerNameDisplay.textContent = teamName;
     if (title) title.textContent = pickNum === 1 ? "THE #1 PICK" : `PICK #${pickNum}`;
-    if (winnerNameDisplay) winnerNameDisplay.textContent = teamName;
-
-    // 3. Prep Image & Sync Display
-    if (winnerImage) {
-        const newSrc = (typeof pickImages !== 'undefined' && pickImages[pickNum]) 
-                       ? pickImages[pickNum] 
-                       : 'badbunny.png';
-
-        // Define what happens the moment the image is ready
-        winnerImage.onload = () => {
-            triggerReveal();
-        };
-
-        // If image is already cached/loaded, trigger immediately
-        if (winnerImage.complete) {
-            triggerReveal();
-        } else {
-            winnerImage.src = newSrc;
-        }
-    } else {
-        triggerReveal();
-    }
-
-    function triggerReveal() {
-        // Now that the image is 100% ready, we show everything at once
-        overlay.classList.remove('hidden');
+    overlay.style.display = 'none';
+    overlay.style.opacity = '0';
+    winnerNameDisplay.classList.remove('animate-pulse');
+    const triggerReveal = () => {
         overlay.style.display = 'flex';
-        
-        // Force a tiny reflow for the opacity transition
-        void overlay.offsetWidth; 
-        
+        overlay.classList.remove('hidden');
+        void overlay.offsetWidth;       
         overlay.style.opacity = '1';
         overlay.style.transition = 'opacity 0.3s ease-in-out';
-
-        // Styling based on Pick Rank
         if (pickNum === 1) {
             overlay.style.backgroundColor = "rgba(0, 0, 0, 1)"; 
             winnerNameDisplay.style.fontSize = "clamp(3rem, 10vw, 6rem)";
@@ -1026,9 +937,23 @@ async function performSingleDraw() {
         } else {
             overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
             winnerNameDisplay.style.fontSize = ""; 
-            winnerNameDisplay.classList.remove('animate-pulse'); 
             setTimeout(() => closeWinnerOverlay(), 8500);
         }
+    };
+    winnerImage.onload = triggerReveal;
+    winnerImage.src = newSrc;
+    if (winnerImage.complete) {
+        triggerReveal();
+    }
+}
+function closeWinnerOverlay() {
+    const overlay = document.getElementById('winnerOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.classList.add('hidden');
+        }, 500);
     }
 }
 function closeWinnerOverlay() {

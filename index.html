@@ -523,27 +523,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Automated Opening Sequence
+  // 3. Automated Opening Sequence
     const introOverlay = document.getElementById('introOverlay');
+    const startDraftBtn = document.getElementById('startDraftBtn'); // Target a specific button
     const curtains = document.getElementById('curtainWrapper');
     const audio = document.getElementById('monacoAudio');
 
-    if (introOverlay) {
-        introOverlay.addEventListener('click', function() {
+    if (introOverlay && startDraftBtn) {
+        startDraftBtn.addEventListener('click', function(e) {
+            // Prevent the click from triggering anything else
+            e.stopPropagation();
+
             if (audio) audio.play().catch(e => console.log("Audio blocked", e));
             
-            // Fade the rules
-            this.style.transition = 'opacity 0.6s ease';
-            this.style.opacity = '0';
-            this.style.pointerEvents = 'none';
+            // Fade the overlay
+            introOverlay.style.transition = 'opacity 0.6s ease';
+            introOverlay.style.opacity = '0';
+            introOverlay.style.pointerEvents = 'none';
 
             setTimeout(() => {
-                this.style.display = 'none'; 
+                introOverlay.style.display = 'none'; 
                 
                 if (curtains) {
                     curtains.classList.add('open'); 
                     
                     // --- THE AUTO-START ---
-                    // Wait 1.2 seconds for the curtains to be partially open, then start the balls!
                     setTimeout(() => {
                         console.log("Curtains open. Automatically starting draft simulation...");
                         if (typeof runFullDraftSimulation === 'function') {
@@ -551,7 +555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }, 1200); 
                     
-                    // Final Cleanup: remove curtains from layout after 3.1s
+                    // Final Cleanup
                     setTimeout(() => {
                         curtains.style.display = 'none';
                     }, 3100); 
@@ -559,7 +563,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 600); 
         }, { once: true });
     }
-});
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     

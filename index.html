@@ -381,7 +381,7 @@ h2 {
             </ul>
         </div>
         
-        <p class="animate-pulse text-3xl font-bold text-gold">CLICK TO COMMENCE THE DRAFT</p>
+        <p class="animate-pulse text-3xl font-bold text-gold">Picks</p>
     </div>
 </div>
 
@@ -607,7 +607,7 @@ async function clearDraftOrderFromSupabase() {
     return true;
 }
 
-async async function initializeDraftState() {
+async function initializeDraftState() {
     // 1. Fetch data
     members = await fetchMembersFromSupabase();
     if (members.length === 0) {

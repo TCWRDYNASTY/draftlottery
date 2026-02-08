@@ -458,63 +458,25 @@ let drawing = false;
 let pickCounter = 8;
 let isDraftSaved = false;
 
-let espnAudio = null;
-let crowdShoutAudio = null;
-let disappointmentAudio = null;
-let cheeringAudio = null;
-let crowdCheersAudio = null;
-let audioTimeout;
-
+// --- ELEMENT DECLARATIONS ---
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
 const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
 const resultsList = document.getElementById('resultsList');
 const teamOddsList = document.getElementById('teamOddsList');
-const audioOverlay = document.getElementById('audioOverlay');
 const commissionerLogin = document.getElementById('commissionerLogin');
 const commissionerPasswordInput = document.getElementById('commissionerPassword');
 const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
 const commissionerPanel = document.getElementById('commissionerPanel');
-const memberConfigInputs = document.getElementById('memberConfigInputs');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
 
-// --- START OF DOMCONTENTLOADED ---
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("Initializing Draft Room...");
-
-    // 1. Fetch data and build initial UI
-    if (typeof fetchDraftState === 'function') await fetchDraftState();
-    if (typeof renderResultsList === 'function') renderResultsList();
-    if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
-    if (typeof populateBalls === 'function') populateBalls();
-
-    // 2. Setup Intro and Curtain logic
-    const introOverlay = document.getElementById('introOverlay');
-    const curtains = document.getElementById('curtainWrapper');
-    const audio = document.getElementById('monacoAudio');
-
-    if (introOverlay) {
-        // We only need THIS ONE click listener
-        introOverlay.addEventListener('click', function() {
-            if (audio) audio.play().catch(e => console.log("Audio blocked", e));
-            
-            this.style.display = 'none';
-            
-            if (curtains) {
-                curtains.classList.add('open');
-                setTimeout(() => {
-                    curtains.style.display = 'none';
-                }, 1600);
-            }
-        }, { once: true });
-    }
-}); 
-
-    function handleCommissionerUnlock(e) {
+// --- COMMISSIONER LOGIC ---
+function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
+    // Ensure COMMISSIONER_PASSWORD is defined globally
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
         commissionerPanel.classList.remove('hidden');
         commissionerLogin.classList.add('hidden');
@@ -523,14 +485,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         showMessage("Incorrect password. Please try again.", "error");
     }
-    
     commissionerPasswordInput.value = ''; 
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeDraftState();    
-
-    // --- BUTTON LISTENERS ---
+// --- CONSOLIDATED DOMCONTENTLOADED ---
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Initializing Draft Room...");
+    if (typeof fetchDraftState === 'function') await fetchDraftState();
+    if (typeof renderResultsList === 'function') renderResultsList();
+    if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
+    if (typeof populateBalls === 'function') populateBalls();
+    if (typeof initializeDraftState === 'function') initializeDraftState();
     if (runFullDraftBtn) {
         runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
     }
@@ -549,51 +514,46 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetDraftBtn) {
         resetDraftBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            const success = await clearDraftOrderFromSupabase();
-            if (success) {
-                initializeDraftState();
-                showMessage('Draft has been reset. A new random draft can now be run.');
+            if (typeof clearDraftOrderFromSupabase === 'function') {
+                const success = await clearDraftOrderFromSupabase();
+                if (success) {
+                    initializeDraftState();
+                    showMessage('Draft has been reset. A new random draft can now be run.');
+                }
             }
         });
     }
 
-    // --- INTRO & CURTAIN LOGIC ---
     const introOverlay = document.getElementById('introOverlay');
     const curtains = document.getElementById('curtainWrapper');
+    const audio = document.getElementById('monacoAudio');
 
     if (introOverlay) {
         introOverlay.addEventListener('click', function() {
-            const audio = document.getElementById('monacoAudio');
-            if (audio) audio.play();
+            if (audio) audio.play().catch(e => console.log("Audio blocked", e));
 
-            // 1. Fade out the text/instructions immediately
+            this.style.transition = 'opacity 0.6s ease';
             this.style.opacity = '0';
             this.style.pointerEvents = 'none';
 
-            // 2. Pause for 1.5s to see the clean image, then start curtain sequence
             setTimeout(() => {
                 this.classList.add('hidden'); 
                 
                 if (curtains) {
-                    // 3. Make the curtains visible (they are CLOSED by default)
                     curtains.style.display = 'flex';
-                    
-                    // 4. Trigger the 3-second slide OPEN
                     setTimeout(() => {
                         curtains.classList.add('open');
-                        
-                        // 5. CLEANUP: Once fully open, set display to none 
-                        // so the wrapper doesn't block the "Run Draft" button
                         setTimeout(() => {
                             curtains.style.display = 'none';
                         }, 3100); 
-                    }, 50); // Tiny delay to allow 'flex' display to register
+                    }, 50); 
+                } else {
+                    this.style.display = 'none';
                 }
-            }, 1500); 
+            }, 1000); 
         }, { once: true });
     }
 });
-
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     
@@ -849,12 +809,9 @@ async function runFullDraftSimulation() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;      
-    
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;        
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-
-    // Pause balls for suspense
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
@@ -874,7 +831,6 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        // 1. Sidebar Cross-out
         const allOddsItems = document.querySelectorAll('#teamOddsList li');
         allOddsItems.forEach(li => {
             const nameSpan = li.querySelector('.team-name');
@@ -883,11 +839,7 @@ async function performSingleDraw() {
                 console.log("Sidebar Update: Crossed out " + drawnMember.name);
             }
         });
-
-        // 2. Remove from available pool
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
-
-        // 3. Ball Animation logic
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -907,8 +859,6 @@ async function performSingleDraw() {
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
         }
-
-        // 4. Reveal Winner
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
 
@@ -920,8 +870,6 @@ async function performSingleDraw() {
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-
-        // 5. Update Table
         if (typeof resultsList !== 'undefined' && resultsList) {
             const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
             if (pickElement) {
@@ -930,36 +878,28 @@ async function performSingleDraw() {
                 pickElement.classList.add('bg-green-500', 'text-white');
             }
         }
-
-        // Resume background balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
-
-        // Wait for the Winner Drop to finish
-        await new Promise(resolve => setTimeout(resolve, 8500));
+        const waitTime = (pickCounter === 1) ? 2000 : 8500;
+        await new Promise(resolve => setTimeout(resolve, waitTime));
     }
-
-    // --- THE FINALE LOGIC ---
-    pickCounter--; // Move to next pick
+    pickCounter--; 
     
     if (pickCounter >= 1) {
-        // Still have picks left, reset balls for next round
         populateBalls();
     } else {
-        // NO PICKS LEFT - Close the show!
         console.log("Draft Complete! Closing curtains...");
-        
         setTimeout(() => {
             const curtains = document.getElementById('curtainWrapper');
             if (curtains) {
-                curtains.style.display = 'block'; 
+                curtains.style.display = 'flex';
                 setTimeout(() => {
                     curtains.classList.remove('open');
                     showMessage("The Draft is Complete! All picks are locked in.", "success");
                 }, 50);
             }
-        }, 3000);
+        }, 1500); 
     }
 }
 

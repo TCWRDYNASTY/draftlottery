@@ -1180,7 +1180,8 @@ async function resetDraft() {
         showMessage("Error resetting draft. Check the console.");
     }
 }
-function updateOddsDisplay() {
+
+    function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
     teamOddsList.innerHTML = '';
@@ -1202,11 +1203,6 @@ function updateOddsDisplay() {
     console.log("Odds display updated with " + members.length + " teams.");
 }
 
-document.getElementById('resetDraftBtn')?.addEventListener('click', resetDraft);
-document.getElementById('saveConfigBtn')?.addEventListener('click', saveConfig);
-document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDraftSimulation);
-initializeDraftState();
-}); 
 </script>
 </body>
 </html>

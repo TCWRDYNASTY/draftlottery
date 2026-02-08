@@ -1203,29 +1203,29 @@ async function saveMembersToSupabase(newMembers) {
 }
 
 async function loadDraftOrderFromSupabase() {
-    console.log('Checking for saved draft order...');
-    const { data, error } = await supabase
-        .from(SUPABASE_ORDERS_TABLE_NAME)
-        .select('order_data')
-        .order('order_data->>pick', { ascending: false });
-    
-    if (error) {
-        console.error('Error fetching draft order:', error);
-        return null;
-    }
+    console.log('Checking for saved draft order...');
+    const { data, error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select('order_data')
+        .order('order_data->>pick', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching draft order:', error);
+        return null;
+    }
 
-    if (data && data.length > 0) {
-        console.log('Draft order found in Supabase:', data);
-        return data.map(item => item.order_data);
-    }
+    if (data && data.length > 0) {
+        console.log('Draft order found in Supabase:', data);
+        return data.map(item => item.order_data);
+    }
 
-    console.log('No draft order found in the database.');
-    return null;
+    console.log('No draft order found in the database.');
+    return null;
 }
 
 /* --- DRAFT MANAGEMENT FUNCTIONS --- */
 async function resetDraft() {
-    const confirmed = confirm("WARNING: This will delete the saved draft order from the database. This cannot be undone. Are you sure you want to reset for a new run?");
+    const confirmed = confirm("WARNING: This will delete the saved draft order from the database. Are you sure?");
     
     if (!confirmed) return;
 
@@ -1236,26 +1236,26 @@ async function resetDraft() {
             .neq('id', 0); 
 
         if (error) throw error;
+        
         sessionStorage.removeItem('hasSeenDraftAnimation');
         draftOrder = [];
         isDraftSaved = false;
-        showMessage("Draft has been reset! Ready for a new lottery.");
+        showMessage("Draft has been reset!");
         initializeDraftState();
 
     } catch (err) {
         console.error("Error during reset:", err);
-        showMessage("Error resetting draft. Check the console.");
+        showMessage("Error resetting draft.");
     }
 }
 
-// --- UPDATE ODDS DISPLAY (The Remaining Teams with Strike-through) ---
+// --- UPDATE ODDS DISPLAY ---
 function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
 
     teamOddsList.innerHTML = '';
 
-    // Keep teams sorted by highest odds
     const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
 
     sortedMembers.forEach(m => {
@@ -1269,21 +1269,15 @@ function updateOddsDisplay() {
             <span class="odds-percent font-mono text-white text-lg">${m.originalWeightDisplay || m.weight + '%'}</span>
         `;
 
-        // Check if this team is already revealed
-        // Logic: if the pick number in the draftOrder is higher than our current countdown, they are out.
         const isPicked = draftOrder.some(p => 
             (String(p.teamId) === String(m.id) || p.member === m.name) && 
             p.pick > pickCounter
         );
         
         if (isPicked) {
-            // ONLY add the class. Let the CSS handle the thick red line and bright white text.
             li.classList.add('picked-team');
         }
 
         teamOddsList.appendChild(li);
     });
 }
-</script>
-</body>
-</html>

@@ -78,23 +78,24 @@ h2 {
     color: var(--light-text);
 }
 
-/* THE MAIN CONTAINER */
-#curtainWrapper, .curtain-wrapper {
+/* --- THE MAIN CURTAIN CONTAINER --- */
+#curtainWrapper {
+    display: none; /* Hidden by default so rules can be read */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 9999; 
-    display: flex; /* Keeps panels side-by-side */
-    pointer-events: none; /* Allows clicking 'through' the wrapper once panels move */
+    display: none; /* JS will toggle this to 'flex' on click */
+    pointer-events: none; /* Allows clicking the "Run Draft" button when open */
 }
 
 /* THE PANELS */
 .curtain-panel {
     position: absolute;
     top: 0;
-    width: 50%; 
+    width: 50.5%; /* Added .5% overlap to prevent a tiny gap in the middle */
     height: 100%;
     background-image: url('badbunny4.png'); 
     background-size: 200% 100%;
@@ -110,6 +111,7 @@ h2 {
     left: 0;
     background-position: 0% center; 
     border-right: 2px solid rgba(0, 0, 0, 0.5);
+    transform: translateX(0); /* Default closed */
 }
 
 /* RIGHT SIDE */
@@ -117,6 +119,7 @@ h2 {
     right: 0;
     background-position: 100% center; 
     border-left: 2px solid rgba(0, 0, 0, 0.5);
+    transform: translateX(0); /* Default closed */
 }
 
 /* TEXTURE/FOLDS EFFECT */
@@ -129,18 +132,16 @@ h2 {
 
 /* ANIMATION STATES */
 /* Open state: slide them out */
-.curtain-wrapper.open .left-panel { transform: translateX(-100%); }
-.curtain-wrapper.open .right-panel { transform: translateX(100%); }
+#curtainWrapper.open .left-panel { transform: translateX(-100%); }
+#curtainWrapper.open .right-panel { transform: translateX(100%); }
 
-/* Closed state (Default): slide them back to center */
-.curtain-wrapper:not(.open) .left-panel { transform: translateX(0); }
-.curtain-wrapper:not(.open) .right-panel { transform: translateX(0); }
+/* --- THE WINNER OVERLAY (ON TOP OF EVERYTHING) --- */
 #winnerOverlay {
     position: fixed;
     inset: 0;
-    z-index: 99999 !important;
+    z-index: 100000 !important; /* One level higher than curtains */
     background-color: rgba(0, 0, 0, 0.95);
-    display: none;
+    display: none; /* JS toggles to flex */
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -249,7 +250,7 @@ h2 {
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
 
-/* --- UI SECTIONS --- */
+/* 1. The Containers (Walls) */
 .team-odds-section, .results-section {
     margin-top: 2rem;
     background-color: var(--section-bg);
@@ -260,7 +261,8 @@ h2 {
     width: 100%;
 }
 
-.team-odds-list, .results-list {
+/* 2. The List Layout (Furniture) - DO NOT SKIP THIS */
+#teamOddsList, .results-list {
     list-style: none;
     padding: 0;
     margin-top: 1rem;
@@ -269,8 +271,7 @@ h2 {
     gap: 1rem;
 }
 
-
-.team-odds-list li, .results-list li {
+#teamOddsList li {
     background-color: var(--container-bg);
     padding: 1rem;
     border-radius: 0.75rem;
@@ -279,28 +280,29 @@ h2 {
     justify-content: space-between;
     align-items: center;
     border-left: 5px solid var(--accent-gold);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.8s ease;
 }
 
-.team-odds-list li.picked-team {
+/* 3. The "Picked" state (Red Strike-through) */
+#teamOddsList li.picked-team {
     background-color: #1a1a1a !important; 
-    opacity: 0.3 !important; 
+    opacity: 0.4 !important; 
     filter: grayscale(100%);
     border-left-color: #444 !important;
     transform: scale(0.96);
-    box-shadow: none !important;
     pointer-events: none;
 }
 
-.team-odds-list li.picked-team span,
-.team-odds-list li.picked-team .team-name,
-.team-odds-list li.picked-team .odds-percent {
-    color: #777 !important;
+/* Ensure BOTH name and percent get the red strike */
+#teamOddsList li.picked-team .team-name,
+#teamOddsList li.picked-team .odds-percent {
+    color: #999 !important;
     text-decoration: line-through !important;
-    text-decoration-color: #ff4444 !important;
-    text-decoration-thickness: 3px;
+    text-decoration-color: #ff4444 !important; 
+    text-decoration-thickness: 4px !important;
 }
+
+/* 4. The Big Display for the winner ball */
 .drawn-ball-display {
     min-height: 120px;
     background-color: var(--section-bg);
@@ -432,8 +434,7 @@ h2 {
     <h1 class="text-white text-7xl font-bold mb-8 animate-bounce tracking-tighter">THE #1 PICK</h1>
     <img id="winnerImage" src="hotdog1.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl mx-auto block">
     <div id="finalWinnerName" class="text-gold text-5xl mt-4 font-black"></div>
-    <button onclick="location.reload()" class="mt-8 px-8 py-3 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Exit Room</button>
-</div>
+    </div>
 <script type="module">
 
 const pickImages = {
@@ -511,8 +512,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, { once: true });
     }
 }); 
-// --- END OF DOMCONTENTLOADED ---
-function handleCommissionerUnlock(e) {
+
+    function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
         commissionerPanel.classList.remove('hidden');
@@ -528,6 +529,8 @@ function handleCommissionerUnlock(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeDraftState();    
+
+    // --- BUTTON LISTENERS ---
     if (runFullDraftBtn) {
         runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
     }
@@ -554,6 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- INTRO & CURTAIN LOGIC ---
     const introOverlay = document.getElementById('introOverlay');
     const curtains = document.getElementById('curtainWrapper');
 
@@ -562,28 +566,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('monacoAudio');
             if (audio) audio.play();
 
-            // 1. Hide the text/instructions immediately
+            // 1. Fade out the text/instructions immediately
             this.style.opacity = '0';
             this.style.pointerEvents = 'none';
 
-            // 2. Wait 6 seconds (letting them see the intro image)
+            // 2. Pause for 1.5s to see the clean image, then start curtain sequence
             setTimeout(() => {
                 this.classList.add('hidden'); 
                 
                 if (curtains) {
-                    // Start the 8-second CSS transition
-                    curtains.classList.add('open');
+                    // 3. Make the curtains visible (they are CLOSED by default)
+                    curtains.style.display = 'flex';
                     
-                    // 3. CLEANUP: Increased to 10 seconds (10000ms)
-                    // This ensures the 8s curtain move is 100% finished
+                    // 4. Trigger the 3-second slide OPEN
                     setTimeout(() => {
-                        curtains.style.display = 'none';
-                    }, 10000); 
+                        curtains.classList.add('open');
+                        
+                        // 5. CLEANUP: Once fully open, set display to none 
+                        // so the wrapper doesn't block the "Run Draft" button
+                        setTimeout(() => {
+                            curtains.style.display = 'none';
+                        }, 3100); 
+                    }, 50); // Tiny delay to allow 'flex' display to register
                 }
-            }, 6000);
+            }, 1500); 
         }, { once: true });
     }
-}); // <--- This closes the DOMContentLoaded listener correctly!
+});
 
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
@@ -973,15 +982,27 @@ async function performSingleDraw() {
                            : 'badbunny.png';
             winnerImage.src = newSrc;
         }
+
         overlay.classList.remove('hidden');
         overlay.style.display = 'flex';
+
         if (pickNum === 1) {
+            // Pick #1 Styling
             overlay.style.backgroundColor = "rgba(0, 0, 0, 1)"; 
-            winnerNameDisplay.style.fontSize = pickNum === 1 ? "clamp(3rem, 10vw, 6rem)" : "";
+            winnerNameDisplay.style.fontSize = "clamp(3rem, 10vw, 6rem)";
             winnerNameDisplay.classList.add('animate-pulse');
+
+            // --- THE 10 SECOND FINALE ---
+            setTimeout(() => {
+                closeWinnerOverlay();
+            }, 10000); 
+
         } else {
+            // Picks #8 through #2 Styling
             overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
             winnerNameDisplay.style.fontSize = ""; 
+            winnerNameDisplay.classList.remove('animate-pulse'); 
+            
             setTimeout(() => {
                 closeWinnerOverlay();
             }, 8500);
@@ -1215,15 +1236,19 @@ async function resetDraft() {
     }
 }
 
-    function updateOddsDisplay() {
+   function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
     teamOddsList.innerHTML = '';
+
+    // Sort teams by weight (highest odds first)
     const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
 
     sortedMembers.forEach(m => {
         const li = document.createElement('li');
         li.setAttribute('data-id', m.id); 
+        
+        // KEEP YOUR STYLING: These classes make it look good
         li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
         
         li.innerHTML = `
@@ -1231,6 +1256,15 @@ async function resetDraft() {
             <span class="odds-percent font-mono text-white text-lg">${m.weight}%</span>
         `;
         
+        // PERSISTENCE LOGIC: Check if this team was already drawn (for page refreshes)
+        const alreadyPicked = draftOrder.find(p => 
+            String(p.teamId) === String(m.id) || p.member === m.name
+        );
+        
+        if (alreadyPicked) {
+            li.classList.add('picked-team');
+        }
+
         teamOddsList.appendChild(li);
     });
     

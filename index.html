@@ -98,20 +98,17 @@ h2 {
     background-size: 200% 100%;
     background-repeat: no-repeat;
     background-color: #000;
+    /* Ensure this timing matches your JS delay */
     transition: transform 8s cubic-bezier(0.7, 0, 0.3, 1);
     z-index: 100;
+    will-change: transform; /* Helps performance */
 }
 
-.left-panel {
-    left: 0;
-    background-position: 0% center; 
-    border-right: 1px solid rgba(255, 215, 0, 0.3);
+.curtain-wrapper.open .left-panel {
+    transform: translateX(-110%);
 }
-
-.right-panel {
-    right: 0;
-    background-position: 100% center; 
-    border-left: 1px solid rgba(255, 215, 0, 0.3);
+.curtain-wrapper.open .right-panel {
+    transform: translateX(110%);
 }
 
 .curtain-panel::after {
@@ -543,33 +540,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-const introOverlay = document.getElementById('introOverlay');
-const curtains = document.getElementById('curtainWrapper');
+    const introOverlay = document.getElementById('introOverlay');
+    const curtains = document.getElementById('curtainWrapper');
 
-if (introOverlay) {
-    introOverlay.addEventListener('click', function() {
-        const audio = document.getElementById('monacoAudio');
-        if (audio) audio.play();
+    if (introOverlay) {
+        introOverlay.addEventListener('click', function() {
+            const audio = document.getElementById('monacoAudio');
+            if (audio) audio.play();
 
-        // 1. Hide the text/instructions immediately so they see the clean image
-        this.style.opacity = '0';
-        this.style.pointerEvents = 'none';
+            // 1. Hide the text/instructions immediately
+            this.style.opacity = '0';
+            this.style.pointerEvents = 'none';
 
-        const curtains = document.getElementById('curtainWrapper');
-        
-
-        setTimeout(() => {
-            this.classList.add('hidden'); 
-            
-            if (curtains) {
-                curtains.classList.add('open');
-                setTimeout(() => {
-                    curtains.style.display = 'none';
-                }, 6500); 
-            }
-        }, 6000);
-    }, { once: true });
-}
+            // 2. Wait 6 seconds (letting them see the intro image)
+            setTimeout(() => {
+                this.classList.add('hidden'); 
+                
+                if (curtains) {
+                    // Start the 8-second CSS transition
+                    curtains.classList.add('open');
+                    
+                    // 3. CLEANUP: Increased to 10 seconds (10000ms)
+                    // This ensures the 8s curtain move is 100% finished
+                    setTimeout(() => {
+                        curtains.style.display = 'none';
+                    }, 10000); 
+                }
+            }, 6000);
+        }, { once: true });
+    }
+}); // <--- This closes the DOMContentLoaded listener correctly!
 
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);

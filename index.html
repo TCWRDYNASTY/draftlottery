@@ -114,7 +114,40 @@ h2 {
     inset: 0;
     z-index: 99999 !important;
     background-color: rgba(0, 0, 0, 0.95);
-    display: none;
+    display: none; /* JS will change this to 'flex' */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* This makes the Hotdog Image behave! */
+#winnerImage {
+    max-width: 85vw;    /* Limits width to 85% of screen */
+    max-height: 50vh;   /* Limits height to 50% of screen */
+    object-fit: contain; /* Keeps hotdog from stretching */
+    border-radius: 1rem;
+    border: 4px solid #FFD700; /* Your gold border */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    margin: 20px 0;
+}
+
+/* Responsive Text Scaling */
+#winnerOverlay h1 {
+    font-size: clamp(2rem, 8vw, 5rem); 
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+#finalWinnerName {
+    font-size: clamp(1.5rem, 6vw, 4rem);
+    color: #FFD700;
+    font-weight: 900;
+    text-transform: uppercase;
 }
 
 .curtain-wrapper {
@@ -323,18 +356,39 @@ h2 {
 
     <button class="btn" id="runFullDraftBtn">Run Draft</button>
     
-    <div class="results-section">...</div>
-    <div class="team-odds-section">...</div>
-    <div class="commissioner-tools">...</div>
+    <div class="results-section">
+        <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Draft Order Reveal</h3>
+        <ul id="resultsList" class="results-list">
+            </ul>
+    </div>
+
+    <div class="team-odds-section">
+        <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Remaining Team Odds</h3>
+        <ul id="teamOddsList" class="team-odds-list">
+            </ul>
+    </div>
+
+    <div class="commissioner-tools mt-12 p-4 border-t border-gray-800">
+        <button id="commissionerLogin" class="text-xs opacity-50 hover:opacity-100 text-white">Commissioner Login</button>
+        
+        <div id="commissionerPanel" class="hidden mt-4 p-6 bg-gray-900 rounded-lg border border-red-900">
+            <h3 class="text-red-500 font-bold mb-4">Commissioner Controls</h3>
+            <div id="memberConfigInputs" class="space-y-4 mb-6">
+                </div>
+            <div class="flex gap-4">
+                <button id="saveConfigBtn" class="px-4 py-2 bg-green-600 text-white rounded">Save Configuration</button>
+                <button id="resetDraftBtn" class="px-4 py-2 bg-red-600 text-white rounded">Reset Draft</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="winnerOverlay" class="hidden fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black bg-opacity-95">
     <h1 class="text-white text-7xl font-bold mb-8 animate-bounce tracking-tighter">THE #1 PICK</h1>
-    <img id="winnerImage" src="monaco_reveal.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-2xl">
+    <img id="winnerImage" src="hotdog1.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl mx-auto block">
     <div id="finalWinnerName" class="text-gold text-5xl mt-4 font-black"></div>
     <button onclick="location.reload()" class="mt-8 px-8 py-3 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Exit Room</button>
 </div>
-    
 <script type="module">
 
 const pickImages = {
@@ -836,7 +890,7 @@ function showWinnerDrop(teamName, pickNum) {
         overlay.style.display = 'flex';
         if (pickNum === 1) {
             overlay.style.backgroundColor = "rgba(0, 0, 0, 1)"; 
-            winnerNameDisplay.style.fontSize = "5rem";
+            winnerNameDisplay.style.fontSize = pickNum === 1 ? "clamp(3rem, 10vw, 6rem)" : "";
             winnerNameDisplay.classList.add('animate-pulse');
         } else {
             overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";

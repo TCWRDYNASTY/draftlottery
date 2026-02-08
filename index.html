@@ -813,8 +813,10 @@ async function runFullDraftSimulation() {
 
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;        
+    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
+    
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
@@ -834,15 +836,9 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        const allOddsItems = document.querySelectorAll('#teamOddsList li');
-        allOddsItems.forEach(li => {
-            const nameSpan = li.querySelector('.team-name');
-            if (nameSpan && nameSpan.textContent.trim() === drawnMember.name.trim()) {
-                li.classList.add('picked-team');
-                console.log("Sidebar Update: Crossed out " + drawnMember.name);
-            }
-        });
+        // 1. Logic for removing the member and animating the ball
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+        
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -862,31 +858,33 @@ async function performSingleDraw() {
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
         }
+
+        // 2. Display winner and update draft state
         drawnTeamNameDisplay.textContent = drawnMember.name;
-        showWinnerDrop(drawnMember.name, pickCounter);
+        if (typeof showWinnerDrop === 'function') showWinnerDrop(drawnMember.name, pickCounter);
 
         if (!isDraftSaved) {
             draftOrder.push({ 
-                pick: pickCounter, 
+                pickNumber: pickCounter, // Ensure key matches renderResultsList
                 teamId: drawnMember.id, 
                 member: drawnMember.name, 
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-        if (typeof resultsList !== 'undefined' && resultsList) {
-            const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-            if (pickElement) {
-                pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name}</span>`;
-                pickElement.classList.remove('bg-gray-700', 'text-gray-300');
-                pickElement.classList.add('bg-green-500', 'text-white');
-            }
-        }
+
+        // 3. THE FIX: Trigger the global UI update functions
+        renderResultsList();
+        updateOddsDisplay();
+
+        // 4. Resume background animations
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
+
         const waitTime = (pickCounter === 1) ? 2000 : 8500;
         await new Promise(resolve => setTimeout(resolve, waitTime));
     }
+
     pickCounter--; 
     
     if (pickCounter >= 1) {
@@ -899,7 +897,9 @@ async function performSingleDraw() {
                 curtains.style.display = 'flex';
                 setTimeout(() => {
                     curtains.classList.remove('open');
-                    showMessage("The Draft is Complete! All picks are locked in.", "success");
+                    if (typeof showMessage === 'function') {
+                        showMessage("The Draft is Complete! All picks are locked in.", "success");
+                    }
                 }, 50);
             }
         }, 1500); 
@@ -1179,19 +1179,44 @@ async function resetDraft() {
     }
 }
 
-   function updateOddsDisplay() {
+   // --- RENDER RESULTS (The Reveal List) ---
+function renderResultsList() {
+    const resultsList = document.getElementById('resultsList');
+    if (!resultsList) return;
+
+    // Clear the current list to prevent duplicates
+    resultsList.innerHTML = '';
+
+    // Loop through the draftOrder array (stored in Supabase or locally)
+    draftOrder.forEach((pick) => {
+        const li = document.createElement('li');
+        
+        // Styling matches your results-section
+        li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-500 hover:scale-102";
+        
+        li.innerHTML = `
+            <span class="font-mono text-yellow-500 font-bold">PICK #${pick.pickNumber}</span>
+            <span class="text-white font-bold uppercase tracking-wider">${pick.member}</span>
+        `;
+        
+        resultsList.appendChild(li);
+    });
+}
+
+// --- UPDATE ODDS DISPLAY (The Remaining Teams) ---
+function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
+
     teamOddsList.innerHTML = '';
 
-    // Sort teams by weight (highest odds first)
+    // Sort teams by weight so highest odds are at the top
     const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
 
     sortedMembers.forEach(m => {
         const li = document.createElement('li');
         li.setAttribute('data-id', m.id); 
         
-        // KEEP YOUR STYLING: These classes make it look good
         li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
         
         li.innerHTML = `
@@ -1199,19 +1224,15 @@ async function resetDraft() {
             <span class="odds-percent font-mono text-white text-lg">${m.weight}%</span>
         `;
         
-        // PERSISTENCE LOGIC: Check if this team was already drawn (for page refreshes)
-        const alreadyPicked = draftOrder.find(p => 
-            String(p.teamId) === String(m.id) || p.member === m.name
-        );
-        
-        if (alreadyPicked) {
-            li.classList.add('picked-team');
+        // If the team has already been picked, dim them out
+        const isPicked = draftOrder.some(p => String(p.teamId) === String(m.id) || p.member === m.name);
+        if (isPicked) {
+            li.classList.add('opacity-30', 'grayscale');
+            li.style.borderLeftColor = '#444';
         }
 
         teamOddsList.appendChild(li);
     });
-    
-    console.log("Odds display updated with " + members.length + " teams.");
 }
 
 </script>

@@ -552,8 +552,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             runFullDraftSimulation();
                         }
                     }, 1200); 
-                    
-                    // Final Cleanup
                     setTimeout(() => {
                         curtains.style.display = 'none';
                     }, 3100); 
@@ -561,6 +559,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 600); 
         }, { once: true });
     }
+});
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     

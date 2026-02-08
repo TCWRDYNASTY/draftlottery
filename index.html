@@ -918,26 +918,26 @@ async function performSingleDraw() {
             });
         }
 
-if (resultsList) {
-    let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-    
-    if (pickElement) {
-        pickElement.innerHTML = `
-            <span class="font-mono text-yellow-300 font-bold text-lg">PICK #${pickCounter}</span> 
-            <span class="font-sans font-black text-white uppercase tracking-tight text-2xl">${drawnMember.name}</span>
-        `;
-        pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50', 'text-gray-400', 'italic');
-        pickElement.className = "flex justify-between items-center p-5 mb-4 bg-green-600 text-white opacity-100 border-l-8 border-yellow-400 shadow-2xl rounded-xl transition-all duration-500";
-    }
+        if (resultsList) {
+            let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+            if (pickElement) {
+                pickElement.innerHTML = `
+                    <span class="font-mono text-yellow-300 font-bold text-lg">PICK #${pickCounter}</span> 
+                    <span class="font-sans font-black text-white uppercase tracking-tight text-2xl">${drawnMember.name}</span>
+                `;
+                pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50', 'text-gray-400', 'italic');
+                pickElement.className = "flex justify-between items-center p-5 mb-4 bg-green-600 text-white opacity-100 border-l-8 border-yellow-400 shadow-2xl rounded-xl transition-all duration-500";
+            }
 
-        if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
-        lotteryMachine.querySelectorAll('.ball').forEach(ball => {
-            ball.style.animationPlayState = 'running';
-        });
+            if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
+            lotteryMachine.querySelectorAll('.ball').forEach(ball => {
+                ball.style.animationPlayState = 'running';
+            });
 
-        const waitTime = (pickCounter === 1) ? 2000 : 8500;
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-    }
+            const waitTime = (pickCounter === 1) ? 2000 : 8500;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+    } // <--- THIS WAS MISSING: Closes the "if (drawnMember)" block
 
     pickCounter--; 
     if (pickCounter >= 1) {
@@ -957,8 +957,7 @@ if (resultsList) {
             }
         }, 1500); 
     }
-}
-
+} 
     function showWinnerDrop(teamName, pickNum) {
     const overlay = document.getElementById('winnerOverlay');
     const winnerNameDisplay = document.getElementById('finalWinnerName');

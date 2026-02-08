@@ -773,7 +773,16 @@ async function runFullDraftSimulation() {
         runFullDraftBtn.disabled = true;
         runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
     }
-    pickCounter = members.length; 
+
+    // --- RESET VISUALS FOR A FRESH START ---
+    pickCounter = members.length; // Set back to 8
+    const resultsList = document.getElementById('resultsList');
+    if (resultsList) resultsList.innerHTML = ''; // Wipe the old results table
+    
+    // Ensure machine is clear and label is reset
+    if (currentPickLabel) currentPickLabel.textContent = "Waiting for Pick #8...";
+    // ----------------------------------------
+
     if (isDraftSaved) {
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
@@ -782,6 +791,7 @@ async function runFullDraftSimulation() {
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     }
+
     const timestamps = [22, 54, 86, 118, 151, 183, 215, 250];
     
     for (let i = 0; i < timestamps.length; i++) {
@@ -790,11 +800,13 @@ async function runFullDraftSimulation() {
         // Wait for the specific beat in the song
         while (audio.currentTime < targetTime) {
             await new Promise(resolve => setTimeout(resolve, 100));
-            // Safety break if audio is stopped
             if (audio.paused && audio.currentTime > 0) break; 
         }
+        
+        // This triggers the ball converge -> Hotdog Overlay -> Table Row update
         await performSingleDraw();
     }
+
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
         isDraftSaved = true;
@@ -809,6 +821,7 @@ async function runFullDraftSimulation() {
         runFullDraftBtn.textContent = 'RUN DRAFT'; 
     }
     
+    // Final end state
     if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 

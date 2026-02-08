@@ -629,7 +629,7 @@ async function initializeDraftState() {
             console.log('Saved draft found, preparing for FIRST reveal.');
             if (resultsList) resultsList.style.display = 'grid'; 
             if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
-            if (currentPickLabel) currentPickLabel.textContent = "THE WINNER IS!";
+            if (currentPickLabel) currentPickLabel.textContent = "";
         }
     } else {
         console.log('New run setup.');
@@ -777,10 +777,19 @@ async function runFullDraftSimulation() {
     // --- RESET VISUALS FOR A FRESH START ---
     pickCounter = members.length; // Set back to 8
     const resultsList = document.getElementById('resultsList');
-    if (resultsList) resultsList.innerHTML = ''; // Wipe the old results table
+    
+    if (resultsList) {
+        // We wipe the innerHTML but re-insert the header immediately
+        resultsList.innerHTML = `
+            <div class="results-header">
+                <span>PICK</span>
+                <span>TEAM</span>
+            </div>
+        `;
+    }
     
     // Ensure machine is clear and label is reset
-    if (currentPickLabel) currentPickLabel.textContent = "Waiting for Pick #8...";
+    if (currentPickLabel) currentPickLabel.textContent = `Waiting for Pick #${pickCounter}...`;
     // ----------------------------------------
 
     if (isDraftSaved) {

@@ -607,68 +607,51 @@ async function clearDraftOrderFromSupabase() {
     return true;
 }
 
-async function initializeDraftState() {
-    members = await fetchMembersFromSupabase();
-    if (members.length === 0) {
-        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured! Use Commissioner Tools to add teams and save the configuration.</div>';
-        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
-        return;
-    }
+async async function initializeDraftState() {
+    // 1. Fetch data
+    members = await fetchMembersFromSupabase();
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
 
-    const savedDraftOrder = await loadDraftOrderFromSupabase();
-    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
+    const savedDraftOrder = await loadDraftOrderFromSupabase();
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
 
-    if (savedDraftOrder && savedDraftOrder.length > 0) {
-        isDraftSaved = true;
-        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
-        
-       if (hasSeenAnimation) {
-       console.log('Saved draft found, user has seen animation. Displaying results.');
-    showResults();
+    // 2. Setup the UI slots (MUST happen before the draft starts)
+    initializeResultsList(); 
     displayTeamOdds();
-            if (runFullDraftBtn) {
-                runFullDraftBtn.textContent = 'Replay Draft Animation';
-                runFullDraftBtn.disabled = false;
-            }
-            if (currentPickLabel) currentPickLabel.textContent = "Draft Complete! Click to Replay.";
-            pickCounter = members.length;
-            availableMembers = members.map(member => ({ ...member }));
-            populateBalls(); 
+    initializeMemberConfigInputs();
+
+    if (savedDraftOrder && savedDraftOrder.length > 0) {
+        isDraftSaved = true;
+        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
+        
+        if (hasSeenAnimation) {
+            console.log('Saved draft found, showing final results.');
+            showResults(); // Shows the list and fills it via updateUIFromCurrentState
+            if (runFullDraftBtn) runFullDraftBtn.textContent = 'Replay Draft Animation';
+            if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+        } else {
+            console.log('Saved draft found, preparing for FIRST reveal.');
+            // Ensure the list is visible so the green boxes can appear
+            if (resultsList) resultsList.style.display = 'grid'; 
+            if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
+            if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
         }
-        else {
-            console.log('Saved draft found, user has NOT seen animation. Setting up for first-time run.');
-            if (resultsList) resultsList.style.display = 'none';
-            if (runFullDraftBtn) {
-                runFullDraftBtn.textContent = 'Run Draft';
-                runFullDraftBtn.disabled = false;
-            }
-            if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
-       
-            pickCounter = members.length;
-            availableMembers = members.map(member => ({ ...member }));
-            populateBalls();
-            displayTeamOdds();
-            initializeResultsList();
-        }
-    } else {
-        console.log('No saved draft found. Setting up for a new random run.');
-        isDraftSaved = false;
-        availableMembers = members.map(member => ({ ...member }));
-        draftOrder = [];
-        pickCounter = members.length;
-        if (runFullDraftBtn) {
-            runFullDraftBtn.textContent = 'Run Draft';
-            runFullDraftBtn.disabled = false;
-        }
-        if (resultsList) resultsList.style.display = 'block';
-        initializeResultsList();
-        populateBalls();
-        displayTeamOdds();
-        drawnTeamNameDisplay.textContent = '...';
-        currentPickLabel.textContent = `Ready to Draw for Pick #${pickCounter}...`;
-    }
-    
-    initializeMemberConfigInputs();
+    } else {
+        console.log('New run setup.');
+        isDraftSaved = false;
+        draftOrder = [];
+        if (resultsList) resultsList.style.display = 'grid';
+        if (currentPickLabel) currentPickLabel.textContent = `Ready for Pick #${members.length}...`;
+    }
+    
+    // 3. Prepare the balls for the machine
+    pickCounter = members.length;
+    availableMembers = members.map(member => ({ ...member }));
+    populateBalls();
 }
 
 function initializeMemberConfigInputs() {
@@ -699,15 +682,28 @@ function initializeMemberConfigInputs() {
 }
 
 function initializeResultsList() {
-    if (!resultsList) return;
-    resultsList.innerHTML = '';
-    for (let i = members.length; i >= 1; i--) {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>Pick ${i}:</span> <span class="text-gray-400">Pending...</span>`;
-        li.classList.add('bg-gray-700', 'text-gray-300');
-        li.setAttribute('data-pick-num', i);
-        resultsList.appendChild(li);
-    }
+    if (!resultsList) return;
+    
+    // Clear the list so we don't double-up if the function is called twice
+    resultsList.innerHTML = '';
+    
+    // Create slots from the highest pick down to 1
+    for (let i = members.length; i >= 1; i--) {
+        const li = document.createElement('li');
+        
+        // This MUST match the querySelector in performSingleDraw
+        li.setAttribute('data-pick-num', i); 
+        
+        // Classes: Added Flex for alignment and transition for the smooth color change
+        li.className = 'flex justify-between items-center p-4 mb-3 bg-gray-700 text-gray-400 rounded-xl border-l-4 border-gray-600 opacity-50 transition-all duration-500 shadow-md';
+        
+        li.innerHTML = `
+            <span class="font-mono font-bold">PICK #${i}:</span> 
+            <span class="italic text-sm tracking-wide">Pending...</span>
+        `;
+        
+        resultsList.appendChild(li);
+    }
 }
 function populateBalls() {
     if (!lotteryMachine) return;
@@ -715,11 +711,16 @@ function populateBalls() {
 
     if (members.length === 0) {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
-        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        // Check if button exists before trying to disable it
+        if (typeof runFullDraftBtn !== 'undefined' && runFullDraftBtn) {
+            runFullDraftBtn.disabled = true;
+        }
         return;
     }
     
-    if (runFullDraftBtn) runFullDraftBtn.disabled = false;
+    if (typeof runFullDraftBtn !== 'undefined' && runFullDraftBtn) {
+        runFullDraftBtn.disabled = false;
+    }
 
     const ballsToRender = [];
     availableMembers.forEach(member => {
@@ -733,40 +734,51 @@ function populateBalls() {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
         return;
     }
+
     const shuffledBalls = [...ballsToRender];
     for (let i = shuffledBalls.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
     }
-const contentWidth = lotteryMachine.clientWidth;
+
+    const contentWidth = lotteryMachine.clientWidth;
     const mixingAreaHeight = lotteryMachine.clientHeight;
-    const contentXStart = 0;
-    const contentYStart = 0;
     
     shuffledBalls.forEach((ballData, index) => {
         const ball = document.createElement('div');
         ball.classList.add('ball');
-        ball.dataset.teamId = ballData.teamId;
-        ball.setAttribute('data-id', String(ballData.teamId));
+        
+        // --- ID STANDARDIZATION ---
+        // We use String() to ensure comparisons in performSingleDraw never fail due to type mismatch
+        const teamIdStr = String(ballData.teamId);
+        ball.dataset.teamId = teamIdStr;
+        ball.setAttribute('data-id', teamIdStr); 
+        
         ball.style.position = 'absolute'; 
 
-        const member = members.find(m => m.id === ballData.teamId); 
+        const member = members.find(m => String(m.id) === teamIdStr); 
         if (member) {
             ball.style.backgroundColor = member.color || 'var(--accent-gold)';
             if (member.image) {
                 ball.style.backgroundImage = `url('${member.image}')`;
             }
         }
-       lotteryMachine.appendChild(ball);
+
+        lotteryMachine.appendChild(ball);
+
+        // Position and Animation Logic
         const ballWidth = ball.offsetWidth || 50; 
         const ballHeight = ball.offsetHeight || 50;
         const randomX = Math.random() * (contentWidth - ballWidth);
         const randomY = Math.random() * (mixingAreaHeight - ballHeight);
-        ball.style.left = `${randomX + contentXStart}px`;
-        ball.style.top = `${randomY + contentYStart}px`;
+        
+        ball.style.left = `${randomX}px`;
+        ball.style.top = `${randomY}px`;
+        
         const radius = Math.random() * (contentWidth / 4) + (contentWidth / 8);
         const duration = Math.random() * 8 + 4;
         const delay = Math.random() * -duration;
+        
         ball.style.setProperty('--circle-radius', `${radius}px`);
         ball.style.animationName = 'circle-motion';
         ball.style.animationDuration = `${duration}s`;
@@ -782,35 +794,56 @@ async function runFullDraftSimulation() {
 
     const audio = document.getElementById('monacoAudio');
     if (!audio) return;
+
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = true;
         runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
     }
     
-    pickCounter = 8; 
+    // Set pickCounter to the number of members (e.g., 8)
+    pickCounter = members.length; 
+    
+    // IMPORTANT: Removed the resultsList.innerHTML = '' line.
+    // This allows performSingleDraw to find the placeholders created by initializeResultsList.
+
     if (isDraftSaved) {
-        if (resultsList) resultsList.innerHTML = '';
+        // Prepare for replay
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     } else {
         draftOrder = [];
+        // Ensure balls are ready for a fresh draft
+        availableMembers = members.map(member => ({ ...member }));
+        populateBalls();
     }
+
+    // Audio-synced reveal timestamps
     const timestamps = [22, 54, 86, 118, 151, 183, 215, 250];
+    
     for (let i = 0; i < timestamps.length; i++) {
         const targetTime = timestamps[i];
+        
+        // Wait for the specific beat in the song
         while (audio.currentTime < targetTime) {
             await new Promise(resolve => setTimeout(resolve, 100));
+            // Safety break if audio is stopped
             if (audio.paused && audio.currentTime > 0) break; 
         }
+        
+        // Triggers the animation and updates the existing UI slot
         await performSingleDraw();
     }
+
+    // Finalize state and save to database if this is a new draft
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
         isDraftSaved = true;
     }  
+
     sessionStorage.setItem('hasSeenDraftAnimation', 'true');
     lotteryMachine.innerHTML = '';
     drawing = false;
+
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = false;
         runFullDraftBtn.textContent = 'RUN DRAFT'; 
@@ -873,21 +906,32 @@ async function performSingleDraw() {
 
         if (!isDraftSaved) {
             draftOrder.push({ 
-                pick: pickCounter, // Key matches Supabase logic
+                pick: pickCounter, 
                 teamId: drawnMember.id, 
                 member: drawnMember.name, 
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
 
-        // --- 3. THE REVEAL FIX: Update the specific slot in the list ---
+        // --- 3. THE REVEAL FIX ---
         if (resultsList) {
-            const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-            if (pickElement) {
-                pickElement.innerHTML = `<span>PICK #${pickCounter}:</span> <span class="uppercase font-bold">${drawnMember.name}</span>`;
-                pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50');
-                pickElement.classList.add('bg-green-600', 'text-white', 'border-l-4', 'border-yellow-400', 'shadow-lg');
+            let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+            
+            // Console log to help you debug live
+            console.log(`Searching for Pick #${pickCounter}. Found element?`, pickElement); 
+            
+            // FALLBACK: If slot is missing, create it so the reveal isn't skipped
+            if (!pickElement) {
+                console.error(`Could not find a placeholder for Pick #${pickCounter}. Creating one manually.`);
+                pickElement = document.createElement('li');
+                pickElement.setAttribute('data-pick-num', pickCounter);
+                resultsList.appendChild(pickElement);
             }
+
+            // Update content and styles
+            pickElement.innerHTML = `<span>PICK #${pickCounter}:</span> <span class="uppercase font-bold">${drawnMember.name}</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50');
+            pickElement.classList.add('bg-green-600', 'text-white', 'border-l-4', 'border-yellow-400', 'shadow-lg');
         }
         
         // Update the sidebar odds

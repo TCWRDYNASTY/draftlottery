@@ -1007,7 +1007,6 @@ async function runFullDraftSimulation() {
     }
     while (pickCounter >= 1) {
         await performSingleDraw();
-        // Brief pause between picks
         await new Promise(resolve => setTimeout(resolve, 1200));
     }
     if (!isDraftSaved) {
@@ -1041,31 +1040,32 @@ async function performSingleDraw() {
     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    
-    // Pause all balls to build suspense
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
-    });
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));    
-    
+    }); 
+    await new Promise(resolve => setTimeout(resolve, 1500));      
     let drawnMember;
-    if (isDraftSaved) {
-        const savedPick = draftOrder.find(p => p.pick === pickCounter);
-        if (savedPick) {
-            drawnMember = members.find(m => m.id === savedPick.teamId || m.name === savedPick.member);
-            if (drawnMember) {
+   if (isDraftSaved) {
+    const savedPick = draftOrder.find(p => p.pick === pickCounter);
 
-            } else {
-                drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
-            }
-        }
-    } else {
-        drawnMember = drawWeightedMember();
+    if (savedPick) {
+        drawnMember = members.find(
+            m => String(m.id) === String(savedPick.teamId) || m.name === savedPick.member
+        );
+
         if (drawnMember) {
+            availableMembers = availableMembers.filter(
+                m => String(m.id) !== String(drawnMember.id)
+            );
+        } else {
+            drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
+        }
+    }else {
+        drawnMember = drawWeightedMember();
     }
-    }
-
+   } else {
+    drawnMember = drawWeightedMember();
+}
     if (drawnMember) {
         playPickAudio(pickCounter);
         
@@ -1078,25 +1078,16 @@ console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Fou
 });
 
             await new Promise(resolve => setTimeout(resolve, 100));
-
-            // 4. TRIGGER THE SLOW MOVEMENT (Matches your 10s CSS)
             teamBalls.forEach(ballElement => {
                 ballElement.style.left = '50%';
                 ballElement.style.top = '20px'; 
                 ballElement.style.transform = 'translate(-50%, -50%) scale(2)';
-                ballElement.style.zIndex = '100'; // Bring to front
+                ballElement.style.zIndex = '100'; 
             });
-
-            // 5. THE BIG WAIT (10s crawl)
             await new Promise(resolve => setTimeout(resolve, 10000));
-            
-            // 6. REVEAL WINNER
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter); 
-            
             await new Promise(resolve => setTimeout(resolve, 4000));
-
-            // 7. CLEANUP (The Elimination)
             teamBalls.forEach(ballElement => {
                 ballElement.classList.remove('selected-for-shoot');
                 ballElement.classList.add('drawn');
@@ -1106,17 +1097,14 @@ console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Fou
             
             teamBalls.forEach(ballElement => {
                 if (ballElement && ballElement.parentNode) {
-                    ballElement.remove(); // Physically remove from machine
+                    ballElement.remove();
                 }
             });
         } else {
-            // Fallback if no balls were found in the DOM
             drawnTeamNameDisplay.textContent = drawnMember.name;
             showWinnerDrop(drawnMember.name, pickCounter);
             await new Promise(resolve => setTimeout(resolve, 4000));
         }
-
-        // --- Save and List Update Logic ---
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -1132,8 +1120,6 @@ console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Fou
             pickElement.classList.remove('bg-gray-700', 'text-gray-300');
             pickElement.classList.add('bg-green-500', 'text-white');
         }
-
-        // Restart the remaining balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });

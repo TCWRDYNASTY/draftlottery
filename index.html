@@ -94,7 +94,7 @@ h2 {
     top: 0;
     width: 50%; 
     height: 100%;
-    background-image: url('badbunny.png'); 
+    background-image: url('badbunny4.png'); 
     background-size: 200% 100%;
     background-repeat: no-repeat;
     background-color: #000;
@@ -425,6 +425,7 @@ const pickImages = {
 };
     
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const COMMISSIONER_PASSWORD = 'Asher'; 
 const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
@@ -446,7 +447,6 @@ let cheeringAudio = null;
 let crowdCheersAudio = null;
 let audioTimeout;
 
-
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
@@ -462,20 +462,29 @@ const memberConfigInputs = document.getElementById('memberConfigInputs');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+
+// --- START OF DOMCONTENTLOADED ---
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("Initializing Draft Room...");
+
+    // 1. Fetch data and build initial UI
     if (typeof fetchDraftState === 'function') await fetchDraftState();
     if (typeof renderResultsList === 'function') renderResultsList();
     if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
     if (typeof populateBalls === 'function') populateBalls();
+
+    // 2. Setup Intro and Curtain logic
     const introOverlay = document.getElementById('introOverlay');
     const curtains = document.getElementById('curtainWrapper');
     const audio = document.getElementById('monacoAudio');
 
     if (introOverlay) {
+        // We only need THIS ONE click listener
         introOverlay.addEventListener('click', function() {
             if (audio) audio.play().catch(e => console.log("Audio blocked", e));
+            
             this.style.display = 'none';
+            
             if (curtains) {
                 curtains.classList.add('open');
                 setTimeout(() => {
@@ -484,22 +493,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, { once: true });
     }
-});
-
-    if (introOverlay) {
-        introOverlay.addEventListener('click', function() {
-            if (audio) audio.play().catch(e => console.log("Audio blocked", e));
-            this.style.display = 'none';
-            if (curtains) {
-                curtains.classList.add('open');
-                setTimeout(() => {
-                    curtains.style.display = 'none';
-                }, 1600);
-            }
-        }, { once: true });
-    }
-});
-
+}); 
+// --- END OF DOMCONTENTLOADED ---
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {

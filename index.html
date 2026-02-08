@@ -77,17 +77,24 @@ h2 {
     margin-bottom: 1.5rem;
     color: var(--light-text);
 }
+#introOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85); /* Darken the background */
+    z-index: 10001; /* Higher than curtains */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-/* --- THE MAIN CURTAIN CONTAINER --- */
 #curtainWrapper {
     position: fixed;
     inset: 0;
-    display: flex; /* Change from 'none' to 'flex' */
-    z-index: 9999; /* Just below the rules (10000) but above the machine */
-    pointer-events: none; /* Allows you to click the rules overlay through it */
+    display: flex; 
+    z-index: 9999; /* Lower than rules */
+    pointer-events: none; /* Crucial: clicks go through to the rules below/above */
 }
 
-/* THE PANELS */
 .curtain-panel {
     position: absolute;
     top: 0;
@@ -431,6 +438,7 @@ h2 {
     <img id="winnerImage" src="hotdog1.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl mx-auto block">
     <div id="finalWinnerName" class="text-gold text-5xl mt-4 font-black"></div>
     </div>
+    
 <script type="module">
 
 const pickImages = {
@@ -524,7 +532,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const curtains = document.getElementById('curtainWrapper');
     const audio = document.getElementById('monacoAudio');
 
-    if (introOverlay) {
+if (introOverlay) {
         introOverlay.addEventListener('click', function() {
             if (audio) audio.play().catch(e => console.log("Audio blocked", e));
             
@@ -533,19 +541,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             this.style.opacity = '0';
             this.style.pointerEvents = 'none';
 
-            // 2. Since curtains are already display:flex in CSS, just slide them!
+            // 2. Trigger the slide
             setTimeout(() => {
-                this.classList.add('hidden'); 
+                this.style.display = 'none'; // Clear the rules out
                 
                 if (curtains) {
-                    curtains.classList.add('open'); // Trigger the slide
+                    curtains.classList.add('open'); // The panels start moving immediately
                     
-                    // Cleanup: Hide wrapper after 3.1s so buttons are clickable
+                    // 3. Final Cleanup
                     setTimeout(() => {
                         curtains.style.display = 'none';
                     }, 3100); 
                 }
-            }, 600); // Start sliding as soon as the rules fade is mostly done
+            }, 600); 
         }, { once: true });
     }
     });

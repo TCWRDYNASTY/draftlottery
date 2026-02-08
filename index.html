@@ -956,13 +956,7 @@ function closeWinnerOverlay() {
         }, 500);
     }
 }
-function closeWinnerOverlay() {
-    const overlay = document.getElementById('winnerOverlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
-        overlay.style.display = 'none';
-    }
-}
+
 
 function drawWeightedMember() {
     if (availableMembers.length === 0) {

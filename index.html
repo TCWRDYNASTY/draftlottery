@@ -74,7 +74,53 @@ h2 {
     color: var(--light-text);
 }
 
-/* --- LOTTERY MACHINE CORE --- */
+.curtain-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9998; 
+    display: flex;
+    pointer-events: none;
+}
+
+.curtain-panel {
+    width: 50%;
+    height: 100%;
+    background-color: #0f172a;
+    transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1);
+    position: relative;
+    border-right: 2px solid var(--accent-gold);
+    border-left: 2px solid var(--accent-gold);
+}
+
+.curtain-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent, rgba(0,0,0,0.2) 20px, transparent 40px);
+}
+
+.curtain-wrapper.open .left-panel { transform: translateX(-100%); }
+.curtain-wrapper.open .right-panel { transform: translateX(100%); }
+
+#winnerOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999 !important;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: none;
+}
+
+.curtain-wrapper {
+    z-index: 9998;
+}
+
+.audio-overlay {
+    z-index: 9999;
+}
+        
 .lottery-machine {
     position: relative;
     width: 80vw;
@@ -86,10 +132,9 @@ h2 {
     border: 15px solid #a0b3c8;
     background: radial-gradient(circle at center, #5b6d90, #2c3e59);
     box-shadow: 0 0 50px rgba(255, 215, 0, 0.2), inset 0 0 80px rgba(255, 255, 255, 0.1), inset 0 0 120px rgba(0, 0, 0, 0.7);
-    z-index: 1;
+    z-index: 10;
 }
-
-/* --- BALL CORE STYLING --- */
+        
 .ball {
     position: absolute;
     width: 50px;
@@ -98,36 +143,28 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2;
+    z-index: 20;
     border: 2px solid var(--accent-gold);
     background-size: cover;
     background-position: center;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.8);
-    
-    /* Animation base */
     animation: circle-motion 8s linear infinite;
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- THE WINNING SEQUENCE ANIMATIONS --- */
-
-/* 1. Stop normal motion and move to center */
 .ball.converging {
-    animation: none !important; /* Kills the circle motion */
+    animation: none !important;
     left: 50% !important;
     top: 50% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 100 !important;
 }
 
-/* 2. Scale up and glow */
 .ball.merged {
     transform: translate(-50%, -50%) scale(2.6) !important;
     z-index: 200 !important;
     box-shadow: 0 0 30px gold, 0 0 60px gold, 0 0 100px rgba(255, 215, 0, 0.8) !important;
 }
-
-/* 3. Pop and Disappear */
 .ball.vanish {
     animation: vanishPop 0.7s ease forwards !important;
 }
@@ -224,119 +261,62 @@ h2 {
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-
 <body>
-<div class="container">
+</head>
+<audio id="monacoAudio" src="Monaco.m4a" preload="auto"></audio>
 
-   <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase"
-    style="
-        font-family: 'Bebas Neue', sans-serif;
-        color: #FFD700;
-        letter-spacing: 0.1em;
-    ">
-    TCWR DY-NASTY Draft Lottery
-</h1>
-
-    <div class="lottery-machine" id="lotteryMachine">
-        <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
-    </div>
-
-    <div class="drawn-ball-display" id="drawnBallDisplay">
-        <div class="current-pick-label" id="currentPickLabel">Ready to Draw for Pick #...</div>
-        <div class="drawn-team-name" id="drawnTeamName"></div>
-    </div>
-
-    <button class="btn" id="runFullDraftBtn">Run Draft</button>
-    
-    <div class="results-section">
-        <h2 class="text-4xl mb-6 tracking-wide uppercase"
-            style="
-                font-family: 'Bebas Neue', sans-serif;
-                color: #FFD700;
-                text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
-                letter-spacing: 2px;
-            ">
-            Draft Order Results
-        </h2>
-        <ul class="results-list" id="resultsList">
-            </ul>
-    </div>
-
-    <div class="team-odds-section">
-        <h2 class="text-4xl mb-6 tracking-wide uppercase" 
-            style="
-                font-family: 'Bebas Neue', sans-serif;
-                color: #FFD700;
-                text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
-                letter-spacing: 2px;
-            ">
-            Team Odds
-        </h2>
-        <ul id="teamOddsList" class="team-odds-list">
-            </ul>
-    </div>
-
-<div class="commissioner-tools">
-    <h2 class="text-2xl font-bold mb-4 text-orange-500">Commissioner Tools</h2>
-    <form id="commissionerLogin">
-        <input type="password" id="commissionerPassword" placeholder="Enter Password" 
-               class="p-3 rounded-md bg-gray-900 border-2 border-yellow-600 text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500">
-        <button type="submit" id="unlockCommissionerBtn" class="btn mt-4 bg-blue-600 hover:bg-blue-700 text-white">Unlock</button>
-    </form>
-
-    <div id="commissionerPanel" class="hidden">
-        <p class="text-sm text-gray-400 mb-4">Update team names and their weighted odds below.</p>
+<div id="introOverlay" class="audio-overlay">
+    <div class="overlay-content">
+        <h1 class="text-accent-gold text-5xl mb-4">TCWR DY-NASTY</h1>
+        <h2 class="text-white mb-6">SUPER BOWL HALFTIME LOTTERY</h2>
         
-        <div id="memberConfigInputs" class="space-y-2"></div>
-
-        <button id="saveConfigBtn" class="btn mt-4 bg-green-600 hover:bg-green-700 text-white font-bold">Save Configuration</button>
-        <button id="resetDraftBtn" class="btn mt-4 ml-2 bg-red-600 hover:bg-red-700 text-white font-bold">Reset Draft</button>
+        <div class="bg-gray-900 p-8 rounded-lg border-2 border-gold text-left max-w-2xl mx-auto mb-8 shadow-2xl">
+            <h3 class="text-accent-gold font-bold text-2xl mb-4 text-center">HOW THE LOTTERY WORKS</h3>
+            <p class="text-white text-lg leading-relaxed mb-6">
+                Suspense builds as we reveal the draft order in reverse, from <span class="text-gold font-bold">Pick #8</span> down to <span class="text-gold font-bold">Pick #1</span>.
+            </p>
+            <ul class="text-white space-y-3 list-disc pl-5 text-md">
+                <li><strong class="text-gold">Reverse Reveal:</strong> Once a team is drawn, they are awarded the current pick and eliminated.</li>
+                <li><strong class="text-gold">High Odds:</strong> Teams with high weights are more likely to be drawn early for Pick #8.</li>
+                <li><strong class="text-gold">The Jackpot:</strong> If a low-odds team survives the early rounds, their shot at Pick #1 becomes massive!</li>
+            </ul>
+        </div>
+        
+        <p class="animate-pulse text-3xl font-bold text-gold">CLICK TO COMMENCE THE DRAFT</p>
     </div>
 </div>
 
-        <div id="messageBox" class="message-box">
-        <p id="messageText"></p>
-        <button onclick="document.getElementById('messageBox').style.display = 'none'">OK</button>
-    </div>
+<div id="curtainWrapper" class="curtain-wrapper">
+    <div class="curtain-panel left-panel"></div>
+    <div class="curtain-panel right-panel"></div>
+</div>
 
-</div> <div id="audioOverlay" class="audio-overlay">
-    <div class="overlay-content">
-        <div class="explanation-text" style="max-width: 800px; padding: 2rem; border-radius: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.7); text-align: center;">
-            <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 1rem; color: #FFD700; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);">
-                How the Lottery Works: Reverse Order Reveal
-            </h3>
-            <p style="font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                Our lottery builds suspense by revealing the draft order in reverse, from Pick #8 down to the highly anticipated Pick #1.
-                <br/><br/>
-                Here’s the key rule: Once a team is drawn from the machine, they are awarded the current pick and are **eliminated from all future draws**.
-            </p>
-            
-            <div style="text-align: left; margin: 0 auto; line-height: 1.6; max-width: 500px;">
-                <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: bold;">This means:</p>
-                <ul style="list-style: disc; list-style-position: inside; padding-left: 1rem; font-size: 1rem;">
-                    <li>
-                        <strong style="color: #FFD700;">Teams with the highest odds</strong> have the highest chance of being drawn for the very first pick revealed... **Pick #8**.
-                    </li>
-                    <li>
-                        <strong style="color: #FFD700;">Teams with the lowest odds</strong> are long shots, but if they get lucky and avoid being picked early, their odds of winning a top pick like #1 increase with every round.
-                    </li>
-                </ul>
-            </div>
-            <p style="font-size: 1rem; margin-top: 1.5rem; font-style: italic;">
-                The suspense builds as the most likely teams are eliminated, leaving a shot at the jackpot for the long shots.
-            </p>
-        </div>
-        
-<p style="margin-top: 2.5rem; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);" class="animate-pulse">
-            Click anywhere to start the simulator!
-        </p>
+<div class="container">
+    <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase" style="font-family: 'Bebas Neue', sans-serif; color: #FFD700; letter-spacing: 0.1em;">
+        TCWR DY-NASTY Draft Lottery
+    </h1>
+
+    <div class="lottery-machine" id="lotteryMachine">
+        <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
     </div>
 
-    <div id="winnerOverlay" class="hidden fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black bg-opacity-90 transition-all duration-500">
-    <h1 class="text-white text-6xl font-bold mb-8 animate-bounce">THE #1 PICK</h1>
-   <img id="winnerImage" src="badbunny.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-md">
-    <button onclick="closeWinnerOverlay()" class="mt-8 px-6 py-2 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Close</button>
+    <div class="drawn-ball-display" id="drawnBallDisplay">
+        <div class="current-pick-label" id="currentPickLabel">Ready to Draw for Pick #...</div>
+        <div class="drawn-team-name" id="drawnTeamName"></div>
+    </div>
+
+    <button class="btn" id="runFullDraftBtn">Run Draft</button>
+    
+    <div class="results-section">...</div>
+    <div class="team-odds-section">...</div>
+    <div class="commissioner-tools">...</div>
+</div>
+
+<div id="winnerOverlay" class="hidden fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black bg-opacity-95">
+    <h1 class="text-white text-7xl font-bold mb-8 animate-bounce tracking-tighter">THE #1 PICK</h1>
+    <img id="winnerImage" src="monaco_reveal.png" class="rounded-xl border-4 border-yellow-400 shadow-2xl max-w-2xl">
+    <div id="finalWinnerName" class="text-gold text-5xl mt-4 font-black"></div>
+    <button onclick="location.reload()" class="mt-8 px-8 py-3 bg-yellow-500 text-black font-bold rounded-full hover:bg-yellow-400">Exit Room</button>
 </div>
     
 <script type="module">
@@ -392,7 +372,6 @@ const commissionerLoginContainer = document.querySelector('.commissioner-tools')
 
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
-
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
         commissionerPanel.classList.remove('hidden');
         commissionerLogin.classList.add('hidden');
@@ -433,10 +412,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (audioOverlay) {
-        audioOverlay.addEventListener('click', handleFirstInteraction, { once: true });
+  // This part handles the intro click, music, and curtains
+    const introOverlay = document.getElementById('introOverlay');
+    if (introOverlay) {
+        introOverlay.addEventListener('click', function() {
+            // 1. Play the music (Monaco)
+            const audio = document.getElementById('monacoAudio');
+            if (audio) audio.play();
+            this.classList.add('hidden');
+            const curtains = document.getElementById('curtainWrapper');
+            if (curtains) {
+                curtains.classList.add('open');
+                setTimeout(() => {
+                    curtains.style.display = 'none';
+                }, 1600);
+            }
+        }, { once: true });
     }
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
 }); 
 
 async function saveDraftOrderToSupabase(draftOrder) {
@@ -466,7 +458,6 @@ async function saveDraftOrderToSupabase(draftOrder) {
 
 async function clearDraftOrderFromSupabase() {
     showMessage('Clearing old draft order from the database...');
-    // A more reliable way to delete all rows
     const { error } = await supabase
         .from(SUPABASE_ORDERS_TABLE_NAME)
         .delete()
@@ -650,85 +641,55 @@ const contentWidth = lotteryMachine.clientWidth;
         ball.style.animationTimingFunction = 'linear';
     });
 }
-function handleFirstInteraction() {
-    if (!espnAudio) {
-        espnAudio = new Audio('Espnprimetime.m4a');
-        espnAudio.loop = true;
-        espnAudio.volume = 0.5;
-        crowdShoutAudio = new Audio('crowd-shouting-6325.mp3');
-        disappointmentAudio = new Audio('disappointment.mp3');
-        cheeringAudio = new Audio('cheering.mp3');
-        crowdCheersAudio = new Audio('crowd-cheers-312833.mp3');
-    }
-
-    espnAudio.play().then(() => {
-        console.log("ESPN Audio is now playing.");
-        espnAudio.muted = false;
-    }).catch(error => {
-        console.error("Failed to play ESPN audio:", error);
-    });
-    
-    if (audioOverlay) {
-        audioOverlay.classList.add('hidden');
-        setTimeout(() => {
-            audioOverlay.style.display = 'none';
-        }, 500);
-    }
-}
 
 async function runFullDraftSimulation() {
     if (drawing) return;
     drawing = true;
+
+    const audio = document.getElementById('monacoAudio');
+    if (!audio) return;
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = true;
-        runFullDraftBtn.textContent = 'Drawing in progress...';
+        runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
     }
+    
     pickCounter = 8; 
-
     if (isDraftSaved) {
-        if (resultsList) resultsList.style.display = 'none';
+        if (resultsList) resultsList.innerHTML = '';
         availableMembers = members.map(member => ({ ...member }));
         populateBalls();
     } else {
         draftOrder = [];
     }
-    while (pickCounter >= 1) {
+    const timestamps = [22, 54, 86, 118, 151, 183, 215, 250];
+    for (let i = 0; i < timestamps.length; i++) {
+        const targetTime = timestamps[i];
+        while (audio.currentTime < targetTime) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (audio.paused && audio.currentTime > 0) break; 
+        }
         await performSingleDraw();
-        await new Promise(resolve => setTimeout(resolve, 1200));
     }
     if (!isDraftSaved) {
         await saveDraftOrderToSupabase(draftOrder);
         isDraftSaved = true;
     }  
     sessionStorage.setItem('hasSeenDraftAnimation', 'true');
-    showResults();
     lotteryMachine.innerHTML = '';
     drawing = false;
     if (runFullDraftBtn) {
         runFullDraftBtn.disabled = false;
-        runFullDraftBtn.textContent = 'Replay Draft Animation';
+        runFullDraftBtn.textContent = 'RUN DRAFT'; 
     }
+    
     if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 
-function playPickAudio(pick) {
-    if (pick === 1) {
-        if (espnAudio) { espnAudio.pause(); espnAudio.currentTime = 0; }
-        console.log("Playing Winner Audio for #1!");
-    } else {
-        if (crowdShoutAudio) {
-            crowdShoutAudio.currentTime = 0;
-            crowdShoutAudio.play().catch(e => console.log("Audio play blocked", e));
-        }
-    }
-}
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    
-    // Pause all balls
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
@@ -748,33 +709,22 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        // MATH CLEANUP: Remove team from mathematical pool immediately
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
         playPickAudio(pickCounter);
-
-        // FIND BALLS: Look for the physical balls
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         
         console.log(`DEBUG: Drawing ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
 
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball, index) => {
-                // IMPORTANT: Clear any inline "left/top" styles that might be locking the ball in place
                 ball.style.left = '';
                 ball.style.top = '';
                 ball.style.transform = '';
-                
-                // Trigger the CSS move to center
                 ball.classList.add('converging');
                 if(index === 0) console.log("DEBUG: 'converging' class added to balls.");
             });
-
-            // Force browser to recalculate layout so animation triggers
             void teamBalls[0].offsetWidth; 
-
             await new Promise(r => setTimeout(r, 900));
-            
-            // Remove extra balls, keep the "Main" one
             for (let i = 1; i < teamBalls.length; i++) {
                 teamBalls[i].remove();
             }
@@ -782,11 +732,9 @@ async function performSingleDraw() {
             const mainBall = teamBalls[0];
             mainBall.classList.add('merged');
             console.log("DEBUG: 'merged' class added.");
-
             await new Promise(r => setTimeout(r, 1200));
             mainBall.classList.add('vanish');
             console.log("DEBUG: 'vanish' animation triggered.");
-            
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
         } else {
@@ -826,20 +774,47 @@ async function performSingleDraw() {
         populateBalls();
     }
 }
-
-    function showWinnerDrop(teamName, pickNumber) {
+function showWinnerDrop(teamName, pickNum) {
     const overlay = document.getElementById('winnerOverlay');
-    const title = overlay.querySelector('h1');
-    const img = document.getElementById('winnerImage');
-    if (!overlay || !img) return;
-    title.innerText = `PICK #${pickNumber}: ${teamName}`;
-    img.src = pickImages[pickNumber] || 'default_bunny.jpg';
-    overlay.classList.remove('hidden');
-    overlay.classList.add('flex');
-    setTimeout(() => {
+    const winnerNameDisplay = document.getElementById('finalWinnerName');
+    const winnerImage = document.getElementById('winnerImage');
+    const title = overlay.querySelector('h1'); 
+
+    if (overlay) {
+        if (title) {
+            title.textContent = pickNum === 1 ? "THE #1 PICK" : `PICK #${pickNum}`;
+        }
+        if (winnerNameDisplay) {
+            winnerNameDisplay.textContent = teamName;
+        }
+        if (winnerImage) {
+            const newSrc = (typeof pickImages !== 'undefined' && pickImages[pickNum]) 
+                           ? pickImages[pickNum] 
+                           : 'badbunny.png';
+            winnerImage.src = newSrc;
+        }
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+        if (pickNum === 1) {
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 1)"; 
+            winnerNameDisplay.style.fontSize = "5rem";
+            winnerNameDisplay.classList.add('animate-pulse');
+        } else {
+            overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
+            winnerNameDisplay.style.fontSize = ""; 
+            setTimeout(() => {
+                closeWinnerOverlay();
+            }, 8500);
+        }
+    }
+}
+
+function closeWinnerOverlay() {
+    const overlay = document.getElementById('winnerOverlay');
+    if (overlay) {
         overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-    }, 8000);
+        overlay.style.display = 'none';
+    }
 }
 
 function drawWeightedMember() {

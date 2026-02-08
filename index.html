@@ -104,11 +104,24 @@ h2 {
     will-change: transform; /* Helps performance */
 }
 
-.curtain-wrapper.open .left-panel {
-    transform: translateX(-110%);
+.left-panel {
+
+    left: 0;
+
+    background-position: 0% center; 
+
+    border-right: 1px solid rgba(255, 215, 0, 0.3);
+
 }
-.curtain-wrapper.open .right-panel {
-    transform: translateX(110%);
+
+.right-panel {
+
+    right: 0;
+
+    background-position: 100% center; 
+
+    border-left: 1px solid rgba(255, 215, 0, 0.3);
+
 }
 
 .curtain-panel::after {

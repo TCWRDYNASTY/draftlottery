@@ -403,8 +403,6 @@ h2 {
         <div class="current-pick-label" id="currentPickLabel">Ready to Draw for Pick #...</div>
         <div class="drawn-team-name" id="drawnTeamName"></div>
     </div>
-
-    <button class="btn" id="runFullDraftBtn">Run Draft</button>
     
     <div class="results-section">
         <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Draft Order Reveal</h3>
@@ -495,26 +493,27 @@ function handleCommissionerUnlock(e) {
 // --- CONSOLIDATED DOMCONTENTLOADED ---
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("Initializing Draft Room...");
-    if (typeof fetchDraftState === 'function') await fetchDraftState();
-    if (typeof renderResultsList === 'function') renderResultsList();
-    if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
-    if (typeof populateBalls === 'function') populateBalls();
-    if (typeof initializeDraftState === 'function') initializeDraftState();
-    if (runFullDraftBtn) {
-        runFullDraftBtn.addEventListener('click', runFullDraftSimulation);
+
+    // 1. Run initialization - NOTE: initializeDraftState usually calls populateBalls & initializeResultsList
+    if (typeof initializeDraftState === 'function') {
+        await initializeDraftState();
+    } else {
+        // Fallbacks if initializeDraftState isn't doing it all
+        if (typeof fetchDraftState === 'function') await fetchDraftState();
+        if (typeof populateBalls === 'function') populateBalls();
     }
-    if (unlockCommissionerBtn) {
-        unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
-    }
-    if (commissionerLogin) {
-        commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
-    }
+
+    // 2. Commissioner Listeners (Keep these as they are)
+    if (unlockCommissionerBtn) unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
+    if (commissionerLogin) commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    
     if (saveConfigBtn) {
         saveConfigBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await saveConfig(); 
         });
     }
+
     if (resetDraftBtn) {
         resetDraftBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -528,27 +527,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // 3. Automated Opening Sequence
     const introOverlay = document.getElementById('introOverlay');
     const curtains = document.getElementById('curtainWrapper');
     const audio = document.getElementById('monacoAudio');
 
-if (introOverlay) {
+    if (introOverlay) {
         introOverlay.addEventListener('click', function() {
             if (audio) audio.play().catch(e => console.log("Audio blocked", e));
             
-            // 1. Fade the rules
+            // Fade the rules
             this.style.transition = 'opacity 0.6s ease';
             this.style.opacity = '0';
             this.style.pointerEvents = 'none';
 
-            // 2. Trigger the slide
             setTimeout(() => {
-                this.style.display = 'none'; // Clear the rules out
+                this.style.display = 'none'; 
                 
                 if (curtains) {
-                    curtains.classList.add('open'); // The panels start moving immediately
+                    curtains.classList.add('open'); 
                     
-                    // 3. Final Cleanup
+                    // --- THE AUTO-START ---
+                    // Wait 1.2 seconds for the curtains to be partially open, then start the balls!
+                    setTimeout(() => {
+                        console.log("Curtains open. Automatically starting draft simulation...");
+                        if (typeof runFullDraftSimulation === 'function') {
+                            runFullDraftSimulation();
+                        }
+                    }, 1200); 
+                    
+                    // Final Cleanup: remove curtains from layout after 3.1s
                     setTimeout(() => {
                         curtains.style.display = 'none';
                     }, 3100); 
@@ -556,7 +564,7 @@ if (introOverlay) {
             }, 600); 
         }, { once: true });
     }
-    });
+});
 async function saveDraftOrderToSupabase(draftOrder) {
     console.log('Saving draft order to Supabase...', draftOrder);
     
@@ -865,16 +873,25 @@ async function performSingleDraw() {
 
         if (!isDraftSaved) {
             draftOrder.push({ 
-                pickNumber: pickCounter, // Ensure key matches renderResultsList
+                pick: pickCounter, // Key matches Supabase logic
                 teamId: drawnMember.id, 
                 member: drawnMember.name, 
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
 
-        // 3. THE FIX: Trigger the global UI update functions
-        renderResultsList();
-        updateOddsDisplay();
+        // --- 3. THE REVEAL FIX: Update the specific slot in the list ---
+        if (resultsList) {
+            const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+            if (pickElement) {
+                pickElement.innerHTML = `<span>PICK #${pickCounter}:</span> <span class="uppercase font-bold">${drawnMember.name}</span>`;
+                pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50');
+                pickElement.classList.add('bg-green-600', 'text-white', 'border-l-4', 'border-yellow-400', 'shadow-lg');
+            }
+        }
+        
+        // Update the sidebar odds
+        if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
 
         // 4. Resume background animations
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
@@ -1179,31 +1196,7 @@ async function resetDraft() {
     }
 }
 
-   // --- RENDER RESULTS (The Reveal List) ---
-function renderResultsList() {
-    const resultsList = document.getElementById('resultsList');
-    if (!resultsList) return;
-
-    // Clear the current list to prevent duplicates
-    resultsList.innerHTML = '';
-
-    // Loop through the draftOrder array (stored in Supabase or locally)
-    draftOrder.forEach((pick) => {
-        const li = document.createElement('li');
-        
-        // Styling matches your results-section
-        li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-500 hover:scale-102";
-        
-        li.innerHTML = `
-            <span class="font-mono text-yellow-500 font-bold">PICK #${pick.pickNumber}</span>
-            <span class="text-white font-bold uppercase tracking-wider">${pick.member}</span>
-        `;
-        
-        resultsList.appendChild(li);
-    });
-}
-
-// --- UPDATE ODDS DISPLAY (The Remaining Teams) ---
+// --- UPDATE ODDS DISPLAY (The Remaining Teams with Strike-through) ---
 function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
@@ -1215,26 +1208,26 @@ function updateOddsDisplay() {
 
     sortedMembers.forEach(m => {
         const li = document.createElement('li');
-        li.setAttribute('data-id', m.id); 
+        // This ID is used by the CSS
+        li.setAttribute('data-team-id', m.id); 
         
         li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
         
         li.innerHTML = `
             <span class="team-name font-bold text-white uppercase tracking-tight">${m.name}</span>
-            <span class="odds-percent font-mono text-white text-lg">${m.weight}%</span>
+            <span class="odds-percent font-mono text-white text-lg">${m.originalWeightDisplay || m.weight + '%'}</span>
         `;
-        
-        // If the team has already been picked, dim them out
+ 
         const isPicked = draftOrder.some(p => String(p.teamId) === String(m.id) || p.member === m.name);
+        
         if (isPicked) {
-            li.classList.add('opacity-30', 'grayscale');
-            li.style.borderLeftColor = '#444';
+            // This class MUST match your CSS rule: #teamOddsList li.picked-team
+            li.classList.add('picked-team');
         }
 
         teamOddsList.appendChild(li);
     });
 }
-
 </script>
 </body>
 </html>

@@ -1047,7 +1047,6 @@ async function performSingleDraw() {
         ball.style.animationPlayState = 'paused';
     });
     
-    // 1. SMALL PAUSE FOR SUSPENSE
     await new Promise(resolve => setTimeout(resolve, 1500));    
     
     let drawnMember;
@@ -1056,7 +1055,7 @@ async function performSingleDraw() {
         if (savedPick) {
             drawnMember = members.find(m => m.id === savedPick.teamId || m.name === savedPick.member);
             if (drawnMember) {
-                availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+
             } else {
                 drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
             }
@@ -1064,7 +1063,6 @@ async function performSingleDraw() {
     } else {
         drawnMember = drawWeightedMember();
         if (drawnMember) {
-        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
     }
     }
 
@@ -1075,14 +1073,10 @@ async function performSingleDraw() {
 const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
 console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
         if (teamBalls.length > 0) {
-           teamBalls.forEach(ballElement => {
-    if (ballElement && ballElement.parentNode) {
-        ballElement.style.display = 'none';
-        ballElement.remove(); 
-    }
+     teamBalls.forEach(ballElement => {
+    ballElement.style.animationPlayState = 'paused';
 });
 
-            // 3. SHORT BREATH
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // 4. TRIGGER THE SLOW MOVEMENT (Matches your 10s CSS)
@@ -1144,8 +1138,8 @@ console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Fou
             ball.style.animationPlayState = 'running';
         });
     }
-
-    pickCounter--; 
+pickCounter--;
+populateBalls();
     if (currentPickLabel) {
         currentPickLabel.textContent = pickCounter >= 1 ? `Ready for Pick #${pickCounter}` : "All Picks Revealed!";
     }

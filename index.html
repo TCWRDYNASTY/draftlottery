@@ -1125,10 +1125,9 @@ console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Fou
         });
     }
 pickCounter--;
-populateBalls();
-    if (currentPickLabel) {
-        currentPickLabel.textContent = pickCounter >= 1 ? `Ready for Pick #${pickCounter}` : "All Picks Revealed!";
-    }
+if (pickCounter >= 1) {
+    populateBalls();
+}
 }
 
     function showWinnerDrop(teamName, pickNumber) {

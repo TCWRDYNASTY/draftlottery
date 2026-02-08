@@ -934,6 +934,7 @@ const contentWidth = lotteryMachine.clientWidth;
         const ball = document.createElement('div');
         ball.classList.add('ball');
         ball.dataset.teamId = ballData.teamId;
+        ball.setAttribute('data-id', String(ballData.teamId));
         ball.style.position = 'absolute'; 
 
         const member = members.find(m => m.id === ballData.teamId); 
@@ -1070,16 +1071,16 @@ async function performSingleDraw() {
     if (drawnMember) {
         playPickAudio(pickCounter);
         
-        // FIX: Ensure ID is a string so querySelector finds the match
-       const teamBalls = lotteryMachine.querySelectorAll('.ball[data-team-id="' + String(drawnMember.id) + '"]');
+
+const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
 console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
         if (teamBalls.length > 0) {
-            // 2. PREPARE SELECTED BALLS
-            teamBalls.forEach(ballElement => {
-                ballElement.style.animation = 'none'; // Kill the old motion
-                ballElement.classList.add('selected-for-shoot');
-                void ballElement.offsetWidth; // Trigger reflow
-            });
+           teamBalls.forEach(ballElement => {
+    if (ballElement && ballElement.parentNode) {
+        ballElement.style.display = 'none';
+        ballElement.remove(); 
+    }
+});
 
             // 3. SHORT BREATH
             await new Promise(resolve => setTimeout(resolve, 100));

@@ -90,13 +90,28 @@ h2 {
 }
 
 .curtain-panel {
-    width: 50%;
+    position: absolute;
+    top: 0;
+    width: 50%; 
     height: 100%;
-    background-color: #0f172a;
-    transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1);
-    position: relative;
-    border-right: 2px solid var(--accent-gold);
-    border-left: 2px solid var(--accent-gold);
+    background-image: url('badbunny.png'); 
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    background-color: #000;
+    transition: transform 1.6s cubic-bezier(0.7, 0, 0.3, 1);
+    z-index: 100;
+}
+
+.left-panel {
+    left: 0;
+    background-position: 0% center; 
+    border-right: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.right-panel {
+    right: 0;
+    background-position: 100% center; 
+    border-left: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .curtain-panel::after {
@@ -255,7 +270,20 @@ h2 {
     border-left: 5px solid var(--accent-gold);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+        .picked-team {
+    opacity: 0.25 !important;
+    filter: grayscale(100%);
+    pointer-events: none;
+    position: relative;
+    transition: all 1s ease;
+}
 
+        .picked-team .team-name, 
+.picked-team .odds-percent {
+    text-decoration: line-through !important;
+    text-decoration-color: #ff4444 !important;
+}
+        
 .drawn-ball-display {
     min-height: 120px;
     background-color: var(--section-bg);
@@ -341,9 +369,9 @@ h2 {
 </div>
 
 <div class="container">
-    <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase" style="font-family: 'Bebas Neue', sans-serif; color: #FFD700; letter-spacing: 0.1em;">
-        TCWR DY-NASTY Draft Lottery
-    </h1>
+ <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase text-center mx-auto" style="font-family: 'Bebas Neue', sans-serif; color: #FFD700; letter-spacing: 0.1em; width: 100%;">
+    TCWR DY-NASTY Draft Lottery
+</h1>
 
     <div class="lottery-machine" id="lotteryMachine">
         <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
@@ -418,6 +446,7 @@ let cheeringAudio = null;
 let crowdCheersAudio = null;
 let audioTimeout;
 
+
 const lotteryMachine = document.getElementById('lotteryMachine');
 const runFullDraftBtn = document.getElementById('runFullDraftBtn');
 const currentPickLabel = document.getElementById('currentPickLabel');
@@ -442,6 +471,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const introOverlay = document.getElementById('introOverlay');
     const curtains = document.getElementById('curtainWrapper');
     const audio = document.getElementById('monacoAudio');
+
+    if (introOverlay) {
+        introOverlay.addEventListener('click', function() {
+            if (audio) audio.play().catch(e => console.log("Audio blocked", e));
+            this.style.display = 'none';
+            if (curtains) {
+                curtains.classList.add('open');
+                setTimeout(() => {
+                    curtains.style.display = 'none';
+                }, 1600);
+            }
+        }, { once: true });
+    }
+});
 
     if (introOverlay) {
         introOverlay.addEventListener('click', function() {
@@ -773,13 +816,10 @@ async function runFullDraftSimulation() {
 }
 
 async function performSingleDraw() {
-    // 1. Safety check for core elements
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
-    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
-    
-    // Pause balls for selection
+
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
@@ -799,16 +839,15 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        // Remove from available pool
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
         
-        // Scratch out on sidebar
-        const oddsItem = document.querySelector(`.team-odds-list li[data-id="${drawnMember.id}"]`);
+        // --- FIX 1 & 2: Match the ID and Class name for the sidebar cross-out ---
+        const oddsItem = document.querySelector(`#teamOddsList li[data-id="${drawnMember.id}"]`);
         if (oddsItem) {
-            oddsItem.classList.add('picked'); 
+            oddsItem.classList.add('picked-team'); // Using the CSS class we just made
         }
+        // -----------------------------------------------------------------------
 
-        // Ball animation logic
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -819,8 +858,7 @@ async function performSingleDraw() {
             });
 
             await new Promise(r => setTimeout(r, 900));
-            for (let i = 1; i < teamBalls.length; i++) { teamBalls[i].remove(); }
-            
+            for (let i = 1; i < teamBalls.length; i++) { teamBalls[i].remove(); }    
             const mainBall = teamBalls[0];
             mainBall.classList.add('merged');
             await new Promise(r => setTimeout(r, 1200));
@@ -829,7 +867,6 @@ async function performSingleDraw() {
             mainBall.remove();
         }
 
-        // Show winner reveal
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
         
@@ -842,8 +879,6 @@ async function performSingleDraw() {
             });
         }
 
-        // 2. NULL-SAFE Check for Results List
-        // This prevents the "Cannot read properties of null" error
         if (typeof resultsList !== 'undefined' && resultsList) {
             const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
             if (pickElement) {
@@ -853,12 +888,10 @@ async function performSingleDraw() {
             }
         }
 
-        // Resume other balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
 
-        // Stay on the winner reveal for the duration of the beat
         await new Promise(resolve => setTimeout(resolve, 8500));
     }
 
@@ -867,7 +900,8 @@ async function performSingleDraw() {
         populateBalls();
     }
 }
-function showWinnerDrop(teamName, pickNum) {
+
+    function showWinnerDrop(teamName, pickNum) {
     const overlay = document.getElementById('winnerOverlay');
     const winnerNameDisplay = document.getElementById('finalWinnerName');
     const winnerImage = document.getElementById('winnerImage');
@@ -1133,6 +1167,27 @@ document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDra
 
 initializeDraftState();
 
+    function updateOddsDisplay() {
+    const teamOddsList = document.getElementById('teamOddsList');
+    if (!teamOddsList || !members || members.length === 0) return;
+    teamOddsList.innerHTML = '';
+    const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
+
+    sortedMembers.forEach(m => {
+        const li = document.createElement('li');
+        li.setAttribute('data-id', m.id); 
+        li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
+        
+        li.innerHTML = `
+            <span class="team-name font-bold text-white uppercase tracking-tight">${m.name}</span>
+            <span class="odds-percent font-mono text-white text-lg">${m.weight}%</span>
+        `;
+        
+        teamOddsList.appendChild(li);
+    });
+    
+    console.log("Odds display updated with " + members.length + " teams.");
+}
 </script>
 </body>
 </html>

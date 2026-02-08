@@ -1146,6 +1146,21 @@ async function performSingleDraw() {
     }
 }
 
+    function showWinnerDrop(teamName, pickNumber) {
+    const overlay = document.getElementById('winnerOverlay');
+    const title = overlay.querySelector('h1');
+    const img = document.getElementById('winnerImage');
+    if (!overlay || !img) return;
+    title.innerText = `PICK #${pickNumber}: ${teamName}`;
+    img.src = pickImages[pickNumber] || 'default_bunny.jpg';
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+    }, 4000);
+}
+
 function drawWeightedMember() {
     if (availableMembers.length === 0) {
         return null;
@@ -1163,6 +1178,7 @@ function drawWeightedMember() {
     return availableMembers.pop();
 }
 
+    
 function showResults() {
     if (resultsList) resultsList.style.display = 'block';
     updateUIFromCurrentState();

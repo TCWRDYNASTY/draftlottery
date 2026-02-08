@@ -702,14 +702,19 @@ async function runFullDraftSimulation() {
 }
 
 async function performSingleDraw() {
+    // 1. Safety check for core elements
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
+    
+    // Pause balls for selection
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
 
     await new Promise(resolve => setTimeout(resolve, 1500));          
+    
     let drawnMember;
     if (isDraftSaved) {
         const savedPick = draftOrder.find(p => p.pick === pickCounter);
@@ -723,11 +728,16 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
+        // Remove from available pool
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+        
+        // Scratch out on sidebar
         const oddsItem = document.querySelector(`.team-odds-list li[data-id="${drawnMember.id}"]`);
         if (oddsItem) {
             oddsItem.classList.add('picked'); 
         }
+
+        // Ball animation logic
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -747,8 +757,11 @@ async function performSingleDraw() {
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
         }
+
+        // Show winner reveal
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
+        
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -757,14 +770,24 @@ async function performSingleDraw() {
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-        if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name}</span>`;
-            pickElement.classList.add('bg-green-500', 'text-white');
+
+        // 2. NULL-SAFE Check for Results List
+        // This prevents the "Cannot read properties of null" error
+        if (typeof resultsList !== 'undefined' && resultsList) {
+            const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+            if (pickElement) {
+                pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name}</span>`;
+                pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+                pickElement.classList.add('bg-green-500', 'text-white');
+            }
         }
+
+        // Resume other balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
+
+        // Stay on the winner reveal for the duration of the beat
         await new Promise(resolve => setTimeout(resolve, 8500));
     }
 

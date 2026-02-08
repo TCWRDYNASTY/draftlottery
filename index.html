@@ -169,8 +169,6 @@ h2 {
     line-height: 1;
 }
 
-
-
 #finalWinnerName {
     font-size: clamp(1.5rem, 6vw, 4rem);
     color: #FFD700;
@@ -373,8 +371,46 @@ h2 {
     .lottery-machine { width: 70vw; border-width: 8px; }
 }
 
+@media (max-width: 600px) {
+    #introOverlay .container {
+        padding: 1rem;
+        gap: 0.3rem;
+        width: 92%;
+        margin: 0 auto;
+        max-height: 95vh; 
+        overflow: hidden; 
+    }
+
+    #introOverlay h1 { font-size: 1.8rem; }
+    #introOverlay h2 { font-size: 1.3rem; margin: 0.3rem 0; }
+    
+    #introOverlay p, #introOverlay li {
+        font-size: 0.8rem;
+        line-height: 1.2;
+        margin-bottom: 3px;
+    }
+
+    #introOverlay .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 1.1rem;
+        margin-top: 8px;
+    }
+}
+
+#introOverlay {
+    -ms-overflow-style: none;
+    scrollbar-width: none; 
+    overflow-y: hidden;
+}
+
+#introOverlay::-webkit-scrollbar {
+    display: none;
+}
+    
 </style>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 </head>
 <body>
 <audio id="monacoAudio" src="Monaco.m4a" preload="auto"></audio>

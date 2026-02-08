@@ -921,13 +921,16 @@ function populateBalls() {
         lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
         return;
     }
-
     const shuffledBalls = [...ballsToRender];
     for (let i = shuffledBalls.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledBalls[i], shuffledBalls[j]] = [shuffledBalls[j], shuffledBalls[i]];
     }
-
+const contentWidth = lotteryMachine.clientWidth;
+    const mixingAreaHeight = lotteryMachine.clientHeight;
+    const contentXStart = 0;
+    const contentYStart = 0;
+    
     shuffledBalls.forEach((ballData, index) => {
         const ball = document.createElement('div');
         ball.classList.add('ball');
@@ -941,9 +944,9 @@ function populateBalls() {
                 ball.style.backgroundImage = `url('${member.image}')`;
             }
         }
-        lotteryMachine.appendChild(ball);
-        const ballWidth = ball.offsetWidth;
-        const ballHeight = ball.offsetHeight;
+       lotteryMachine.appendChild(ball);
+        const ballWidth = ball.offsetWidth || 50; 
+        const ballHeight = ball.offsetHeight || 50;
         const randomX = Math.random() * (contentWidth - ballWidth);
         const randomY = Math.random() * (mixingAreaHeight - ballHeight);
         ball.style.left = `${randomX + contentXStart}px`;

@@ -163,7 +163,6 @@ h2 {
     margin: 20px 0;
 }
 
-/* Responsive Text Scaling */
 #winnerOverlay h1 {
     font-size: clamp(2rem, 8vw, 5rem); 
     color: white;
@@ -253,7 +252,7 @@ h2 {
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
 
-/* 1. The Containers (Walls) */
+/* KEEP these first three blocks for layout */
 .team-odds-section, .results-section {
     margin-top: 2rem;
     background-color: var(--section-bg);
@@ -263,8 +262,6 @@ h2 {
     border: 2px solid var(--highlight-blue);
     width: 100%;
 }
-
-/* 2. The List Layout (Furniture) - DO NOT SKIP THIS */
 #teamOddsList, .results-list {
     list-style: none;
     padding: 0;
@@ -273,7 +270,6 @@ h2 {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
 }
-
 #teamOddsList li {
     background-color: var(--container-bg);
     padding: 1rem;
@@ -286,23 +282,22 @@ h2 {
     transition: all 0.8s ease;
 }
 
-/* 3. The "Picked" state (Red Strike-through) */
+/* REPLACE the "Picked" logic with this to stop the fading/lightening */
 #teamOddsList li.picked-team {
-    background-color: #1a1a1a !important; 
-    opacity: 0.4 !important; 
-    filter: grayscale(100%);
-    border-left-color: #444 !important;
-    transform: scale(0.96);
+    background-color: var(--container-bg) !important; /* Keep original dark color */
+    opacity: 1 !important;                            /* No fading */
+    filter: none !important;                          /* No grayscale */
+    border-left-color: var(--accent-gold) !important; /* Keep gold border */
     pointer-events: none;
 }
 
-/* Ensure BOTH name and percent get the red strike */
+/* Ensure BOTH name and percent get a THICK red strike while staying white */
 #teamOddsList li.picked-team .team-name,
 #teamOddsList li.picked-team .odds-percent {
-    color: #999 !important;
+    color: white !important;                /* Keep text bright white */
     text-decoration: line-through !important;
-    text-decoration-color: #ff4444 !important; 
-    text-decoration-thickness: 4px !important;
+    text-decoration-color: #ff0000 !important; /* Pure Red strike */
+    text-decoration-thickness: 5px !important;  /* Very bold line */
 }
 
 /* 4. The Big Display for the winner ball */
@@ -381,7 +376,7 @@ h2 {
             </ul>
         </div>
         
-        <p class="animate-pulse text-3xl font-bold text-gold">Picks</p>
+        <p class="animate-pulse text-3xl font-bold text-gold">COMMENCE THE DRAFT</p>
     </div>
 </div>
 
@@ -616,6 +611,16 @@ async function initializeDraftState() {
         return;
     }
 
+    // --- NEW: PRELOAD PICK IMAGES ---
+    // This fetches images in the background so they appear instantly during the draw
+    if (typeof pickImages !== 'undefined') {
+        Object.values(pickImages).forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+        console.log("Pick images preloaded for instant reveal.");
+    }
+
     const savedDraftOrder = await loadDraftOrderFromSupabase();
     const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
 
@@ -638,7 +643,7 @@ async function initializeDraftState() {
             // Ensure the list is visible so the green boxes can appear
             if (resultsList) resultsList.style.display = 'grid'; 
             if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
-            if (currentPickLabel) currentPickLabel.textContent = "Click 'Run Draft' to begin!";
+            if (currentPickLabel) currentPickLabel.textContent = "PICKS!";
         }
     } else {
         console.log('New run setup.');
@@ -913,31 +918,19 @@ async function performSingleDraw() {
             });
         }
 
-        // --- 3. THE REVEAL FIX ---
-        if (resultsList) {
-            let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
-            
-            // Console log to help you debug live
-            console.log(`Searching for Pick #${pickCounter}. Found element?`, pickElement); 
-            
-            // FALLBACK: If slot is missing, create it so the reveal isn't skipped
-            if (!pickElement) {
-                console.error(`Could not find a placeholder for Pick #${pickCounter}. Creating one manually.`);
-                pickElement = document.createElement('li');
-                pickElement.setAttribute('data-pick-num', pickCounter);
-                resultsList.appendChild(pickElement);
-            }
+if (resultsList) {
+    let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+    
+    if (pickElement) {
+        pickElement.innerHTML = `
+            <span class="font-mono text-yellow-300 font-bold text-lg">PICK #${pickCounter}</span> 
+            <span class="font-sans font-black text-white uppercase tracking-tight text-2xl">${drawnMember.name}</span>
+        `;
+        pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50', 'text-gray-400', 'italic');
+        pickElement.className = "flex justify-between items-center p-5 mb-4 bg-green-600 text-white opacity-100 border-l-8 border-yellow-400 shadow-2xl rounded-xl transition-all duration-500";
+    }
 
-            // Update content and styles
-            pickElement.innerHTML = `<span>PICK #${pickCounter}:</span> <span class="uppercase font-bold">${drawnMember.name}</span>`;
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50');
-            pickElement.classList.add('bg-green-600', 'text-white', 'border-l-4', 'border-yellow-400', 'shadow-lg');
-        }
-        
-        // Update the sidebar odds
         if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
-
-        // 4. Resume background animations
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
@@ -947,7 +940,6 @@ async function performSingleDraw() {
     }
 
     pickCounter--; 
-    
     if (pickCounter >= 1) {
         populateBalls();
     } else {
@@ -973,47 +965,63 @@ async function performSingleDraw() {
     const winnerImage = document.getElementById('winnerImage');
     const title = overlay.querySelector('h1'); 
 
-    if (overlay) {
-        if (title) {
-            title.textContent = pickNum === 1 ? "THE #1 PICK" : `PICK #${pickNum}`;
-        }
-        if (winnerNameDisplay) {
-            winnerNameDisplay.textContent = teamName;
-        }
-        if (winnerImage) {
-            const newSrc = (typeof pickImages !== 'undefined' && pickImages[pickNum]) 
-                           ? pickImages[pickNum] 
-                           : 'badbunny.png';
+    if (!overlay) return;
+
+    // 1. Hide the overlay completely while we prep
+    overlay.style.display = 'none';
+    overlay.classList.add('hidden');
+    overlay.style.opacity = '0'; // Start invisible to prevent the "flash"
+
+    // 2. Prep Text Content
+    if (title) title.textContent = pickNum === 1 ? "THE #1 PICK" : `PICK #${pickNum}`;
+    if (winnerNameDisplay) winnerNameDisplay.textContent = teamName;
+
+    // 3. Prep Image & Sync Display
+    if (winnerImage) {
+        const newSrc = (typeof pickImages !== 'undefined' && pickImages[pickNum]) 
+                       ? pickImages[pickNum] 
+                       : 'badbunny.png';
+
+        // Define what happens the moment the image is ready
+        winnerImage.onload = () => {
+            triggerReveal();
+        };
+
+        // If image is already cached/loaded, trigger immediately
+        if (winnerImage.complete) {
+            triggerReveal();
+        } else {
             winnerImage.src = newSrc;
         }
+    } else {
+        triggerReveal();
+    }
 
+    function triggerReveal() {
+        // Now that the image is 100% ready, we show everything at once
         overlay.classList.remove('hidden');
         overlay.style.display = 'flex';
+        
+        // Force a tiny reflow for the opacity transition
+        void overlay.offsetWidth; 
+        
+        overlay.style.opacity = '1';
+        overlay.style.transition = 'opacity 0.3s ease-in-out';
 
+        // Styling based on Pick Rank
         if (pickNum === 1) {
-            // Pick #1 Styling
             overlay.style.backgroundColor = "rgba(0, 0, 0, 1)"; 
             winnerNameDisplay.style.fontSize = "clamp(3rem, 10vw, 6rem)";
             winnerNameDisplay.classList.add('animate-pulse');
-
-            // --- THE 10 SECOND FINALE ---
-            setTimeout(() => {
-                closeWinnerOverlay();
-            }, 10000); 
-
+            setTimeout(() => closeWinnerOverlay(), 10000); 
         } else {
-            // Picks #8 through #2 Styling
             overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
             winnerNameDisplay.style.fontSize = ""; 
             winnerNameDisplay.classList.remove('animate-pulse'); 
-            
-            setTimeout(() => {
-                closeWinnerOverlay();
-            }, 8500);
+            setTimeout(() => closeWinnerOverlay(), 8500);
         }
     }
 }
-
 function closeWinnerOverlay() {
     const overlay = document.getElementById('winnerOverlay');
     if (overlay) {
@@ -1247,12 +1255,11 @@ function updateOddsDisplay() {
 
     teamOddsList.innerHTML = '';
 
-    // Sort teams by weight so highest odds are at the top
+    // Keep teams sorted by highest odds
     const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
 
     sortedMembers.forEach(m => {
         const li = document.createElement('li');
-        // This ID is used by the CSS
         li.setAttribute('data-team-id', m.id); 
         
         li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
@@ -1261,11 +1268,16 @@ function updateOddsDisplay() {
             <span class="team-name font-bold text-white uppercase tracking-tight">${m.name}</span>
             <span class="odds-percent font-mono text-white text-lg">${m.originalWeightDisplay || m.weight + '%'}</span>
         `;
- 
-        const isPicked = draftOrder.some(p => String(p.teamId) === String(m.id) || p.member === m.name);
+
+        // Check if this team is already revealed
+        // Logic: if the pick number in the draftOrder is higher than our current countdown, they are out.
+        const isPicked = draftOrder.some(p => 
+            (String(p.teamId) === String(m.id) || p.member === m.name) && 
+            p.pick > pickCounter
+        );
         
         if (isPicked) {
-            // This class MUST match your CSS rule: #teamOddsList li.picked-team
+            // ONLY add the class. Let the CSS handle the thick red line and bright white text.
             li.classList.add('picked-team');
         }
 

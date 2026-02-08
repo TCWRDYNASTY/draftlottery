@@ -239,7 +239,7 @@ h2 {
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
 
-/* --- REMAINING UI STYLES --- */
+/* --- UI SECTIONS --- */
 .team-odds-section, .results-section {
     margin-top: 2rem;
     background-color: var(--section-bg);
@@ -259,6 +259,7 @@ h2 {
     gap: 1rem;
 }
 
+
 .team-odds-list li, .results-list li {
     background-color: var(--container-bg);
     padding: 1rem;
@@ -269,21 +270,27 @@ h2 {
     align-items: center;
     border-left: 5px solid var(--accent-gold);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-        .picked-team {
-    opacity: 0.25 !important;
-    filter: grayscale(100%);
-    pointer-events: none;
-    position: relative;
-    transition: all 1s ease;
+    transition: all 0.8s ease;
 }
 
-        .picked-team .team-name, 
-.picked-team .odds-percent {
+.team-odds-list li.picked-team {
+    background-color: #1a1a1a !important; 
+    opacity: 0.3 !important; 
+    filter: grayscale(100%);
+    border-left-color: #444 !important;
+    transform: scale(0.96);
+    box-shadow: none !important;
+    pointer-events: none;
+}
+
+.team-odds-list li.picked-team span,
+.team-odds-list li.picked-team .team-name,
+.team-odds-list li.picked-team .odds-percent {
+    color: #777 !important;
     text-decoration: line-through !important;
     text-decoration-color: #ff4444 !important;
+    text-decoration-thickness: 3px;
 }
-        
 .drawn-ball-display {
     min-height: 120px;
     background-color: var(--section-bg);

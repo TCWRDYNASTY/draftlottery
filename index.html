@@ -12,14 +12,14 @@
     
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-    <style>
-   :root {
-    --primary-dark: #1e3159; 
-    --accent-gold: #FFD700; 
-    --light-text: #f0f4f8; 
-    --container-bg: #2a3d60; 
-    --section-bg: #3c5283; 
-    --highlight-blue: #6495ed; 
+  <style>
+    :root {
+     --primary-dark: #1e3159; 
+     --accent-gold: #FFD700; 
+     --light-text: #f0f4f8; 
+     --container-bg: #2a3d60; 
+     --section-bg: #3c5283; 
+     --highlight-blue: #6495ed; 
 }
 
 body {
@@ -69,6 +69,7 @@ h1 {
     background: linear-gradient(90deg, #FFD700, #FFEF9F);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-align: center;
 }
 
 h2 {
@@ -77,11 +78,12 @@ h2 {
     margin-bottom: 1.5rem;
     color: var(--light-text);
 }
+
 #introOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85); /* Darken the background */
-    z-index: 10001; /* Higher than curtains */
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10001;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -91,14 +93,14 @@ h2 {
     position: fixed;
     inset: 0;
     display: flex; 
-    z-index: 9999; /* Lower than rules */
-    pointer-events: none; /* Crucial: clicks go through to the rules below/above */
+    z-index: 9999;
+    pointer-events: none;
 }
 
 .curtain-panel {
     position: absolute;
     top: 0;
-    width: 50.5%; /* Added .5% overlap to prevent a tiny gap in the middle */
+    width: 50.5%;
     height: 100%;
     background-image: url('badbunny4.png'); 
     background-size: 200% 100%;
@@ -109,23 +111,20 @@ h2 {
     will-change: transform;
 }
 
-/* LEFT SIDE */
 .left-panel {
     left: 0;
     background-position: 0% center; 
     border-right: 2px solid rgba(0, 0, 0, 0.5);
-    transform: translateX(0); /* Default closed */
+    transform: translateX(0);
 }
 
-/* RIGHT SIDE */
 .right-panel {
     right: 0;
     background-position: 100% center; 
     border-left: 2px solid rgba(0, 0, 0, 0.5);
-    transform: translateX(0); /* Default closed */
+    transform: translateX(0);
 }
 
-/* TEXTURE/FOLDS EFFECT */
 .curtain-panel::after {
     content: '';
     position: absolute;
@@ -133,18 +132,16 @@ h2 {
     background: repeating-linear-gradient(90deg, transparent, rgba(0,0,0,0.2) 20px, transparent 40px);
 }
 
-/* ANIMATION STATES */
-/* Open state: slide them out */
 #curtainWrapper.open .left-panel { transform: translateX(-100%); }
 #curtainWrapper.open .right-panel { transform: translateX(100%); }
 
-/* --- THE WINNER OVERLAY (ON TOP OF EVERYTHING) --- */
+/* --- THE WINNER OVERLAY --- */
 #winnerOverlay {
     position: fixed;
     inset: 0;
-    z-index: 100000 !important; /* One level higher than curtains */
+    z-index: 100000 !important;
     background-color: rgba(0, 0, 0, 0.95);
-    display: none; /* JS toggles to flex */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -154,11 +151,11 @@ h2 {
 }
 
 #winnerImage {
-    max-width: 85vw;    /* Limits width to 85% of screen */
-    max-height: 50vh;   /* Limits height to 50% of screen */
-    object-fit: contain; /* Keeps hotdog from stretching */
+    max-width: 85vw;
+    max-height: 50vh;
+    object-fit: contain;
     border-radius: 1rem;
-    border: 4px solid #FFD700; /* Your gold border */
+    border: 4px solid #FFD700;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     margin: 20px 0;
 }
@@ -178,10 +175,6 @@ h2 {
     text-transform: uppercase;
 }
 
-.curtain-wrapper {
-    z-index: 9998;
-}
-
 .audio-overlay {
     position: fixed;
     top: 0;
@@ -194,7 +187,6 @@ h2 {
     align-items: center;
     justify-content: center;
     text-align: center;
-    cursor: pointer;
     color: white;
 }
         
@@ -252,74 +244,89 @@ h2 {
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
 
-/* KEEP these first three blocks for layout */
+/* --- DYNAMIC SECTION LAYOUT --- */
 .team-odds-section, .results-section {
     margin-top: 2rem;
     background-color: var(--section-bg);
     border-radius: 1rem;
-    padding: 2rem;
+    padding: 1.5rem;
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
     border: 2px solid var(--highlight-blue);
     width: 100%;
+    box-sizing: border-box;
 }
+
 #teamOddsList, .results-list {
     list-style: none;
     padding: 0;
-    margin-top: 1rem;
+    margin: 1rem 0 0 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    /* This creates a responsive grid that wraps items automatically */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
+    width: 100%;
 }
-#teamOddsList li {
+
+#teamOddsList li, .results-list li {
     background-color: var(--container-bg);
-    padding: 1rem;
+    padding: 1.25rem;
     border-radius: 0.75rem;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-left: 5px solid var(--accent-gold);
-    transition: all 0.8s ease;
+    transition: all 0.5s ease;
+    /* Fix: Allow text to wrap if it's too long */
+    flex-wrap: wrap; 
+    gap: 10px;
+    height: auto;
+    min-height: 60px;
 }
 
-/* REPLACE the "Picked" logic with this to stop the fading/lightening */
+/* Ensure long names don't break the box */
+#teamOddsList li span, .results-list li span {
+    word-break: break-word;
+    max-width: 100%;
+}
+
 #teamOddsList li.picked-team {
-    background-color: var(--container-bg) !important; /* Keep original dark color */
-    opacity: 1 !important;                            /* No fading */
-    filter: none !important;                          /* No grayscale */
-    border-left-color: var(--accent-gold) !important; /* Keep gold border */
+    background-color: var(--container-bg) !important; 
+    opacity: 1 !important; 
     pointer-events: none;
 }
 
-/* Ensure BOTH name and percent get a THICK red strike while staying white */
 #teamOddsList li.picked-team .team-name,
 #teamOddsList li.picked-team .odds-percent {
-    color: white !important;                /* Keep text bright white */
+    color: white !important; 
     text-decoration: line-through !important;
-    text-decoration-color: #ff0000 !important; /* Pure Red strike */
-    text-decoration-thickness: 5px !important;  /* Very bold line */
+    text-decoration-color: #ff0000 !important; 
+    text-decoration-thickness: 4px !important; 
 }
 
-/* 4. The Big Display for the winner ball */
 .drawn-ball-display {
     min-height: 120px;
+    width: 100%;
+    max-width: 600px;
     background-color: var(--section-bg);
     border-radius: 1.5rem;
     padding: 1.5rem;
-    margin-top: 2rem;
+    margin: 2rem auto 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 4px dashed var(--accent-gold);
-    position: relative;
+    box-sizing: border-box;
 }
 
 .drawn-ball-display .drawn-team-name {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 8vw, 3.5rem);
     font-weight: 900;
     font-family: 'Bebas Neue', sans-serif;
     color: #FFD700;
     text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255, 215, 0, 0.6);
+    text-align: center;
+    word-break: break-word;
 }
 
 .btn {
@@ -333,6 +340,7 @@ h2 {
     text-transform: uppercase;
     font-family: 'Bebas Neue', sans-serif;
     transition: all 0.3s ease;
+    border: none;
 }
 
 .btn:hover:not(:disabled) {
@@ -341,18 +349,18 @@ h2 {
 
 .hidden { display: none !important; }
 
-/* --- CORE ANIMATIONS --- */
 @keyframes circle-motion {
     0% { transform: rotate(0deg) translateX(var(--circle-radius, 50px)) rotate(0deg); }
     100% { transform: rotate(360deg) translateX(var(--circle-radius, 50px)) rotate(-360deg); }
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.8; }
+/* Fix for small screens */
+@media (max-width: 480px) {
+    .container { padding: 1.5rem 1rem; }
+    h1 { font-size: 2.2rem; }
+    .lottery-machine { width: 70vw; border-width: 8px; }
 }
-    </style>
+</style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -408,7 +416,7 @@ h2 {
     </div>
 
     <div class="team-odds-section">
-        <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Remaining Team Odds</h3>
+        <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Team Odds</h3>
         <ul id="teamOddsList" class="team-odds-list">
             </ul>
     </div>
@@ -645,7 +653,7 @@ async function initializeDraftState() {
             // Ensure the list is visible so the green boxes can appear
             if (resultsList) resultsList.style.display = 'grid'; 
             if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
-            if (currentPickLabel) currentPickLabel.textContent = "PICKS!";
+            if (currentPickLabel) currentPickLabel.textContent = "THE WINNER IS!";
         }
     } else {
         console.log('New run setup.');

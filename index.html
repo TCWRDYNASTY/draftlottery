@@ -338,14 +338,8 @@ h2 {
 <script type="module">
 
 const pickImages = {
-    8: 'hotdog1.png',
-    7: 'hotdog2.png',
-    6: 'hotdog3.png',
-    5: 'hotdog4.png',
-    4: 'hotdog5.png',
-    3: 'hotdog6.png',
-    2: 'hotdog7.png',
-    1: 'hotdog8.png'
+    8: 'hotdog8.png', 7: 'hotdog7.png', 6: 'hotdog6.png', 5: 'hotdog5.png',
+    4: 'hotdog4.png', 3: 'hotdog3.png', 2: 'hotdog2.png', 1: 'hotdog1.png'
 };
     
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -385,6 +379,29 @@ const memberConfigInputs = document.getElementById('memberConfigInputs');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Initializing Draft Room...");
+    if (typeof fetchDraftState === 'function') await fetchDraftState();
+    if (typeof renderResultsList === 'function') renderResultsList();
+    if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
+    if (typeof populateBalls === 'function') populateBalls();
+    const introOverlay = document.getElementById('introOverlay');
+    const curtains = document.getElementById('curtainWrapper');
+    const audio = document.getElementById('monacoAudio');
+
+    if (introOverlay) {
+        introOverlay.addEventListener('click', function() {
+            if (audio) audio.play().catch(e => console.log("Audio blocked", e));
+            this.style.display = 'none';
+            if (curtains) {
+                curtains.classList.add('open');
+                setTimeout(() => {
+                    curtains.style.display = 'none';
+                }, 1600);
+            }
+        }, { once: true });
+    }
+});
 
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();

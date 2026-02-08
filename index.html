@@ -791,6 +791,7 @@ async function clearDraftOrderFromSupabase() {
     sessionStorage.removeItem('hasSeenDraftAnimation');
     return true;
 }
+
 async function initializeDraftState() {
     members = await fetchMembersFromSupabase();
     if (members.length === 0) {
@@ -1054,21 +1055,24 @@ async function performSingleDraw() {
         if (savedPick) {
             drawnMember = members.find(m => m.id === savedPick.teamId || m.name === savedPick.member);
             if (drawnMember) {
-                availableMembers = availableMembers.filter(m => m.id !== drawnMember.id);
+                availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
             } else {
                 drawnMember = { name: savedPick.member || "Unknown", id: 'none' };
             }
         }
     } else {
         drawnMember = drawWeightedMember();
+        if (drawnMember) {
+        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+    }
     }
 
     if (drawnMember) {
         playPickAudio(pickCounter);
         
         // FIX: Ensure ID is a string so querySelector finds the match
-        const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-team-id="${String(drawnMember.id)}"]`);
-
+       const teamBalls = lotteryMachine.querySelectorAll('.ball[data-team-id="' + String(drawnMember.id) + '"]');
+console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
         if (teamBalls.length > 0) {
             // 2. PREPARE SELECTED BALLS
             teamBalls.forEach(ballElement => {

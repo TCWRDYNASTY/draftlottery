@@ -78,17 +78,19 @@ h2 {
     color: var(--light-text);
 }
 
-.curtain-wrapper {
+/* THE MAIN CONTAINER */
+#curtainWrapper, .curtain-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9998; 
-    display: flex;
-    pointer-events: none;
+    z-index: 9999; 
+    display: flex; /* Keeps panels side-by-side */
+    pointer-events: none; /* Allows clicking 'through' the wrapper once panels move */
 }
 
+/* THE PANELS */
 .curtain-panel {
     position: absolute;
     top: 0;
@@ -98,32 +100,26 @@ h2 {
     background-size: 200% 100%;
     background-repeat: no-repeat;
     background-color: #000;
-    /* Ensure this timing matches your JS delay */
     transition: transform 3s cubic-bezier(0.7, 0, 0.3, 1);
     z-index: 100;
-    will-change: transform; /* Helps performance */
+    will-change: transform;
 }
 
+/* LEFT SIDE */
 .left-panel {
-
     left: 0;
-
     background-position: 0% center; 
-
-    border-right: 1px solid rgba(255, 215, 0, 0.3);
-
+    border-right: 2px solid rgba(0, 0, 0, 0.5);
 }
 
+/* RIGHT SIDE */
 .right-panel {
-
     right: 0;
-
     background-position: 100% center; 
-
-    border-left: 1px solid rgba(255, 215, 0, 0.3);
-
+    border-left: 2px solid rgba(0, 0, 0, 0.5);
 }
 
+/* TEXTURE/FOLDS EFFECT */
 .curtain-panel::after {
     content: '';
     position: absolute;
@@ -131,9 +127,14 @@ h2 {
     background: repeating-linear-gradient(90deg, transparent, rgba(0,0,0,0.2) 20px, transparent 40px);
 }
 
+/* ANIMATION STATES */
+/* Open state: slide them out */
 .curtain-wrapper.open .left-panel { transform: translateX(-100%); }
 .curtain-wrapper.open .right-panel { transform: translateX(100%); }
 
+/* Closed state (Default): slide them back to center */
+.curtain-wrapper:not(.open) .left-panel { transform: translateX(0); }
+.curtain-wrapper:not(.open) .right-panel { transform: translateX(0); }
 #winnerOverlay {
     position: fixed;
     inset: 0;
@@ -839,17 +840,17 @@ async function runFullDraftSimulation() {
 }
 
 async function performSingleDraw() {
-    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;      
     
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
 
-    // Pause the balls to build suspense
+    // Pause balls for suspense
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
 
-    await new Promise(resolve => setTimeout(resolve, 1500));          
+    await new Promise(resolve => setTimeout(resolve, 1500));              
     
     let drawnMember;
     if (isDraftSaved) {
@@ -864,7 +865,7 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        // --- 1. SIDEBAR CROSS-OUT (NAME MATCH) ---
+        // 1. Sidebar Cross-out
         const allOddsItems = document.querySelectorAll('#teamOddsList li');
         allOddsItems.forEach(li => {
             const nameSpan = li.querySelector('.team-name');
@@ -874,11 +875,10 @@ async function performSingleDraw() {
             }
         });
 
-        // --- 2. REMOVE FROM POOL ---
-        // Prevents the team from being drawn again for the next pick
+        // 2. Remove from available pool
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
 
-        // --- 3. BALL ANIMATION ---
+        // 3. Ball Animation logic
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -899,11 +899,10 @@ async function performSingleDraw() {
             mainBall.remove();
         }
 
-        // --- 4. ANNOUNCE WINNER ---
+        // 4. Reveal Winner
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
-        
-        // Save to draft order if this is a fresh run
+
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -913,7 +912,7 @@ async function performSingleDraw() {
             });
         }
 
-        // --- 5. UPDATE RESULTS TABLE ---
+        // 5. Update Table
         if (typeof resultsList !== 'undefined' && resultsList) {
             const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
             if (pickElement) {
@@ -922,14 +921,36 @@ async function performSingleDraw() {
                 pickElement.classList.add('bg-green-500', 'text-white');
             }
         }
+
+        // Resume background balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
+
+        // Wait for the Winner Drop to finish
         await new Promise(resolve => setTimeout(resolve, 8500));
     }
-    pickCounter--;
+
+    // --- THE FINALE LOGIC ---
+    pickCounter--; // Move to next pick
+    
     if (pickCounter >= 1) {
+        // Still have picks left, reset balls for next round
         populateBalls();
+    } else {
+        // NO PICKS LEFT - Close the show!
+        console.log("Draft Complete! Closing curtains...");
+        
+        setTimeout(() => {
+            const curtains = document.getElementById('curtainWrapper');
+            if (curtains) {
+                curtains.style.display = 'block'; 
+                setTimeout(() => {
+                    curtains.classList.remove('open');
+                    showMessage("The Draft is Complete! All picks are locked in.", "success");
+                }, 50);
+            }
+        }, 3000);
     }
 }
 

@@ -303,7 +303,10 @@
             }
 /* Converging motion */
 .ball.converging {
-    transition: all 0.8s cubic-bezier(.25,.8,.25,1);
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    transition: all 0.9s ease-in-out;
 }
 
 .ball.merged {
@@ -1072,9 +1075,6 @@ async function performSingleDraw() {
         if (teamBalls.length > 0) {
             teamBalls.forEach(ball => {
                 ball.classList.add('converging');
-                ball.style.left = '50%';
-                ball.style.top = '50%';
-                ball.style.transform = 'translate(-50%, -50%)';
             });
 
             await new Promise(r => setTimeout(r, 900));

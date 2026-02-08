@@ -98,7 +98,7 @@ h2 {
     background-size: 200% 100%;
     background-repeat: no-repeat;
     background-color: #000;
-    transition: transform 4s cubic-bezier(0.7, 0, 0.3, 1);
+    transition: transform 5s cubic-bezier(0.7, 0, 0.3, 1);
     z-index: 100;
 }
 
@@ -129,7 +129,7 @@ h2 {
     inset: 0;
     z-index: 99999 !important;
     background-color: rgba(0, 0, 0, 0.95);
-    display: none; /* JS will change this to 'flex' */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -138,7 +138,6 @@ h2 {
     overflow: hidden;
 }
 
-/* This makes the Hotdog Image behave! */
 #winnerImage {
     max-width: 85vw;    /* Limits width to 85% of screen */
     max-height: 50vh;   /* Limits height to 50% of screen */
@@ -566,9 +565,9 @@ if (introOverlay) {
                 curtains.classList.add('open');
                 setTimeout(() => {
                     curtains.style.display = 'none';
-                }, 4100); 
+                }, 6500); 
             }
-        }, 3000);
+        }, 4000);
     }, { once: true });
 }
 
@@ -828,9 +827,11 @@ async function runFullDraftSimulation() {
 
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
+    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
 
+    // Pause the balls to build suspense
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
         ball.style.animationPlayState = 'paused';
     }); 
@@ -850,15 +851,21 @@ async function performSingleDraw() {
     }
 
     if (drawnMember) {
-        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
-        
-        // --- FIX 1 & 2: Match the ID and Class name for the sidebar cross-out ---
-        const oddsItem = document.querySelector(`#teamOddsList li[data-id="${drawnMember.id}"]`);
-        if (oddsItem) {
-            oddsItem.classList.add('picked-team'); // Using the CSS class we just made
-        }
-        // -----------------------------------------------------------------------
+        // --- 1. SIDEBAR CROSS-OUT (NAME MATCH) ---
+        const allOddsItems = document.querySelectorAll('#teamOddsList li');
+        allOddsItems.forEach(li => {
+            const nameSpan = li.querySelector('.team-name');
+            if (nameSpan && nameSpan.textContent.trim() === drawnMember.name.trim()) {
+                li.classList.add('picked-team');
+                console.log("Sidebar Update: Crossed out " + drawnMember.name);
+            }
+        });
 
+        // --- 2. REMOVE FROM POOL ---
+        // Prevents the team from being drawn again for the next pick
+        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+
+        // --- 3. BALL ANIMATION ---
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
         if (teamBalls.length > 0) {
             teamBalls.forEach((ball) => {
@@ -870,6 +877,7 @@ async function performSingleDraw() {
 
             await new Promise(r => setTimeout(r, 900));
             for (let i = 1; i < teamBalls.length; i++) { teamBalls[i].remove(); }    
+            
             const mainBall = teamBalls[0];
             mainBall.classList.add('merged');
             await new Promise(r => setTimeout(r, 1200));
@@ -878,9 +886,11 @@ async function performSingleDraw() {
             mainBall.remove();
         }
 
+        // --- 4. ANNOUNCE WINNER ---
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
         
+        // Save to draft order if this is a fresh run
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -890,6 +900,7 @@ async function performSingleDraw() {
             });
         }
 
+        // --- 5. UPDATE RESULTS TABLE ---
         if (typeof resultsList !== 'undefined' && resultsList) {
             const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
             if (pickElement) {
@@ -898,14 +909,11 @@ async function performSingleDraw() {
                 pickElement.classList.add('bg-green-500', 'text-white');
             }
         }
-
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
-
         await new Promise(resolve => setTimeout(resolve, 8500));
     }
-
     pickCounter--;
     if (pickCounter >= 1) {
         populateBalls();
@@ -1148,6 +1156,7 @@ async function loadDraftOrderFromSupabase() {
     return null;
 }
 
+/* --- DRAFT MANAGEMENT FUNCTIONS --- */
 async function resetDraft() {
     const confirmed = confirm("WARNING: This will delete the saved draft order from the database. This cannot be undone. Are you sure you want to reset for a new run?");
     
@@ -1172,13 +1181,8 @@ async function resetDraft() {
     }
 }
 
-document.getElementById('resetDraftBtn')?.addEventListener('click', resetDraft);
-document.getElementById('saveConfigBtn')?.addEventListener('click', saveConfig);
-document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDraftSimulation);
-
-initializeDraftState();
-
-    function updateOddsDisplay() {
+/* --- UI UPDATE FUNCTIONS --- */
+function updateOddsDisplay() {
     const teamOddsList = document.getElementById('teamOddsList');
     if (!teamOddsList || !members || members.length === 0) return;
     teamOddsList.innerHTML = '';
@@ -1199,7 +1203,14 @@ initializeDraftState();
     
     console.log("Odds display updated with " + members.length + " teams.");
 }
-    });
+
+/* --- EVENT LISTENERS & INITIALIZATION --- */
+document.getElementById('resetDraftBtn')?.addEventListener('click', resetDraft);
+document.getElementById('saveConfigBtn')?.addEventListener('click', saveConfig);
+document.getElementById('runFullDraftBtn')?.addEventListener('click', runFullDraftSimulation);
+
+// This kickstarts the UI
+initializeDraftState();
 </script>
 </body>
 </html>

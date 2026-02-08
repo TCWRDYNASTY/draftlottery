@@ -202,6 +202,63 @@
         list-style: none;
         padding: 0;
         margin: 1rem 0 0 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .results-list li {
+        background-color: var(--container-bg);
+        padding: 0.8rem 1.25rem;
+        border-radius: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 5px solid var(--accent-gold);
+        transition: transform 0.3s ease;
+    }
+
+    .results-list li .pick-number {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.4rem;
+        color: var(--highlight-blue);
+        flex-shrink: 0;
+    }
+
+    .results-list li .team-name {
+        font-size: clamp(1rem, 3.5vw, 1.25rem); /* Dynamically scales down */
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--light-text);
+        text-align: right;
+        word-break: break-word;
+    }
+
+    /* --- BUTTONS & UTILS --- */
+    .btn {
+        background: linear-gradient(90deg, #FFD700, #FFEF9F);
+        color: var(--primary-dark);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-weight: 900;
+        font-size: 1.3rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Bebas Neue', sans-serif;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn:hover:not(:disabled) { transform: scale(1.05); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+        .container { padding: 1rem; }
+        .results-list { grid-template-columns: 1fr; }
+        .lottery-machine { width: 80vw; }
+    }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>

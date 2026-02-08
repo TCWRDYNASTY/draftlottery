@@ -774,23 +774,7 @@ async function runFullDraftSimulation() {
         runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
     }
 
-    // --- RESET VISUALS FOR A FRESH START ---
-    pickCounter = members.length; // Set back to 8
-    const resultsList = document.getElementById('resultsList');
-    
-    if (resultsList) {
-        // We wipe the innerHTML but re-insert the header immediately
-        resultsList.innerHTML = `
-            <div class="results-header">
-                <span>PICK</span>
-                <span>TEAM</span>
-            </div>
-        `;
-    }
-    
-    // Ensure machine is clear and label is reset
-    if (currentPickLabel) currentPickLabel.textContent = `Waiting for Pick #${pickCounter}...`;
-    // ----------------------------------------
+    pickCounter = members.length; 
 
     if (isDraftSaved) {
         availableMembers = members.map(member => ({ ...member }));
@@ -806,13 +790,11 @@ async function runFullDraftSimulation() {
     for (let i = 0; i < timestamps.length; i++) {
         const targetTime = timestamps[i];
         
-        // Wait for the specific beat in the song
         while (audio.currentTime < targetTime) {
             await new Promise(resolve => setTimeout(resolve, 100));
             if (audio.paused && audio.currentTime > 0) break; 
         }
         
-        // This triggers the ball converge -> Hotdog Overlay -> Table Row update
         await performSingleDraw();
     }
 
@@ -830,7 +812,6 @@ async function runFullDraftSimulation() {
         runFullDraftBtn.textContent = 'RUN DRAFT'; 
     }
     
-    // Final end state
     if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
 }
 

@@ -260,8 +260,6 @@
         pointer-events: none;
         z-index: 1;
     }
-
-    /* Display for the drawn ball */
     .drawn-ball-display {
         min-height: 120px;
         background-color: var(--section-bg);
@@ -310,6 +308,25 @@
         text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255, 215, 0, 0.6);
         letter-spacing: 0.1em;
             }
+/* Converging motion */
+.ball.converging {
+    transition: all 0.8s cubic-bezier(.25,.8,.25,1);
+}
+
+.ball.merged {
+    transform: translate(-50%, -50%) scale(2.6);
+    z-index: 200;
+    box-shadow: 0 0 30px gold, 0 0 60px gold;
+}
+@keyframes vanishPop {
+    0%   { transform: translate(-50%, -50%) scale(2.6); opacity: 1; }
+    60%  { transform: translate(-50%, -50%) scale(3.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.ball.vanish {
+    animation: vanishPop 0.7s ease forwards;
+}
 
     .btn {
         background: linear-gradient(90deg, #FFD700, #FFEF9F);
@@ -1071,30 +1088,30 @@ async function performSingleDraw() {
         
 
 const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
-console.log(`Searching for team ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
-        if (teamBalls.length > 0) {
-     teamBalls.forEach(ballElement => {
-    ballElement.style.animationPlayState = 'paused';
-});
 
-            await new Promise(resolve => setTimeout(resolve, 100));
-            teamBalls.forEach(ballElement => {
-                ballElement.style.left = '50%';
-                ballElement.style.top = '20px'; 
-                ballElement.style.transform = 'translate(-50%, -50%) scale(2)';
-                ballElement.style.zIndex = '100'; 
-            });
-            await new Promise(resolve => setTimeout(resolve, 10000));
-            drawnTeamNameDisplay.textContent = drawnMember.name;
-            showWinnerDrop(drawnMember.name, pickCounter); 
-            await new Promise(resolve => setTimeout(resolve, 4000));
-            teamBalls.forEach(ballElement => {
-                ballElement.classList.remove('selected-for-shoot');
-                ballElement.classList.add('drawn');
-            });
+if (teamBalls.length > 0) {
+    teamBalls.forEach(ball => ball.style.animationPlayState = 'paused');
+    await new Promise(r => setTimeout(r, 200));
+    teamBalls.forEach(ball => {
+        ball.classList.add('converging');
+        ball.style.left = '50%';
+        ball.style.top = '50%';
+        ball.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
+    await new Promise(r => setTimeout(r, 900));
+    const mainBall = teamBalls[0];
+
+    for (let i = 1; i < teamBalls.length; i++) {
+        teamBalls[i].remove();
+    }
+    mainBall.classList.add('merged');
+
+    await new Promise(r => setTimeout(r, 1200));
+    mainBall.classList.add('vanish');
+
+    await new Promise(r => setTimeout(r, 800));
+}     
             teamBalls.forEach(ballElement => {
                 if (ballElement && ballElement.parentNode) {
                     ballElement.remove();

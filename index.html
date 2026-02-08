@@ -338,14 +338,14 @@ h2 {
 <script type="module">
 
 const pickImages = {
-    8: 'badbunny9.png',
-    7: 'badbunny7.png',
-    6: 'badbunny6.png',
-    5: 'badbunny3.png',
-    4: 'badbunny2.png',
-    3: 'badbunny1.png',
-    2: 'badbunny.png',
-    1: 'badbunny4.png'
+    8: 'hotdog1.png',
+    7: 'hotdog2.png',
+    6: 'hotdog3.png',
+    5: 'hotdog4.png',
+    4: 'hotdog5.png',
+    3: 'hotdog6.png',
+    2: 'hotdog7.png',
+    1: 'hotdog8.png'
 };
     
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -703,7 +703,6 @@ async function runFullDraftSimulation() {
 
 async function performSingleDraw() {
     if (!currentPickLabel || !drawnTeamNameDisplay || !lotteryMachine) return;     
-    
     currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
     drawnTeamNameDisplay.textContent = '';   
     lotteryMachine.querySelectorAll('.ball').forEach(ball => {
@@ -712,7 +711,6 @@ async function performSingleDraw() {
 
     await new Promise(resolve => setTimeout(resolve, 1500));          
     let drawnMember;
-
     if (isDraftSaved) {
         const savedPick = draftOrder.find(p => p.pick === pickCounter);
         if (savedPick) {
@@ -726,40 +724,31 @@ async function performSingleDraw() {
 
     if (drawnMember) {
         availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
-        playPickAudio(pickCounter);
+        const oddsItem = document.querySelector(`.team-odds-list li[data-id="${drawnMember.id}"]`);
+        if (oddsItem) {
+            oddsItem.classList.add('picked'); 
+        }
         const teamBalls = lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`);
-        
-        console.log(`DEBUG: Drawing ${drawnMember.name} (ID: ${drawnMember.id}). Found ${teamBalls.length} balls.`);
-
         if (teamBalls.length > 0) {
-            teamBalls.forEach((ball, index) => {
+            teamBalls.forEach((ball) => {
                 ball.style.left = '';
                 ball.style.top = '';
                 ball.style.transform = '';
                 ball.classList.add('converging');
-                if(index === 0) console.log("DEBUG: 'converging' class added to balls.");
             });
-            void teamBalls[0].offsetWidth; 
+
             await new Promise(r => setTimeout(r, 900));
-            for (let i = 1; i < teamBalls.length; i++) {
-                teamBalls[i].remove();
-            }
+            for (let i = 1; i < teamBalls.length; i++) { teamBalls[i].remove(); }
             
             const mainBall = teamBalls[0];
             mainBall.classList.add('merged');
-            console.log("DEBUG: 'merged' class added.");
             await new Promise(r => setTimeout(r, 1200));
             mainBall.classList.add('vanish');
-            console.log("DEBUG: 'vanish' animation triggered.");
             await new Promise(r => setTimeout(r, 800));
             mainBall.remove();
-        } else {
-            console.error(`DEBUG ERROR: No balls found in machine for team ID ${drawnMember.id}. Check populateBalls logic.`);
         }
-
         drawnTeamNameDisplay.textContent = drawnMember.name;
         showWinnerDrop(drawnMember.name, pickCounter);
-        
         if (!isDraftSaved) {
             draftOrder.push({ 
                 pick: pickCounter, 
@@ -768,20 +757,14 @@ async function performSingleDraw() {
                 originalWeightDisplay: drawnMember.originalWeightDisplay 
             });
         }
-
         const pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
         if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name} (${drawnMember.originalWeightDisplay || ''})</span>`;
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.innerHTML = `<span>Pick ${pickCounter}:</span> <span>${drawnMember.name}</span>`;
             pickElement.classList.add('bg-green-500', 'text-white');
         }
-
-        // Resume other balls
         lotteryMachine.querySelectorAll('.ball').forEach(ball => {
             ball.style.animationPlayState = 'running';
         });
-
-        // Wait for the big 8-second overlay to finish
         await new Promise(resolve => setTimeout(resolve, 8500));
     }
 

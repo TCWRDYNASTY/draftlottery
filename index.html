@@ -78,19 +78,6 @@ h2 {
     color: var(--light-text);
 }
 
-#introOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 10001;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 20px 10px;
-    box-sizing: border-box;
-}
-
 #curtainWrapper {
     position: fixed;
     inset: 0;
@@ -197,52 +184,6 @@ h2 {
   .final-order-grid { grid-template-columns: 1fr; }
   .curtain-card { padding: 22px; }
 }
-
-
-#winnerOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100000 !important;
-    background-color: rgba(0, 0, 0, 0.95);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
-    overflow: hidden;
-}
-
-#winnerOverlay h1 {
-    font-size: clamp(2rem, 8vw, 5rem); 
-    color: white;
-    font-weight: bold;
-    margin-bottom: 10px;
-    line-height: 1;
-}
-
-#finalWinnerName {
-    font-size: clamp(1.5rem, 6vw, 4rem);
-    color: #FFD700;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
-.audio-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-    z-index: 9999; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-}      
-
 
 
 .lottery-stage {
@@ -762,42 +703,6 @@ h2 {
     .lottery-machine { width: 70vw; border-width: 8px; }
 }
 
-@media (max-width: 600px) {
-    #introOverlay .container {
-        padding: 1rem;
-        gap: 0.3rem;
-        width: 92%;
-        margin: 0 auto;
-        max-height: 95vh; 
-        overflow: hidden; 
-    }
-
-    #introOverlay h1 { font-size: 1.8rem; }
-    #introOverlay h2 { font-size: 1.3rem; margin: 0.3rem 0; }
-    
-    #introOverlay p, #introOverlay li {
-        font-size: 0.8rem;
-        line-height: 1.2;
-        margin-bottom: 3px;
-    }
-
-    #introOverlay .btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 1.1rem;
-        margin-top: 8px;
-    }
-}
-
-#introOverlay {
-    -ms-overflow-style: none;
-    scrollbar-width: none; 
-    overflow-y: hidden;
-}
-
-#introOverlay::-webkit-scrollbar {
-    display: none;
-}
-    
 
 /* v7 responsive layout and simplified drop chute */
 @media (max-width: 1120px) {
@@ -855,23 +760,33 @@ h2 {
     overflow-wrap: anywhere;
 }
 
+
+.curtain-start-button {
+    margin-top: 1.4rem;
+    padding: 0.9rem 1.6rem;
+    border: 2px solid #ffd54a;
+    border-radius: 0.8rem;
+    background: linear-gradient(180deg, #ffd84f, #e5ad12);
+    color: #081426;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(255, 205, 48, 0.28);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.curtain-start-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 32px rgba(255, 205, 48, 0.45);
+}
+.curtain-start-button:disabled { opacity: .55; cursor: default; transform: none; }
+
 </style>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
 </head>
 <body>
-<div id="introOverlay" class="audio-overlay">
-    <div class="overlay-content">
-        <h1 class="text-accent-gold text-5xl mb-4">TCWR DY-NASTY</h1>
-        <h2 class="text-white mb-6">SUPER BOWL HALFTIME LOTTERY</h2>
-        
-        <button id="startDraftBtn" class="animate-pulse text-3xl font-bold text-gold cursor-pointer hover:scale-110 transition-transform bg-transparent border-none">
-    COMMENCE THE DRAFT
-</button>
-    </div>
-</div>
-
 <div id="curtainWrapper" class="curtain-wrapper">
     <div class="curtain-panel left-panel"></div>
     <div class="curtain-panel right-panel"></div>
@@ -887,6 +802,7 @@ h2 {
                         <li><strong>The Jackpot:</strong> A low-odds team that survives the early rounds gains a much stronger chance at Pick #1.</li>
                     </ul>
                 </div>
+                <button id="startDraftBtn" class="curtain-start-button" type="button">COMMENCE THE DRAFT</button>
             </div>
             <div id="curtainFinalView" hidden>
                 <h2>Final Draft Order</h2>
@@ -951,25 +867,32 @@ h2 {
     </div>
 
     <div class="commissioner-tools mt-12 p-4 border-t border-gray-800">
-        <button id="commissionerLogin" class="text-xs opacity-50 hover:opacity-100 text-white">Commissioner Login</button>
+        <button id="commissionerLogin" type="button" class="text-xs opacity-60 hover:opacity-100 text-white">Commissioner Login</button>
+
+        <form id="commissionerLoginForm" class="hidden mt-4 max-w-md p-4 bg-gray-900 rounded-lg border border-gray-700" autocomplete="off">
+            <label for="commissionerPassword" class="block text-xs uppercase tracking-wider text-gray-300 mb-2">Commissioner Password</label>
+            <div class="flex gap-2">
+                <input id="commissionerPassword" type="password" class="flex-1 p-2 rounded bg-black border border-gray-600 text-white" placeholder="Enter password" autocomplete="current-password">
+                <button id="unlockCommissionerBtn" type="submit" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded">Unlock</button>
+                <button id="cancelCommissionerBtn" type="button" class="px-3 py-2 bg-gray-700 text-white rounded">Cancel</button>
+            </div>
+        </form>
         
-        <div id="commissionerPanel" class="hidden mt-4 p-6 bg-gray-900 rounded-lg border border-red-900">
-            <h3 class="text-red-500 font-bold mb-4">Commissioner Controls</h3>
-            <div id="memberConfigInputs" class="space-y-4 mb-6">
-                </div>
-            <div class="flex gap-4">
-                <button id="saveConfigBtn" class="px-4 py-2 bg-green-600 text-white rounded">Save Configuration</button>
-                <button id="resetDraftBtn" class="px-4 py-2 bg-red-600 text-white rounded">Reset Draft</button>
+        <div id="commissionerPanel" class="hidden mt-4 p-6 bg-gray-900 rounded-lg border border-gray-700">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <h3 class="text-yellow-400 font-bold">Commissioner Controls</h3>
+                <button id="lockCommissionerBtn" type="button" class="text-xs text-gray-300 hover:text-white">Lock</button>
+            </div>
+            <p class="text-sm text-gray-400 mb-4">Update team names and lottery weights, then save directly to Supabase.</p>
+            <div id="memberConfigInputs" class="space-y-4 mb-6"></div>
+            <div class="flex flex-wrap gap-4">
+                <button id="saveConfigBtn" type="button" class="px-4 py-2 bg-green-600 text-white rounded">Save Configuration</button>
+                <button id="resetDraftBtn" type="button" class="px-4 py-2 bg-red-600 text-white rounded">Reset Draft</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="winnerOverlay" class="hidden fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black bg-opacity-95">
-    <h1 class="text-white text-7xl font-bold mb-8 tracking-tighter">THE #1 PICK</h1>
-    <div id="finalWinnerName" class="text-gold text-5xl mt-4 font-black text-center px-6"></div>
-</div>
-    
 <script type="module">
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -1002,23 +925,49 @@ const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
 const resultsList = document.getElementById('resultsList');
 const teamOddsList = document.getElementById('teamOddsList');
 const commissionerLogin = document.getElementById('commissionerLogin');
+const commissionerLoginForm = document.getElementById('commissionerLoginForm');
 const commissionerPasswordInput = document.getElementById('commissionerPassword');
 const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
+const cancelCommissionerBtn = document.getElementById('cancelCommissionerBtn');
+const lockCommissionerBtn = document.getElementById('lockCommissionerBtn');
 const commissionerPanel = document.getElementById('commissionerPanel');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+
+function openCommissionerLogin() {
+    commissionerLoginForm?.classList.remove('hidden');
+    commissionerLogin?.classList.add('hidden');
+    setTimeout(() => commissionerPasswordInput?.focus(), 0);
+}
+
+function closeCommissionerLogin() {
+    commissionerLoginForm?.classList.add('hidden');
+    commissionerLogin?.classList.remove('hidden');
+    if (commissionerPasswordInput) commissionerPasswordInput.value = '';
+}
+
+function lockCommissionerPanel() {
+    commissionerPanel?.classList.add('hidden');
+    closeCommissionerLogin();
+}
+
 function handleCommissionerUnlock(e) {
     if (e) e.preventDefault();
+    if (!commissionerPasswordInput) return;
+
     if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
-        commissionerPanel.classList.remove('hidden');
-        commissionerLogin.classList.add('hidden');
+        commissionerPanel?.classList.remove('hidden');
+        commissionerLoginForm?.classList.add('hidden');
+        commissionerLogin?.classList.add('hidden');
+        commissionerPasswordInput.value = '';
+        initializeMemberConfigInputs();
         showMessage("Commissioner tools unlocked!", "success");
         console.log("Commissioner panel unlocked.");
     } else {
         showMessage("Incorrect password. Please try again.", "error");
+        commissionerPasswordInput.select();
     }
-    commissionerPasswordInput.value = ''; 
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1030,8 +979,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof fetchDraftState === 'function') await fetchDraftState();
         if (typeof populateBalls === 'function') populateBalls();
     }
-    if (unlockCommissionerBtn) unlockCommissionerBtn.addEventListener('click', handleCommissionerUnlock);
-    if (commissionerLogin) commissionerLogin.addEventListener('submit', handleCommissionerUnlock);
+    if (commissionerLogin) commissionerLogin.addEventListener('click', openCommissionerLogin);
+    if (commissionerLoginForm) commissionerLoginForm.addEventListener('submit', handleCommissionerUnlock);
+    if (cancelCommissionerBtn) cancelCommissionerBtn.addEventListener('click', closeCommissionerLogin);
+    if (lockCommissionerBtn) lockCommissionerBtn.addEventListener('click', lockCommissionerPanel);
     
     if (saveConfigBtn) {
         saveConfigBtn.addEventListener('click', async (e) => {
@@ -1052,32 +1003,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-    const introOverlay = document.getElementById('introOverlay');
-    const startDraftBtn = document.getElementById('startDraftBtn'); // Target a specific button
+    const startDraftBtn = document.getElementById('startDraftBtn');
     const curtains = document.getElementById('curtainWrapper');
 
-    if (introOverlay && startDraftBtn) {
+    if (startDraftBtn) {
         startDraftBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            introOverlay.style.transition = 'opacity 0.6s ease';
-            introOverlay.style.opacity = '0';
-            introOverlay.style.pointerEvents = 'none';
-
-            setTimeout(() => {
-                introOverlay.style.display = 'none';        
-                if (curtains) {
-                    curtains.classList.add('open'); 
-                    setTimeout(() => {
-                        console.log("Curtains open. Automatically starting draft simulation...");
-                        if (typeof runFullDraftSimulation === 'function') {
-                            runFullDraftSimulation();
-                        }
-                    }, 1200); 
-                    setTimeout(() => {
-                        curtains.style.display = 'none';
-                    }, 3100); 
-                }
-            }, 600); 
+            startDraftBtn.disabled = true;
+            startDraftBtn.textContent = 'OPENING...';
+            if (curtains) {
+                curtains.classList.add('open');
+                setTimeout(() => {
+                    console.log('Curtains open. Starting draft simulation...');
+                    if (typeof runFullDraftSimulation === 'function') {
+                        runFullDraftSimulation();
+                    }
+                }, 1200);
+                setTimeout(() => {
+                    curtains.style.display = 'none';
+                }, 3100);
+            }
         }, { once: true });
     }
 });
@@ -1466,9 +1411,9 @@ async function runFullDraftSimulation() {
         populateBalls();
     }
 
-    // Start each normal draw seven seconds after the previous draw started.
+    // Start each normal draw ten seconds after the previous draw started.
     // Once Pick #2 is revealed, Pick #1 is revealed immediately by elimination.
-    const drawIntervalMs = 7000;
+    const drawIntervalMs = 10000;
     const numberOfDraws = Math.min(members.length, 8);
 
     for (let i = 0; i < numberOfDraws; i++) {
@@ -1559,7 +1504,6 @@ async function performSingleDraw() {
             if (slotStatus) slotStatus.textContent = drawnMember.name;
             completedSlot.title = drawnMember.name;
         }
-        if (typeof showWinnerDrop === 'function') showWinnerDrop(drawnMember.name, pickCounter);
 
         if (!isDraftSaved) {
             draftOrder.push({ 
@@ -1623,48 +1567,6 @@ function prepareClosingCurtainOrder() {
         row.innerHTML = `<span class="pick">#${pick}</span><span class="team"></span>`;
         row.querySelector('.team').textContent = teamName;
         finalOrder.appendChild(row);
-    }
-}
-
-  function showWinnerDrop(teamName, pickNum) {
-    const overlay = document.getElementById('winnerOverlay');
-    const winnerNameDisplay = document.getElementById('finalWinnerName');
-    const title = overlay?.querySelector('h1');
-
-    if (!overlay || !winnerNameDisplay) return;
-
-    winnerNameDisplay.textContent = teamName;
-    if (title) title.textContent = pickNum === 1 ? "THE #1 PICK" : `PICK #${pickNum}`;
-
-    overlay.style.display = 'flex';
-    overlay.classList.remove('hidden');
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.3s ease-in-out';
-    winnerNameDisplay.classList.remove('animate-pulse');
-
-    void overlay.offsetWidth;
-    overlay.style.opacity = '1';
-
-    if (pickNum === 1) {
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 1)";
-        winnerNameDisplay.style.fontSize = "clamp(3rem, 10vw, 6rem)";
-        winnerNameDisplay.classList.add('animate-pulse');
-        setTimeout(() => closeWinnerOverlay(), 8000);
-    } else {
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
-        winnerNameDisplay.style.fontSize = "clamp(2.5rem, 7vw, 5rem)";
-        setTimeout(() => closeWinnerOverlay(), 2000);
-    }
-}
-
-function closeWinnerOverlay() {
-    const overlay = document.getElementById('winnerOverlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            overlay.classList.add('hidden');
-        }, 500);
     }
 }
 
@@ -1767,7 +1669,8 @@ async function saveConfig() {
                 id: member.id,
                 name: newName,
                 weight: newWeight,
-                originalWeightDisplay: newDisplay || `${newWeight}%`
+                originalWeightDisplay: newDisplay || `${newWeight}%`,
+                color: member.color || null
             });
         }
     }
@@ -1823,7 +1726,8 @@ async function saveMembersToSupabase(newMembers) {
         members_data: {
             name: member.name,
             weight: member.weight,
-            originalWeightDisplay: member.originalWeightDisplay
+            originalWeightDisplay: member.originalWeightDisplay,
+            color: member.color || null
         }
     }));
     

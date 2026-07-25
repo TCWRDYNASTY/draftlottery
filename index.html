@@ -81,8 +81,12 @@ h2 {
 #curtainWrapper {
     position: fixed;
     inset: 0;
-    display: flex; 
+    display: flex;
     z-index: 9999;
+    pointer-events: auto;
+}
+
+#curtainWrapper.open {
     pointer-events: none;
 }
 
@@ -95,6 +99,7 @@ h2 {
     transition: transform 3s cubic-bezier(0.7, 0, 0.3, 1);
     z-index: 100;
     will-change: transform;
+    pointer-events: none;
 }
 
 .left-panel {
@@ -130,13 +135,16 @@ h2 {
     text-align: center;
     color: #fff;
     transition: opacity .45s ease, transform .45s ease;
-    pointer-events: none;
+    pointer-events: auto;
 }
 #curtainWrapper.open .curtain-content {
     opacity: 0;
     transform: scale(.97);
 }
 .curtain-card {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
     width: min(980px, 90vw);
     max-height: 88vh;
     overflow: auto;
@@ -762,6 +770,9 @@ h2 {
 
 
 .curtain-start-button {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
     margin-top: 1.4rem;
     padding: 0.9rem 1.6rem;
     border: 2px solid #ffd54a;

@@ -4,10 +4,10 @@
     <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Football Draft Lottery</title>
+    <title>TCWR Rookie Draft Lottery</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
 <style>
@@ -864,6 +864,639 @@ h2 {
     }
 }
 
+
+
+/* =========================================================
+   TCWR BROADCAST RESTYLE
+   Visual layer only: lottery logic and timing remain unchanged.
+   ========================================================= */
+
+:root {
+    --primary-dark: #061426;
+    --accent-gold: #f4be3d;
+    --light-text: #f7fbff;
+    --container-bg: rgba(7, 24, 43, 0.88);
+    --section-bg: rgba(10, 34, 59, 0.78);
+    --highlight-blue: #45a8ef;
+
+    --tcwr-navy-950: #020914;
+    --tcwr-navy-900: #061426;
+    --tcwr-navy-850: #081b31;
+    --tcwr-navy-800: #0b2440;
+    --tcwr-navy-700: #12385e;
+    --tcwr-blue-500: #2386d8;
+    --tcwr-blue-400: #45a8ef;
+    --tcwr-cyan-300: #79d8ff;
+    --tcwr-gold-500: #f4be3d;
+    --tcwr-gold-400: #ffd56b;
+    --tcwr-gold-300: #ffe39a;
+    --tcwr-white: #f7fbff;
+    --tcwr-muted: #a8bdd2;
+    --tcwr-panel: rgba(7, 24, 43, 0.88);
+    --tcwr-panel-soft: rgba(10, 34, 59, 0.74);
+    --tcwr-line: rgba(142, 205, 255, 0.20);
+    --tcwr-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+}
+
+html {
+    min-height: 100%;
+    background: var(--tcwr-navy-950);
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--tcwr-white);
+    padding: clamp(.75rem, 2vw, 1.75rem);
+    background:
+        radial-gradient(circle at 50% 9%, rgba(35, 134, 216, .22), transparent 30%),
+        radial-gradient(circle at 10% 88%, rgba(244, 190, 61, .09), transparent 24%),
+        linear-gradient(155deg, var(--tcwr-navy-950) 0%, var(--tcwr-navy-900) 44%, #071d34 100%);
+    background-attachment: fixed;
+    position: relative;
+    isolation: isolate;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, transparent 49.88%, rgba(121, 216, 255, .10) 50%, transparent 50.12%),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 119px,
+            rgba(255,255,255,.018) 120px
+        );
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    z-index: -1;
+    top: -30vh;
+    left: 50%;
+    width: 58vw;
+    height: 105vh;
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: .30;
+    background: linear-gradient(
+        180deg,
+        rgba(92,190,255,.30),
+        rgba(92,190,255,.06) 53%,
+        transparent 82%
+    );
+    clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+    filter: blur(18px);
+    animation: tcwrBeamPulse 6s ease-in-out infinite;
+}
+
+.container {
+    max-width: 1480px;
+    padding: clamp(1rem, 2.4vw, 2rem);
+    border: 1px solid rgba(142,205,255,.20);
+    border-radius: 28px;
+    background:
+        linear-gradient(145deg, rgba(15,48,80,.63), rgba(4,18,33,.86)),
+        rgba(5,19,34,.82);
+    box-shadow: var(--tcwr-shadow), inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter: blur(18px);
+}
+
+.draft-room-header {
+    width: 100%;
+    margin: 0 auto clamp(1.25rem, 2.8vw, 2rem);
+    text-align: center;
+}
+
+.draft-room-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    margin-bottom: .6rem;
+    color: var(--tcwr-gold-400);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(.72rem, 1.3vw, .92rem);
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.draft-room-eyebrow::before,
+.draft-room-eyebrow::after {
+    content: '';
+    width: clamp(20px, 4vw, 42px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--tcwr-gold-500));
+}
+
+.draft-room-eyebrow::after {
+    background: linear-gradient(90deg, var(--tcwr-gold-500), transparent);
+}
+
+.draft-room-header h1,
+h1 {
+    margin: 0;
+    color: var(--tcwr-white);
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(2.7rem, 6vw, 5.8rem);
+    line-height: .88;
+    font-weight: 900;
+    letter-spacing: -.025em;
+    text-shadow: 0 10px 32px rgba(0,0,0,.34);
+    -webkit-text-stroke: 0;
+    text-transform: uppercase;
+}
+
+.draft-room-header h1 span {
+    display: block;
+    color: var(--tcwr-gold-400);
+    text-shadow:
+        0 0 30px rgba(244,190,61,.18),
+        0 4px 0 rgba(72,45,3,.35);
+}
+
+.draft-room-header p {
+    max-width: 720px;
+    margin: .9rem auto 0;
+    color: #b9cde0;
+    font-size: clamp(.78rem, 1.35vw, 1rem);
+    line-height: 1.65;
+}
+
+h2,
+h3,
+.panel-title,
+.console-label,
+.console-pick,
+.console-screen,
+.final-order-row .pick,
+.curtain-start-button,
+.btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    -webkit-text-stroke: 0;
+}
+
+.lottery-stage {
+    min-height: 590px;
+    margin-top: .5rem;
+    padding: clamp(.8rem, 1.7vw, 1.25rem);
+    border: 1px solid rgba(142,205,255,.22);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 52% 40%, rgba(35,134,216,.21), transparent 33%),
+        linear-gradient(180deg, rgba(8,27,49,.96) 0%, rgba(4,15,29,.98) 66%, rgba(2,9,20,.99) 100%);
+    box-shadow:
+        inset 0 0 80px rgba(0,0,0,.50),
+        0 22px 48px rgba(0,0,0,.34);
+}
+
+.lottery-stage::before,
+.lottery-stage::after {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(244,190,61,.82), transparent);
+    box-shadow: 0 0 16px rgba(244,190,61,.30);
+}
+
+.draw-order-panel,
+.pick-console {
+    border: 1px solid rgba(142,205,255,.22);
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(15,48,80,.92), rgba(4,17,32,.96));
+    box-shadow:
+        0 18px 38px rgba(0,0,0,.38),
+        inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.draw-order-panel::before,
+.pick-console::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    border-radius: 18px 0 0 18px;
+    background: linear-gradient(var(--tcwr-gold-300), var(--tcwr-gold-500), transparent);
+    pointer-events: none;
+}
+
+.panel-title {
+    padding: .9rem .7rem;
+    color: var(--tcwr-white);
+    border-bottom: 1px solid rgba(142,205,255,.16);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.order-slot {
+    border-bottom: 1px solid rgba(142,205,255,.10);
+    color: rgba(168,189,210,.52);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.order-slot .order-number {
+    color: rgba(205,225,240,.62);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+}
+
+.order-slot.active {
+    color: var(--tcwr-gold-400);
+    background: linear-gradient(90deg, rgba(244,190,61,.14), transparent);
+    box-shadow: inset 3px 0 var(--tcwr-gold-500);
+}
+
+.order-slot.active .order-number {
+    color: var(--tcwr-gold-400);
+}
+
+.order-slot.filled {
+    color: var(--tcwr-white);
+    background: linear-gradient(90deg, rgba(35,134,216,.18), transparent);
+}
+
+.order-slot .order-status {
+    font-size: .68rem;
+    letter-spacing: .03em;
+}
+
+.lottery-machine {
+    border-color: rgba(214,237,250,.77);
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.43), transparent 15%),
+        radial-gradient(circle at center, rgba(69,168,239,.14), rgba(5,23,42,.54) 70%);
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,.08),
+        0 0 42px rgba(69,168,239,.20),
+        inset 0 0 55px rgba(255,255,255,.12),
+        inset 0 -55px 85px rgba(0,0,0,.60);
+}
+
+.globe-brace,
+.intake-neck,
+.chute-segment {
+    border-color: rgba(214,237,250,.76);
+}
+
+.machine-base {
+    background: linear-gradient(180deg, #163858 0%, #071321 72%);
+    border-color: #355f80;
+    box-shadow:
+        0 16px 22px rgba(0,0,0,.52),
+        inset 0 5px 8px rgba(255,255,255,.11),
+        0 0 0 7px rgba(4,13,23,.78);
+}
+
+.machine-base::before,
+.reveal-tray::after {
+    background: var(--tcwr-blue-400);
+    box-shadow: 0 0 18px rgba(69,168,239,.82);
+}
+
+.air-glow {
+    background: radial-gradient(
+        ellipse,
+        rgba(69,168,239,.58),
+        rgba(69,168,239,.07) 65%,
+        transparent 72%
+    );
+}
+
+.console-label {
+    color: var(--tcwr-muted);
+    font-size: .82rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.console-pick {
+    color: var(--tcwr-gold-400);
+    font-size: clamp(2.8rem, 4.5vw, 3.7rem);
+    font-weight: 900;
+    text-shadow: 0 0 22px rgba(244,190,61,.16);
+}
+
+.console-screen {
+    border: 1px solid rgba(244,190,61,.46);
+    border-radius: 12px;
+    color: var(--tcwr-gold-400);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(244,190,61,.06), transparent 55%),
+        #02070d;
+    font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+    font-weight: 800;
+    letter-spacing: .065em;
+    box-shadow:
+        inset 0 0 20px rgba(244,190,61,.06),
+        0 7px 20px rgba(0,0,0,.25);
+}
+
+.team-odds-section,
+.results-section {
+    margin-top: 1.25rem;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border: 1px solid rgba(142,205,255,.20);
+    border-radius: 20px;
+    background:
+        linear-gradient(145deg, rgba(15,48,80,.60), rgba(4,18,33,.80));
+    box-shadow:
+        0 16px 36px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.team-odds-section h3 {
+    margin: 0 0 .9rem !important;
+    color: var(--tcwr-white);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 800;
+    letter-spacing: .13em;
+}
+
+.team-odds-section h3::after {
+    content: '';
+    display: block;
+    width: 52px;
+    height: 2px;
+    margin: .55rem auto 0;
+    border-radius: 999px;
+    background: var(--tcwr-gold-500);
+    box-shadow: 0 0 12px rgba(244,190,61,.28);
+}
+
+#teamOddsList,
+.results-list {
+    gap: .75rem;
+}
+
+#teamOddsList li,
+.results-list li {
+    min-height: 58px;
+    padding: .78rem 1rem;
+    border: 1px solid rgba(142,205,255,.13);
+    border-left: 3px solid var(--tcwr-gold-500);
+    border-radius: 13px;
+    background: rgba(5,22,40,.70);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+#teamOddsList .team-name {
+    color: #eaf5fc;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+#teamOddsList .odds-percent {
+    color: var(--tcwr-gold-400);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    letter-spacing: .035em;
+}
+
+#teamOddsList li.picked-team {
+    background: rgba(5,22,40,.46) !important;
+    opacity: .58;
+}
+
+.curtain-panel {
+    background:
+        linear-gradient(90deg, rgba(2,9,20,.98) 0%, rgba(8,27,49,.99) 45%, rgba(4,17,32,.99) 100%);
+}
+
+.curtain-panel::after {
+    background:
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            rgba(0,0,0,.18) 22px,
+            rgba(121,216,255,.025) 44px,
+            transparent 66px
+        );
+}
+
+.left-panel {
+    border-right-color: rgba(244,190,61,.20);
+}
+
+.right-panel {
+    border-left-color: rgba(244,190,61,.20);
+}
+
+.curtain-card {
+    width: min(900px, 92vw);
+    padding: clamp(24px, 4vw, 50px);
+    border: 1px solid rgba(142,205,255,.20);
+    border-radius: 28px;
+    background:
+        linear-gradient(145deg, rgba(15,48,80,.70), rgba(4,18,33,.91));
+    box-shadow:
+        0 24px 74px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter: blur(18px);
+}
+
+.curtain-card::before {
+    content: 'THE WAR ROOM AWAITS';
+    display: block;
+    margin-bottom: .6rem;
+    color: var(--tcwr-gold-400);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(.72rem, 1.3vw, .92rem);
+    font-weight: 800;
+    letter-spacing: .18em;
+}
+
+.curtain-card h2 {
+    margin-bottom: 1rem;
+    color: var(--tcwr-white);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: .9;
+    font-weight: 900;
+    letter-spacing: -.015em;
+    text-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+.curtain-rules {
+    max-width: 760px;
+    margin: 0 auto;
+    color: #bfd1e2;
+    font-size: clamp(.9rem, 1.35vw, 1.08rem);
+    line-height: 1.7;
+}
+
+.curtain-rules strong {
+    color: var(--tcwr-gold-400);
+}
+
+.curtain-rules ul {
+    padding-left: 1.15rem;
+}
+
+.curtain-rules li::marker {
+    color: var(--tcwr-gold-500);
+}
+
+.curtain-start-button,
+.btn {
+    min-height: 52px;
+    border: 1px solid var(--tcwr-gold-300);
+    border-radius: 12px;
+    color: #08111c;
+    background: linear-gradient(180deg, var(--tcwr-gold-300), var(--tcwr-gold-500));
+    font-weight: 900;
+    letter-spacing: .09em;
+    box-shadow:
+        0 15px 32px rgba(244,190,61,.17),
+        inset 0 1px 0 rgba(255,255,255,.52);
+    transition:
+        transform 180ms ease,
+        filter 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.curtain-start-button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow:
+        0 18px 38px rgba(244,190,61,.24),
+        inset 0 1px 0 rgba(255,255,255,.52);
+}
+
+.curtain-start-button:focus-visible,
+.btn:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid rgba(121,216,255,.78);
+    outline-offset: 3px;
+}
+
+.final-order-grid {
+    gap: .7rem;
+}
+
+.final-order-row {
+    border: 1px solid rgba(142,205,255,.13);
+    border-left: 3px solid var(--tcwr-gold-500);
+    border-radius: 13px;
+    background: rgba(5,22,40,.72);
+}
+
+.final-order-row .pick {
+    color: var(--tcwr-gold-400);
+    font-weight: 900;
+}
+
+.final-order-row .team {
+    color: var(--tcwr-white);
+    font-family: 'Montserrat', sans-serif;
+    font-size: .88rem;
+    letter-spacing: .01em;
+}
+
+.commissioner-tools {
+    margin-top: 1.5rem !important;
+    border-color: rgba(142,205,255,.12) !important;
+}
+
+#commissionerLogin {
+    color: var(--tcwr-muted);
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: .04em;
+}
+
+#commissionerLoginForm,
+#commissionerPanel {
+    border: 1px solid rgba(142,205,255,.18) !important;
+    border-radius: 16px !important;
+    background: rgba(3,14,27,.92) !important;
+    box-shadow: 0 14px 30px rgba(0,0,0,.28);
+}
+
+#commissionerPanel h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+#commissionerPanel input,
+#commissionerLoginForm input {
+    border-color: rgba(142,205,255,.22) !important;
+    border-radius: 9px !important;
+    background: rgba(1,8,16,.92) !important;
+    color: var(--tcwr-white) !important;
+}
+
+@keyframes tcwrBeamPulse {
+    0%, 100% {
+        opacity: .23;
+        transform: translateX(-50%) scaleX(.94);
+    }
+    50% {
+        opacity: .40;
+        transform: translateX(-50%) scaleX(1.04);
+    }
+}
+
+@media (max-width: 900px) {
+    .container {
+        border-radius: 22px;
+    }
+
+    .draft-room-header {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 650px) {
+    body {
+        padding: .45rem;
+    }
+
+    .container {
+        padding: .7rem;
+        border-radius: 18px;
+    }
+
+    .draft-room-header h1,
+    h1 {
+        font-size: clamp(2.8rem, 15vw, 4.5rem);
+    }
+
+    .draft-room-header p {
+        padding: 0 .5rem;
+    }
+
+    .lottery-stage {
+        border-radius: 18px;
+    }
+
+    .team-odds-section {
+        border-radius: 17px;
+    }
+
+    .curtain-card {
+        border-radius: 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::after {
+        animation: none;
+    }
+}
+
 </style>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -899,9 +1532,11 @@ h2 {
 </div>
 
 <div class="container">
- <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase text-center mx-auto" style="font-family: 'Bebas Neue', sans-serif; color: #FFD700; letter-spacing: 0.1em; width: 100%;">
-    TCWR DY-NASTY Draft Lottery
-</h1>
+ <header class="draft-room-header">
+        <div class="draft-room-eyebrow">Official TCWR Selection Event</div>
+        <h1>Rookie Draft <span>Lottery Reveal</span></h1>
+        <p>Eight teams enter the war room. The order is revealed from Pick #8 to Pick #1.</p>
+    </header>
 
     <div class="lottery-stage" id="lotteryStage">
         <aside class="draw-order-panel" aria-label="Draft order">

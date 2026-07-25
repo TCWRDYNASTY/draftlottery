@@ -1226,31 +1226,27 @@ input:focus-visible {
 
 
 
-/* Keep every revealed team name on one line at a readable size. */
+/* Keep every revealed team name large and on exactly one line. */
 .console-screen {
     display: flex !important;
     align-items: center;
     justify-content: center;
     white-space: nowrap !important;
     overflow: hidden !important;
-    overflow-wrap: normal !important;
-    word-break: normal !important;
-    text-overflow: clip;
     padding-left: .55rem;
     padding-right: .55rem;
     line-height: 1 !important;
-    font-size: clamp(1.2rem, 2vw, 1.7rem) !important;
+    font-size: clamp(1.35rem, 2.2vw, 1.9rem) !important;
     letter-spacing: .035em !important;
 }
 
-.console-screen.fit-long {
-    font-size: clamp(1.02rem, 1.55vw, 1.35rem) !important;
-    letter-spacing: .015em !important;
-}
-
-.console-screen.fit-extra-long {
-    font-size: clamp(.9rem, 1.3vw, 1.15rem) !important;
-    letter-spacing: 0 !important;
+.console-screen .console-text {
+    display: inline-block;
+    flex: 0 0 auto;
+    max-width: none;
+    white-space: nowrap;
+    transform-origin: center center;
+    will-change: transform;
 }
 
 </style>
@@ -1462,19 +1458,44 @@ function fitConsoleScreenText(element, text) {
 
     const value = String(text ?? '').trim();
 
-    element.classList.remove('fit-long', 'fit-extra-long');
+    element.innerHTML = '';
+    const span = document.createElement('span');
+    span.className = 'console-text';
+    span.textContent = value;
+    element.appendChild(span);
 
-    // Keep normal status words and short team names large.
-    if (value.length >= 19) {
-        element.classList.add('fit-extra-long');
-    } else if (value.length >= 14) {
-        element.classList.add('fit-long');
-    }
+    const applyFit = () => {
+        span.style.transform = 'scaleX(1)';
 
-    element.textContent = value;
+        const styles = getComputedStyle(element);
+        const availableWidth =
+            element.clientWidth
+            - parseFloat(styles.paddingLeft || 0)
+            - parseFloat(styles.paddingRight || 0);
+
+        const naturalWidth = span.getBoundingClientRect().width;
+
+        if (availableWidth > 0 && naturalWidth > availableWidth) {
+            const scale = Math.max(0.58, availableWidth / naturalWidth);
+            span.style.transform = `scaleX(${scale})`;
+        }
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(applyFit));
 }
 
 
+
+
+let consoleFitResizeTimer = null;
+window.addEventListener('resize', () => {
+    clearTimeout(consoleFitResizeTimer);
+    consoleFitResizeTimer = setTimeout(() => {
+        const screen = document.getElementById('machineConsoleScreen');
+        const currentText = screen?.querySelector('.console-text')?.textContent ?? screen?.textContent ?? '';
+        if (screen) fitConsoleScreenText(screen, currentText);
+    }, 120);
+});
 
 function openCommissionerLogin() {
     commissionerLoginForm?.classList.remove('hidden');
@@ -1512,6 +1533,10 @@ function handleCommissionerUnlock(e) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const initialConsoleScreen = document.getElementById('machineConsoleScreen');
+    if (initialConsoleScreen) {
+        fitConsoleScreenText(initialConsoleScreen, initialConsoleScreen.textContent);
+    }
     console.log("Initializing Draft Room...");
     if (typeof initializeDraftState === 'function') {
         await initializeDraftState();

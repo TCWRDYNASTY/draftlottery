@@ -1224,6 +1224,20 @@ input:focus-visible {
     outline-offset: 3px;
 }
 
+
+
+/* Keep every revealed team name on exactly one line. */
+.console-screen {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+    text-overflow: clip;
+    padding-left: .45rem;
+    padding-right: .45rem;
+    line-height: 1 !important;
+}
+
 </style>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1397,7 +1411,84 @@ function stopLotteryMusic() {
     if (!lotteryMusic) return;
     lotteryMusic.pause();
     lotteryMusic.currentTime = 0;
+    lotteryMusic.volume = 0.55;
 }
+
+let lotteryMusicFadeFrame = null;
+
+function fadeOutLotteryMusic(duration = 2000) {
+    if (!lotteryMusic || lotteryMusic.paused) return;
+
+    if (lotteryMusicFadeFrame) {
+        cancelAnimationFrame(lotteryMusicFadeFrame);
+        lotteryMusicFadeFrame = null;
+    }
+
+    const startingVolume = lotteryMusic.volume;
+    const startTime = performance.now();
+
+    const fadeStep = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        lotteryMusic.volume = Math.max(0, startingVolume * (1 - progress));
+
+        if (progress < 1) {
+            lotteryMusicFadeFrame = requestAnimationFrame(fadeStep);
+        } else {
+            lotteryMusicFadeFrame = null;
+            stopLotteryMusic();
+        }
+    };
+
+    lotteryMusicFadeFrame = requestAnimationFrame(fadeStep);
+}
+
+function fitConsoleScreenText(element, text) {
+    if (!element) return;
+
+    const value = String(text ?? '').trim();
+    element.textContent = value;
+
+    // Reset to the normal display size before measuring.
+    element.style.fontSize = '';
+    element.style.letterSpacing = '';
+    element.style.whiteSpace = 'nowrap';
+
+    const fitText = () => {
+        const availableWidth =
+            element.clientWidth
+            - parseFloat(getComputedStyle(element).paddingLeft || 0)
+            - parseFloat(getComputedStyle(element).paddingRight || 0);
+
+        if (availableWidth <= 0) return;
+
+        let fontSize = parseFloat(getComputedStyle(element).fontSize);
+        const minimumFontSize = 10;
+
+        // Shrink based on the actual rendered width, not character count.
+        while (element.scrollWidth > availableWidth + 1 && fontSize > minimumFontSize) {
+            fontSize -= 0.5;
+            element.style.fontSize = `${fontSize}px`;
+        }
+
+        // Tighten spacing only if the smallest font still needs a little room.
+        if (element.scrollWidth > availableWidth + 1) {
+            element.style.letterSpacing = '-0.04em';
+        }
+    };
+
+    // Measure after the browser has painted the new team name.
+    requestAnimationFrame(fitText);
+}
+
+
+let consoleResizeTimer = null;
+window.addEventListener('resize', () => {
+    window.clearTimeout(consoleResizeTimer);
+    consoleResizeTimer = window.setTimeout(() => {
+        const screen = document.getElementById('machineConsoleScreen');
+        if (screen) fitConsoleScreenText(screen, screen.textContent);
+    }, 100);
+});
 
 function openCommissionerLogin() {
     commissionerLoginForm?.classList.remove('hidden');
@@ -1925,7 +2016,7 @@ async function performSingleDraw() {
     const machineCurrentPick = document.getElementById('machineCurrentPick');
     const machineConsoleScreen = document.getElementById('machineConsoleScreen');
     if (machineCurrentPick) machineCurrentPick.textContent = `#${pickCounter}`;
-    if (machineConsoleScreen) machineConsoleScreen.textContent = pickCounter === 1 ? 'BY ELIMINATION' : 'MIXING...';
+    if (machineConsoleScreen) fitConsoleScreenText(machineConsoleScreen, pickCounter === 1 ? 'BY ELIMINATION' : 'MIXING...');
     document.querySelectorAll('.order-slot').forEach(slot => {
         const active = Number(slot.dataset.machinePick) === pickCounter;
         slot.classList.toggle('active', active);
@@ -1964,7 +2055,7 @@ async function performSingleDraw() {
         if (pickCounter === 1 && availableMembers.length === 0) {
             if (revealTray) revealTray.classList.remove('has-ball');
             const machineConsoleScreen = document.getElementById('machineConsoleScreen');
-            if (machineConsoleScreen) machineConsoleScreen.textContent = drawnMember.name;
+            if (machineConsoleScreen) fitConsoleScreenText(machineConsoleScreen, drawnMember.name);
         } else {
             await animateBallThroughChute(drawnMember);
         }
@@ -2008,11 +2099,16 @@ async function performSingleDraw() {
         populateBalls();
     } else {
         console.log("Draft Complete! Holding the final board before closing curtains...");
+
+        // Hold the finished board for 3 seconds, then fade the music for
+        // the final 2 seconds so it reaches silence as the curtains close.
+        setTimeout(() => {
+            fadeOutLotteryMusic(2000);
+        }, 3000);
+
         setTimeout(() => {
             const curtains = document.getElementById('curtainWrapper');
             if (curtains) {
-                // Stop and reset the league theme exactly as the closing curtain begins.
-                stopLotteryMusic();
                 prepareClosingCurtainOrder();
                 curtains.style.display = 'flex';
                 setTimeout(() => {

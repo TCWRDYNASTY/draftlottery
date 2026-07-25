@@ -870,7 +870,7 @@ h2 {
     
 </head>
 <body>
-<audio id="lotteryMusic" preload="auto" loop>
+<audio id="lotteryMusic" preload="auto">
     <source src="Lottery War Room.mp3" type="audio/mpeg">
 </audio>
 <div id="curtainWrapper" class="curtain-wrapper">
@@ -1516,24 +1516,25 @@ async function runFullDraftSimulation() {
         populateBalls();
     }
 
-    // Start each normal draw ten seconds after the previous draw started.
-    // Once Pick #2 is revealed, Pick #1 is revealed immediately by elimination.
-    const drawIntervalMs = 10000;
-    const numberOfDraws = Math.min(members.length, 8);
+    // Give the opening presentation twenty seconds before the first ball is drawn.
+    // After each normal ball reveal, wait ten seconds before drawing the next ball.
+    // Once Pick #2 is revealed, Pick #1 is awarded immediately by elimination.
+    const firstDrawDelayMs = 20000;
+    const betweenDrawDelayMs = 10000;
+    const numberOfReveals = Math.min(members.length, 8);
 
-    for (let i = 0; i < numberOfDraws; i++) {
-        const drawStartedAt = performance.now();
+    await new Promise(resolve => setTimeout(resolve, firstDrawDelayMs));
+
+    for (let i = 0; i < numberOfReveals; i++) {
         await performSingleDraw();
 
-        const isSecondToLastComplete = pickCounter === 1;
+        const onlyPickOneRemains = pickCounter === 1;
         const isDraftComplete = pickCounter < 1;
 
-        if (!isDraftComplete && !isSecondToLastComplete) {
-            const elapsed = performance.now() - drawStartedAt;
-            const remainingDelay = Math.max(0, drawIntervalMs - elapsed);
-            await new Promise(resolve => setTimeout(resolve, remainingDelay));
+        if (!isDraftComplete && !onlyPickOneRemains) {
+            await new Promise(resolve => setTimeout(resolve, betweenDrawDelayMs));
         }
-        // No delay here when only one team remains. The final ball starts immediately.
+        // No delay when only Pick #1 remains; reveal it immediately by elimination.
     }
 
     if (!isDraftSaved) {

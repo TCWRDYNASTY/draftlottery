@@ -1226,16 +1226,31 @@ input:focus-visible {
 
 
 
-/* Keep every revealed team name on exactly one line. */
+/* Keep every revealed team name on one line at a readable size. */
 .console-screen {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap !important;
     overflow: hidden !important;
     overflow-wrap: normal !important;
-    word-break: keep-all !important;
+    word-break: normal !important;
     text-overflow: clip;
-    padding-left: .45rem;
-    padding-right: .45rem;
+    padding-left: .55rem;
+    padding-right: .55rem;
     line-height: 1 !important;
+    font-size: clamp(1.2rem, 2vw, 1.7rem) !important;
+    letter-spacing: .035em !important;
+}
+
+.console-screen.fit-long {
+    font-size: clamp(1.02rem, 1.55vw, 1.35rem) !important;
+    letter-spacing: .015em !important;
+}
+
+.console-screen.fit-extra-long {
+    font-size: clamp(.9rem, 1.3vw, 1.15rem) !important;
+    letter-spacing: 0 !important;
 }
 
 </style>
@@ -1446,49 +1461,20 @@ function fitConsoleScreenText(element, text) {
     if (!element) return;
 
     const value = String(text ?? '').trim();
+
+    element.classList.remove('fit-long', 'fit-extra-long');
+
+    // Keep normal status words and short team names large.
+    if (value.length >= 19) {
+        element.classList.add('fit-extra-long');
+    } else if (value.length >= 14) {
+        element.classList.add('fit-long');
+    }
+
     element.textContent = value;
-
-    // Reset to the normal display size before measuring.
-    element.style.fontSize = '';
-    element.style.letterSpacing = '';
-    element.style.whiteSpace = 'nowrap';
-
-    const fitText = () => {
-        const availableWidth =
-            element.clientWidth
-            - parseFloat(getComputedStyle(element).paddingLeft || 0)
-            - parseFloat(getComputedStyle(element).paddingRight || 0);
-
-        if (availableWidth <= 0) return;
-
-        let fontSize = parseFloat(getComputedStyle(element).fontSize);
-        const minimumFontSize = 10;
-
-        // Shrink based on the actual rendered width, not character count.
-        while (element.scrollWidth > availableWidth + 1 && fontSize > minimumFontSize) {
-            fontSize -= 0.5;
-            element.style.fontSize = `${fontSize}px`;
-        }
-
-        // Tighten spacing only if the smallest font still needs a little room.
-        if (element.scrollWidth > availableWidth + 1) {
-            element.style.letterSpacing = '-0.04em';
-        }
-    };
-
-    // Measure after the browser has painted the new team name.
-    requestAnimationFrame(fitText);
 }
 
 
-let consoleResizeTimer = null;
-window.addEventListener('resize', () => {
-    window.clearTimeout(consoleResizeTimer);
-    consoleResizeTimer = window.setTimeout(() => {
-        const screen = document.getElementById('machineConsoleScreen');
-        if (screen) fitConsoleScreenText(screen, screen.textContent);
-    }, 100);
-});
 
 function openCommissionerLogin() {
     commissionerLoginForm?.classList.remove('hidden');

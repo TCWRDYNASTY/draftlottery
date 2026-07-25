@@ -1516,11 +1516,13 @@ async function runFullDraftSimulation() {
         populateBalls();
     }
 
-    // Give the opening presentation twenty seconds before the first ball is drawn.
-    // After each normal ball reveal, wait ten seconds before drawing the next ball.
-    // Once Pick #2 is revealed, Pick #1 is awarded immediately by elimination.
+    // Give the opening presentation twenty seconds before Pick #8 is drawn.
+    // Wait ten seconds between the normal ball draws.
+    // After Pick #2 is revealed, hold for three seconds before awarding Pick #1
+    // by process of elimination.
     const firstDrawDelayMs = 20000;
     const betweenDrawDelayMs = 10000;
+    const finalEliminationDelayMs = 3000;
     const numberOfReveals = Math.min(members.length, 8);
 
     await new Promise(resolve => setTimeout(resolve, firstDrawDelayMs));
@@ -1531,10 +1533,12 @@ async function runFullDraftSimulation() {
         const onlyPickOneRemains = pickCounter === 1;
         const isDraftComplete = pickCounter < 1;
 
-        if (!isDraftComplete && !onlyPickOneRemains) {
-            await new Promise(resolve => setTimeout(resolve, betweenDrawDelayMs));
+        if (!isDraftComplete) {
+            await new Promise(resolve => setTimeout(
+                resolve,
+                onlyPickOneRemains ? finalEliminationDelayMs : betweenDrawDelayMs
+            ));
         }
-        // No delay when only Pick #1 remains; reveal it immediately by elimination.
     }
 
     if (!isDraftSaved) {
@@ -1574,7 +1578,11 @@ async function performSingleDraw() {
     if (drawnTeamNameDisplay) drawnTeamNameDisplay.textContent = '';
     if (revealTray) revealTray.classList.remove('has-ball');   
     
-    await new Promise(resolve => setTimeout(resolve, 1500));              
+    // Pick #1 is already preceded by the dedicated three-second elimination hold.
+    // Other picks retain the brief machine-mixing pause.
+    if (pickCounter !== 1) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    }
     
     let drawnMember;
     if (isDraftSaved) {
@@ -1639,11 +1647,12 @@ async function performSingleDraw() {
     if (pickCounter >= 1) {
         populateBalls();
     } else {
-        console.log("Draft Complete! Closing curtains...");
-        stopLotteryMusic();
+        console.log("Draft Complete! Holding the final board before closing curtains...");
         setTimeout(() => {
             const curtains = document.getElementById('curtainWrapper');
             if (curtains) {
+                // Stop and reset the league theme exactly as the closing curtain begins.
+                stopLotteryMusic();
                 prepareClosingCurtainOrder();
                 curtains.style.display = 'flex';
                 setTimeout(() => {
@@ -1652,8 +1661,10 @@ async function performSingleDraw() {
                         showMessage("The Draft is Complete! All picks are locked in.", "success");
                     }
                 }, 50);
+            } else {
+                stopLotteryMusic();
             }
-        }, 1500); 
+        }, 5000);
     }
 } 
 function prepareClosingCurtainOrder() {

@@ -870,6 +870,9 @@ h2 {
     
 </head>
 <body>
+<audio id="lotteryMusic" preload="auto" loop>
+    <source src="Lottery War Room.mp3" type="audio/mpeg">
+</audio>
 <div id="curtainWrapper" class="curtain-wrapper">
     <div class="curtain-panel left-panel"></div>
     <div class="curtain-panel right-panel"></div>
@@ -1017,6 +1020,24 @@ const commissionerPanel = document.getElementById('commissionerPanel');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const resetDraftBtn = document.getElementById('resetDraftBtn');
 const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+const lotteryMusic = document.getElementById('lotteryMusic');
+
+async function startLotteryMusic() {
+    if (!lotteryMusic) return;
+    lotteryMusic.volume = 0.55;
+    lotteryMusic.currentTime = 0;
+    try {
+        await lotteryMusic.play();
+    } catch (error) {
+        console.warn('Lottery music could not start:', error);
+    }
+}
+
+function stopLotteryMusic() {
+    if (!lotteryMusic) return;
+    lotteryMusic.pause();
+    lotteryMusic.currentTime = 0;
+}
 
 function openCommissionerLogin() {
     commissionerLoginForm?.classList.remove('hidden');
@@ -1090,8 +1111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const curtains = document.getElementById('curtainWrapper');
 
     if (startDraftBtn) {
-        startDraftBtn.addEventListener('click', function(e) {
+        startDraftBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
+            await startLotteryMusic();
             startDraftBtn.disabled = true;
             startDraftBtn.textContent = 'OPENING...';
             if (curtains) {
@@ -1110,45 +1132,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 async function saveDraftOrderToSupabase(draftOrder) {
-    console.log('Saving draft order to Supabase...', draftOrder);
-    
-    const formattedData = draftOrder.map(pick => ({
-        id: `pick_${pick.pick}`,
-        order_data: {
-            pick: pick.pick,
-            member: pick.member,
-            originalWeightDisplay: pick.originalWeightDisplay
-        }
-    }));
+    console.log('Saving draft order to Supabase...', draftOrder);
+    
+    const formattedData = draftOrder.map(pick => ({
+        id: `pick_${pick.pick}`,
+        order_data: {
+            pick: pick.pick,
+            member: pick.member,
+            originalWeightDisplay: pick.originalWeightDisplay
+        }
+    }));
 
-    const { data, error } = await supabase
-        .from('draft_orders')
-        .upsert(formattedData, { onConflict: 'id' })
-        .select();
+    const { data, error } = await supabase
+        .from('draft_orders')
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
 
-    if (error) {
-        console.error('Error saving draft order to Supabase:', error);
-        return false;
-    }
-    console.log('Draft order saved successfully:', data);
-    return true;
+    if (error) {
+        console.error('Error saving draft order to Supabase:', error);
+        return false;
+    }
+    console.log('Draft order saved successfully:', data);
+    return true;
 }
 
 async function clearDraftOrderFromSupabase() {
-    showMessage('Clearing old draft order from the database...');
-    const { error } = await supabase
-        .from(SUPABASE_ORDERS_TABLE_NAME)
-        .delete()
-        .not('id', 'is', null);
-    
-    if (error) {
-        console.error('Error clearing draft order:', error);
-        showMessage('Error clearing draft order. Check console.');
-        return false;
-    }
-    console.log('Draft order cleared successfully.');
-    sessionStorage.removeItem('hasSeenDraftAnimation');
-    return true;
+    showMessage('Clearing old draft order from the database...');
+    const { error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .delete()
+        .not('id', 'is', null);
+    
+    if (error) {
+        console.error('Error clearing draft order:', error);
+        showMessage('Error clearing draft order. Check console.');
+        return false;
+    }
+    console.log('Draft order cleared successfully.');
+    sessionStorage.removeItem('hasSeenDraftAnimation');
+    return true;
 }
 
 async function initializeDraftState() {
@@ -1617,6 +1639,7 @@ async function performSingleDraw() {
         populateBalls();
     } else {
         console.log("Draft Complete! Closing curtains...");
+        stopLotteryMusic();
         setTimeout(() => {
             const curtains = document.getElementById('curtainWrapper');
             if (curtains) {
@@ -1673,29 +1696,29 @@ function drawWeightedMember() {
 
     
 function showResults() {
-    if (resultsList) resultsList.style.display = 'none';
-    updateUIFromCurrentState();
+    if (resultsList) resultsList.style.display = 'none';
+    updateUIFromCurrentState();
 }
 
 function updateUIFromCurrentState() {
-    initializeResultsList();
-    const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
-    sortedDraftOrder.forEach(item => {
-        const originalMember = members.find(m => m.name === item.member);
-        if (originalMember) {
-            const oddsElement = teamOddsList.querySelector(`li[data-team-id="${originalMember.id}"]`);
-            if (oddsElement) {
-                oddsElement.classList.add('picked');
-            }
-        }
-    
-        const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
-        if (pickElement) {
-            pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
-            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
-            pickElement.classList.add('bg-green-500', 'text-white');
-        }
-    });
+    initializeResultsList();
+    const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
+    sortedDraftOrder.forEach(item => {
+        const originalMember = members.find(m => m.name === item.member);
+        if (originalMember) {
+            const oddsElement = teamOddsList.querySelector(`li[data-team-id="${originalMember.id}"]`);
+            if (oddsElement) {
+                oddsElement.classList.add('picked');
+            }
+        }
+    
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+    });
 }
 
 function displayTeamOdds() {
@@ -1772,60 +1795,60 @@ async function saveConfig() {
 }
 
 async function fetchMembersFromSupabase() {
-    console.log('Fetching members from Supabase...');
-    const { data, error } = await supabase
-        .from(SUPABASE_TABLE_NAME)
-        .select('id, members_data')
-        .order('members_data->>weight', { ascending: false });
+    console.log('Fetching members from Supabase...');
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select('id, members_data')
+        .order('members_data->>weight', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching data from Supabase:', error);
-        showMessage('Error fetching data from the database. Check console for details.');
-        return [];
-    }
+    if (error) {
+        console.error('Error fetching data from Supabase:', error);
+        showMessage('Error fetching data from the database. Check console for details.');
+        return [];
+    }
 
-    if (data && data.length > 0) {
-        console.log('Data fetched successfully:', data);
-        const members = data.map(item => ({
-            id: item.id,
-            name: item.members_data.name,
-            weight: item.members_data.weight,
-            originalWeightDisplay: item.members_data.originalWeightDisplay,
-            color: item.members_data.color 
-        }));
-        console.log('After mapping, members array:', members, 'Length:', members.length);
-        return members;
-    } else {
-        console.warn('No member data found in Supabase table.');
-        return [];
-    }
+    if (data && data.length > 0) {
+        console.log('Data fetched successfully:', data);
+        const members = data.map(item => ({
+            id: item.id,
+            name: item.members_data.name,
+            weight: item.members_data.weight,
+            originalWeightDisplay: item.members_data.originalWeightDisplay,
+            color: item.members_data.color 
+        }));
+        console.log('After mapping, members array:', members, 'Length:', members.length);
+        return members;
+    } else {
+        console.warn('No member data found in Supabase table.');
+        return [];
+    }
 }
 
 async function saveMembersToSupabase(newMembers) {
-    console.log('Saving configuration to Supabase...', newMembers);
+    console.log('Saving configuration to Supabase...', newMembers);
 
-    const formattedData = newMembers.map(member => ({
-        id: member.id,
-        members_data: {
-            name: member.name,
-            weight: member.weight,
-            originalWeightDisplay: member.originalWeightDisplay,
+    const formattedData = newMembers.map(member => ({
+        id: member.id,
+        members_data: {
+            name: member.name,
+            weight: member.weight,
+            originalWeightDisplay: member.originalWeightDisplay,
             color: member.color || null
-        }
-    }));
-    
-    const { data, error } = await supabase
-        .from(SUPABASE_TABLE_NAME)
-        .upsert(formattedData, { onConflict: 'id' })
-        .select();
+        }
+    }));
+    
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
 
-    if (error) {
-        console.error('Error saving data to Supabase:', error);
-        showMessage('Error saving configuration to the database. Check console for details.');
-        return false;
-    }
-    console.log('Configuration saved successfully:', data);
-    return true;
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+        showMessage('Error saving configuration to the database. Check console for details.');
+        return false;
+    }
+    console.log('Configuration saved successfully:', data);
+    return true;
 }
 
 async function loadDraftOrderFromSupabase() {

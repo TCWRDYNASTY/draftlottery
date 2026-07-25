@@ -1226,27 +1226,30 @@ input:focus-visible {
 
 
 
-/* Keep every revealed team name large and on exactly one line. */
+/* FINAL CURRENT-PICK NAME FIX
+   This overrides all earlier .console-screen rules. */
 .console-screen {
+    width: calc(100% - 1rem) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 .5rem 1rem !important;
+    padding: .7rem .45rem !important;
+
     display: flex !important;
-    align-items: center;
-    justify-content: center;
+    align-items: center !important;
+    justify-content: center !important;
+
     white-space: nowrap !important;
     overflow: hidden !important;
-    padding-left: .55rem;
-    padding-right: .55rem;
-    line-height: 1 !important;
-    font-size: clamp(1.15rem, 2.0vw, 1.7rem) !important;
-    letter-spacing: .035em !important;
-}
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-overflow: clip !important;
 
-.console-screen .console-text {
-    display: inline-block;
-    flex: 0 0 auto;
-    max-width: none;
-    white-space: nowrap;
-    transform-origin: center center;
-    will-change: transform;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: clamp(1.15rem, 1.65vw, 1.45rem) !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: .01em !important;
 }
 
 </style>
@@ -1455,47 +1458,12 @@ function fadeOutLotteryMusic(duration = 2000) {
 
 function fitConsoleScreenText(element, text) {
     if (!element) return;
-
-    const value = String(text ?? '').trim();
-
-    element.innerHTML = '';
-    const span = document.createElement('span');
-    span.className = 'console-text';
-    span.textContent = value;
-    element.appendChild(span);
-
-    const applyFit = () => {
-        span.style.transform = 'scaleX(1)';
-
-        const styles = getComputedStyle(element);
-        const availableWidth =
-            element.clientWidth
-            - parseFloat(styles.paddingLeft || 0)
-            - parseFloat(styles.paddingRight || 0);
-
-        const naturalWidth = span.getBoundingClientRect().width;
-
-        if (availableWidth > 0 && naturalWidth > availableWidth) {
-            const scale = Math.max(0.58, availableWidth / naturalWidth);
-            span.style.transform = `scaleX(${scale})`;
-        }
-    };
-
-    requestAnimationFrame(() => requestAnimationFrame(applyFit));
+    element.textContent = String(text ?? '').trim();
 }
 
 
 
 
-let consoleFitResizeTimer = null;
-window.addEventListener('resize', () => {
-    clearTimeout(consoleFitResizeTimer);
-    consoleFitResizeTimer = setTimeout(() => {
-        const screen = document.getElementById('machineConsoleScreen');
-        const currentText = screen?.querySelector('.console-text')?.textContent ?? screen?.textContent ?? '';
-        if (screen) fitConsoleScreenText(screen, currentText);
-    }, 120);
-});
 
 function openCommissionerLogin() {
     commissionerLoginForm?.classList.remove('hidden');

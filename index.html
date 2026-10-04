@@ -1424,7 +1424,22 @@ const COMMISSIONER_PASSWORD =
 
 
 /* =========================================================
+   =========================================================
    SUPABASE
+   =========================================================
+   =========================================================
+
+   IMPORTANT:
+
+   Paste your CURRENT Supabase publishable key below.
+
+   It should start with:
+
+   sb_publishable_
+
+   DO NOT put an sb_secret key here.
+   DO NOT put a service_role key here.
+
    ========================================================= */
 
 const SUPABASE_URL =
@@ -1451,7 +1466,31 @@ const supabase =
 
 
 /* =========================================================
-   IMAGE FILES
+   =========================================================
+   IMAGE FILES — CHANGE FILENAMES HERE
+   =========================================================
+   =========================================================
+
+   THIS IS THE IMAGE SECTION.
+
+   Put the image files in the SAME folder as this HTML file.
+
+   If your files are:
+
+   Matt.jpeg
+   Steven.jpeg
+   Jess.jpeg
+   Kevin.jpeg
+   Sarah.jpeg
+   Mike.jpeg
+   Chris.jpeg
+   Amanda.jpeg
+
+   change this section to those names.
+
+   The Commissioner dropdown will automatically use
+   whatever filenames are listed here.
+
    ========================================================= */
 
 const IMAGE_FILES = [
@@ -1568,21 +1607,16 @@ let raf =
 
 /* =========================================================
    RACE POSITION SETTINGS
-   =========================================================
-
-   The finish point is intentionally INSIDE the blue
-   end zone.
-
-   79% places the CENTER of the player image
-   comfortably inside the blue end zone.
    ========================================================= */
 
+/* The finish point is intentionally INSIDE the blue end zone.
+   At 86%, the center of the runner lands farther inside
+   the blue end zone while still leaving room before the far boundary. */
 const START_POSITION =
   8;
 
-
 const FINISH_POSITION =
-  79;
+  86;
 
 
 /* =========================================================
@@ -3231,6 +3265,21 @@ function showSavedDraft(){
 
 /* =========================================================
    START RACE
+   =========================================================
+
+   THIS IS THE IMPORTANT CORRECTION.
+
+   The race no longer gets cancelled just because
+   Supabase fails to save the newly generated order.
+
+   If there is already a saved order, use it.
+
+   If there isn't one:
+     1. Generate the weighted order.
+     2. Immediately use that order for the race.
+     3. Try to save it to Supabase.
+     4. A Supabase failure does NOT stop the race.
+
    ========================================================= */
 
 async function start(){
@@ -3298,6 +3347,8 @@ async function start(){
     }
 
 
+    /* Keep the locally generated order immediately. */
+
     savedDraftOrder =
       officialOrder.map(
         item => ({
@@ -3312,6 +3363,11 @@ async function start(){
         })
       );
 
+
+    /*
+       Try to save the order, but do not allow a
+       Supabase problem to stop the race.
+    */
 
     const saved =
       await saveDraftOrderToSupabase(
@@ -3462,65 +3518,45 @@ async function start(){
       /*
          Each runner gets a different momentum profile.
 
-         The profile is made from speed changes,
-         not position changes. Therefore a runner
-         can fall behind the pack, but can NEVER
-         run backward.
+         The profile is made from positive speed changes,
+         not negative position changes. Therefore a runner
+         can fall behind the pack, but can NEVER run backward.
       */
 
       runner.behavior = {
 
+        /* Strength of each acceleration/deceleration event. */
         earlySurge:
-          1.20 +
-          Math.random() *
-          .75,
+          1.20 + Math.random() * .75,
 
         earlyFade:
-          .38 +
-          Math.random() *
-          .42,
+          .38 + Math.random() * .42,
 
         midSurge:
-          1.35 +
-          Math.random() *
-          .90,
+          1.35 + Math.random() * .90,
 
         midFade:
-          .42 +
-          Math.random() *
-          .48,
+          .42 + Math.random() * .48,
 
         lateSurge:
-          1.45 +
-          Math.random() *
-          1.00,
+          1.45 + Math.random() * 1.00,
 
         lateFade:
-          .35 +
-          Math.random() *
-          .45,
+          .35 + Math.random() * .45,
 
+        /* Every runner has a different rhythm. */
         phase:
-          Math.random() *
-          Math.PI *
-          2,
+          Math.random() * Math.PI * 2,
 
         waveSpeed:
-          2.0 +
-          Math.random() *
-          1.8,
+          2.0 + Math.random() * 1.8,
 
         waveAmount:
-          .16 +
-          Math.random() *
-          .12,
+          .16 + Math.random() * .12,
 
+        /* Controls how long each surge/fade lasts. */
         timingShift:
-          (
-            Math.random() -
-            .5
-          ) *
-          .08,
+          (Math.random() - .5) * .08,
 
         totalSpeedIntegral:
           1
@@ -3547,10 +3583,7 @@ async function start(){
 
     return Math.exp(
       -Math.pow(
-        (
-          progress -
-          center
-        ) /
+        (progress - center) /
         width,
         2
       )
@@ -3575,18 +3608,18 @@ async function start(){
     /*
        These are SPEED changes.
 
-       Positive = faster forward movement.
-       Negative = slower forward movement.
+       A positive value means the player moves forward
+       faster during that portion of the race.
 
-       Never negative total speed.
+       A negative value means the player continues forward,
+       but more slowly than normal.
     */
 
     const earlySurge =
       b.earlySurge *
       pulse(
         progress,
-        .12 +
-        shift,
+        .12 + shift,
         .085
       );
 
@@ -3595,8 +3628,7 @@ async function start(){
       b.earlyFade *
       pulse(
         progress,
-        .27 +
-        shift,
+        .27 + shift,
         .080
       );
 
@@ -3605,8 +3637,7 @@ async function start(){
       b.midSurge *
       pulse(
         progress,
-        .44 -
-        shift,
+        .44 - shift,
         .085
       );
 
@@ -3615,8 +3646,7 @@ async function start(){
       b.midFade *
       pulse(
         progress,
-        .58 +
-        shift,
+        .58 + shift,
         .080
       );
 
@@ -3625,8 +3655,7 @@ async function start(){
       b.lateSurge *
       pulse(
         progress,
-        .74 -
-        shift,
+        .74 - shift,
         .090
       );
 
@@ -3635,11 +3664,17 @@ async function start(){
       b.lateFade *
       pulse(
         progress,
-        .88 +
-        shift,
+        .88 + shift,
         .065
       );
 
+
+    /*
+       Small ongoing rhythm variation.
+
+       This is intentionally subtle compared with the
+       larger surge/fade events above.
+    */
 
     const wave =
       Math.sin(
@@ -3650,6 +3685,17 @@ async function start(){
       ) *
       b.waveAmount;
 
+
+    /*
+       Convert the events into a positive speed.
+
+       Base speed is 1.
+
+       Surge raises speed.
+       Fade lowers speed.
+
+       The floor guarantees forward motion.
+    */
 
     const rawSpeed =
       .55 +
@@ -3662,12 +3708,6 @@ async function start(){
       wave;
 
 
-    /*
-       The floor guarantees that speed is always
-       positive. A runner can slow way down but
-       cannot travel backward.
-    */
-
     return Math.max(
       .18,
       rawSpeed
@@ -3676,9 +3716,14 @@ async function start(){
   }
 
 
-  /* =========================================================
-     NORMALIZE EACH RUNNER'S SPEED CURVE
-     ========================================================= */
+  /*
+     Normalize each runner's full speed curve.
+
+     This lets a runner surge and fade dramatically while
+     still arriving at the official finish time. Because
+     distance is accumulated from a positive speed, the
+     runner can never move backward.
+  */
 
   runners.forEach(
     runner => {
@@ -3686,14 +3731,11 @@ async function start(){
       let integral =
         0;
 
-
       const samples =
         500;
 
-
       const step =
-        1 /
-        samples;
+        1 / samples;
 
 
       for(
@@ -3703,9 +3745,7 @@ async function start(){
       ){
 
         const p =
-          i *
-          step;
-
+          i * step;
 
         integral +=
           speedMultiplier(
@@ -3726,10 +3766,6 @@ async function start(){
     }
   );
 
-
-  /* =========================================================
-     REVEAL RUNNER
-     ========================================================= */
 
   function revealRunner(
     runner
@@ -3754,14 +3790,8 @@ async function start(){
 
 
     /*
-       IMPORTANT:
-
-       The CENTER of the player image lands
-       INSIDE THE BLUE END ZONE.
-
-       It does not stop on the goal line.
-       It does not enter the far edge of the
-       end zone.
+       The CENTER of the player image is now well inside
+       the blue end zone.
     */
 
     runner.el.style.left =
@@ -3826,9 +3856,12 @@ async function start(){
           );
 
 
+        /*
+           Calculate the frame-to-frame time.
+        */
+
         if(
-          runner.lastFrameTime ===
-          0
+          runner.lastFrameTime === 0
         ){
 
           runner.lastFrameTime =
@@ -3859,16 +3892,16 @@ async function start(){
 
 
         /*
-           This is the amount of time that passed
-           during this animation frame.
+           Use the runner's individual official finish
+           time as the normal pace.
+
+           Then multiply that pace by the changing momentum
+           curve. This is what creates visible surges and fades.
         */
 
         const deltaProgress =
           deltaSeconds /
-          (
-            finishTime /
-            1000
-          );
+          (finishTime / 1000);
 
 
         const speed =
@@ -3878,14 +3911,6 @@ async function start(){
           );
 
 
-        /*
-           ACCUMULATED DISTANCE
-
-           This value ONLY increases.
-
-           Therefore the player can never move backward.
-        */
-
         runner.distance +=
           (
             deltaProgress *
@@ -3893,6 +3918,14 @@ async function start(){
           ) /
           runner.behavior.totalSpeedIntegral;
 
+
+        /*
+           Normalize toward the official finish time.
+
+           The runner is allowed to get substantially ahead
+           or behind during the race, but we never let a runner
+           cross the finish before its official reveal time.
+        */
 
         const maximumBeforeFinish =
           .995;
@@ -3918,14 +3951,13 @@ async function start(){
 
 
         /*
-           currentPosition can ONLY increase.
+           CRITICAL:
 
-           Slow = falls behind.
-           Fast = surges ahead.
-           Slow again = gets caught.
-           Fast again = surges back.
+           currentPosition can ONLY increase because
+           runner.distance only ever increases.
 
-           NEVER backward.
+           A slow runner falls behind by moving forward
+           more slowly. It never moves backward.
         */
 
         runner.el.style.left =
@@ -3990,11 +4022,6 @@ async function start(){
   return true;
 
 }
-
-
-/* =========================================================
-   COMMISSIONER OPEN
-   ========================================================= */
 
 function openCommissioner(){
 
@@ -4336,6 +4363,15 @@ async function runCountdown(){
 
 /* =========================================================
    START FROM OVERLAY
+   =========================================================
+
+   IMPORTANT CORRECTION:
+
+   We open the curtains BEFORE waiting for Supabase.
+
+   The race itself no longer controls whether the
+   curtain opens.
+
    ========================================================= */
 
 async function startDashFromOverlay(){
@@ -4353,11 +4389,17 @@ async function startDashFromOverlay(){
     true;
 
 
+  /*
+     Run countdown.
+  */
+
   await runCountdown();
 
 
   /*
-     Open the curtains immediately at GO.
+     GO!
+
+     Open curtains immediately.
   */
 
   raceCurtain.classList.add(
@@ -4370,6 +4412,14 @@ async function startDashFromOverlay(){
   );
 
 
+  /*
+     Give the curtain a moment to start moving,
+     then start the race.
+
+     start() can now safely deal with Supabase
+     without cancelling the curtain.
+  */
+
   await wait(
     180
   );
@@ -4378,6 +4428,14 @@ async function startDashFromOverlay(){
   const success =
     await start();
 
+
+  /*
+     If start somehow fails because the local
+     draft itself is invalid, restore the overlay.
+
+     A normal Supabase save failure does NOT
+     reach this point anymore.
+  */
 
   if(
     !success
@@ -4402,6 +4460,12 @@ async function startDashFromOverlay(){
 
   }
 
+
+  /*
+     Let the curtains finish opening.
+
+     Then completely remove the overlay.
+  */
 
   await wait(
     900
@@ -4565,12 +4629,25 @@ async function initialize(){
   );
 
 
+  /*
+     Load teams.
+
+     If Supabase isn't available, the page uses
+     the default configuration instead.
+  */
+
   teams =
     await loadTeamsFromSupabase();
 
 
   renderPermanentLabels();
 
+
+  /*
+     Load the official saved draft.
+
+     If it exists, everyone gets the same order.
+  */
 
   savedDraftOrder =
     await loadDraftOrderFromSupabase();

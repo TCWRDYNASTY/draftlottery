@@ -4,13 +4,19 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
 <title>TCWR 100-YARD DRAFT DASH</title>
 
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800;900&family=Montserrat:wght@600;700;800&display=swap');
+/* =========================================================
+   GLOBAL
+   ========================================================= */
 
 *{
   box-sizing:border-box;
@@ -20,9 +26,14 @@ html,
 body{
   margin:0;
   padding:0;
+
   background:#071522;
   color:#fff;
-  font-family:Montserrat,Arial,sans-serif;
+
+  font-family:
+    Montserrat,
+    Arial,
+    sans-serif;
 }
 
 body{
@@ -38,8 +49,11 @@ select{
 button{
   border:0;
   border-radius:8px;
+
   padding:12px 20px;
+
   font-weight:800;
+
   cursor:pointer;
 }
 
@@ -50,19 +64,23 @@ button:disabled{
 
 
 /* =========================================================
-   MAIN PAGE
+   MAIN WRAPPER
    ========================================================= */
 
 .wrap{
   width:100%;
   max-width:1400px;
+
   margin:0 auto;
+
   padding:24px;
 }
 
 h1{
   margin:0 0 8px;
+
   text-align:center;
+
   font:
     900
     clamp(32px,5vw,64px)
@@ -70,14 +88,19 @@ h1{
     .95
     "Barlow Condensed",
     sans-serif;
+
   letter-spacing:1px;
 }
 
 .sub{
   text-align:center;
+
   color:#d8b45a;
+
   font-weight:800;
+
   letter-spacing:2px;
+
   margin-bottom:20px;
 }
 
@@ -88,9 +111,13 @@ h1{
 
 .status{
   text-align:center;
+
   min-height:24px;
+
   margin:8px 0 14px;
+
   color:#d8b45a;
+
   font-weight:800;
 }
 
@@ -101,9 +128,13 @@ h1{
 
 .panel{
   background:#0c1d2b;
+
   border:1px solid #294354;
+
   border-radius:12px;
+
   padding:14px;
+
   margin-bottom:16px;
 }
 
@@ -114,8 +145,13 @@ h1{
 
 .race-layout{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 340px;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    340px;
+
   gap:18px;
+
   align-items:start;
 }
 
@@ -129,12 +165,15 @@ h1{
 
 .results .panel{
   position:sticky;
+
   top:18px;
+
   margin-bottom:0;
 }
 
 .results h2{
   margin:0 0 14px;
+
   font:
     900
     30px
@@ -142,27 +181,37 @@ h1{
     1
     "Barlow Condensed",
     sans-serif;
-  letter-spacing:.5px;
 }
 
 .result-list{
   list-style:none;
+
   padding:0;
+
   margin:0;
 }
 
 .result-list li{
   display:flex;
+
   justify-content:space-between;
+
   align-items:center;
+
   gap:12px;
+
   padding:10px;
-  border-bottom:1px solid #294354;
+
+  border-bottom:
+    1px solid
+    #294354;
+
   font-size:14px;
 }
 
 .result-list li:first-child{
   color:#d8b45a;
+
   font-size:16px;
 }
 
@@ -177,16 +226,34 @@ h1{
 
 .field{
   position:relative;
+
   width:100%;
+
   aspect-ratio:2 / 1;
+
+  /*
+     Keep the race contained inside the field.
+
+     The staggered finish positions are still inside
+     this boundary.
+  */
   overflow:hidden;
+
   border-radius:14px;
+
   border:5px solid #fff;
 
-  background-image:url("racefield.png");
-  background-position:center center;
-  background-repeat:no-repeat;
-  background-size:100% 100%;
+  background-image:
+    url("racefield.png");
+
+  background-position:
+    center center;
+
+  background-repeat:
+    no-repeat;
+
+  background-size:
+    100% 100%;
 }
 
 
@@ -196,14 +263,19 @@ h1{
 
 .runner{
   position:absolute;
+
   left:8%;
-  transform:translate(-50%,-50%);
+
+  transform:
+    translate(-50%,-50%);
+
   z-index:10;
 
   width:64px;
   height:64px;
 
-  transition:left .15s linear;
+  transition:
+    left .12s linear;
 }
 
 .player-image{
@@ -215,7 +287,10 @@ h1{
   object-fit:cover;
 
   border-radius:50%;
-  border:3px solid #d8b45a;
+
+  border:
+    3px solid
+    #d8b45a;
 
   background:#071522;
 
@@ -228,6 +303,7 @@ h1{
 
 .runner.finished{
   opacity:1 !important;
+
   visibility:visible !important;
 }
 
@@ -238,19 +314,30 @@ h1{
 
 .permanent-labels{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+
+  grid-template-columns:
+    repeat(4,1fr);
+
   gap:10px;
+
   margin-top:16px;
 }
 
 .permanent-team{
   display:flex;
+
   align-items:center;
+
   gap:9px;
+
   min-width:0;
 
   background:#0c1d2b;
-  border:1px solid #294354;
+
+  border:
+    1px solid
+    #294354;
+
   border-radius:10px;
 
   padding:8px 10px;
@@ -260,21 +347,29 @@ h1{
 .label-image-placeholder{
   width:40px;
   height:40px;
+
   flex:0 0 40px;
 
   border-radius:50%;
+
   object-fit:cover;
 
-  border:2px solid #d8b45a;
+  border:
+    2px solid
+    #d8b45a;
+
   background:#071522;
 }
 
 .label-image-placeholder{
   display:flex;
+
   align-items:center;
+
   justify-content:center;
 
   color:#fff;
+
   font-weight:900;
 }
 
@@ -290,13 +385,17 @@ h1{
     sans-serif;
 
   white-space:nowrap;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
 }
 
 .permanent-team-odds{
   color:#d8b45a;
+
   font-size:11px;
+
   font-weight:800;
 }
 
@@ -307,31 +406,44 @@ h1{
 
 #commissionerArea{
   margin-top:22px;
+
   margin-bottom:16px;
 }
 
 #commissionerBottomButton{
   display:block;
+
   margin:0 auto;
 
   background:#d8b45a;
+
   color:#071522;
 }
 
 #commissionerLoginBox,
 #commissionerPanel{
   background:#0c1d2b;
-  border:1px solid #294354;
+
+  border:
+    1px solid
+    #294354;
+
   border-radius:12px;
+
   padding:14px;
+
   margin-top:10px;
 }
 
 #commissionerLoginBox{
   display:flex;
+
   gap:8px;
+
   align-items:center;
+
   justify-content:center;
+
   flex-wrap:wrap;
 }
 
@@ -341,9 +453,13 @@ h1{
   padding:10px 12px;
 
   border-radius:7px;
-  border:1px solid #405765;
+
+  border:
+    1px solid
+    #405765;
 
   background:#081722;
+
   color:#fff;
 }
 
@@ -363,30 +479,39 @@ h1{
 
 .commissioner-actions{
   display:flex;
+
   gap:8px;
+
   flex-wrap:wrap;
+
   margin-top:14px;
 }
 
 #saveConfigBtn{
   background:#2d8a57;
+
   color:#fff;
 }
 
 #lockCommissionerBtn{
   background:#243746;
+
   color:#fff;
 }
 
 #resetDraftBtn{
   background:#8e3d3d;
+
   color:#fff;
 }
 
 .lock-note{
   text-align:center;
+
   color:#9fb0ba;
+
   font-size:12px;
+
   margin:7px 0 0;
 }
 
@@ -401,6 +526,7 @@ h1{
 
 .teams{
   width:100%;
+
   overflow-x:auto;
 }
 
@@ -414,6 +540,7 @@ h1{
     minmax(250px,1fr);
 
   gap:12px;
+
   align-items:center;
 }
 
@@ -421,12 +548,20 @@ h1{
   padding:11px 12px;
 
   background:#102838;
+
   color:#d8b45a;
 
-  border:1px solid #294354;
+  border:
+    1px solid
+    #294354;
+
   border-bottom:0;
 
-  border-radius:10px 10px 0 0;
+  border-radius:
+    10px
+    10px
+    0
+    0;
 
   font:
     800
@@ -437,6 +572,7 @@ h1{
     sans-serif;
 
   letter-spacing:.7px;
+
   text-transform:uppercase;
 }
 
@@ -445,36 +581,63 @@ h1{
 
   background:#081722;
 
-  border-left:1px solid #294354;
-  border-right:1px solid #294354;
-  border-top:1px solid #294354;
+  border-left:
+    1px solid
+    #294354;
+
+  border-right:
+    1px solid
+    #294354;
+
+  border-top:
+    1px solid
+    #294354;
 }
 
 .team-edit:last-child{
-  border-bottom:1px solid #294354;
-  border-radius:0 0 10px 10px;
+  border-bottom:
+    1px solid
+    #294354;
+
+  border-radius:
+    0
+    0
+    10px
+    10px;
 }
 
 .team-edit input,
 .team-edit select{
   width:100%;
+
   min-height:40px;
 
   padding:9px 10px;
 
   border-radius:6px;
-  border:1px solid #405765;
+
+  border:
+    1px solid
+    #405765;
 
   background:#071522;
+
   color:#fff;
 
-  font-family:Montserrat,Arial,sans-serif;
+  font-family:
+    Montserrat,
+    Arial,
+    sans-serif;
+
   font-size:14px;
 }
 
 .team-edit input:focus,
 .team-edit select:focus{
-  outline:2px solid rgba(216,180,90,.45);
+  outline:
+    2px solid
+    rgba(216,180,90,.45);
+
   border-color:#d8b45a;
 }
 
@@ -486,6 +649,7 @@ h1{
     minmax(150px,1fr);
 
   gap:8px;
+
   align-items:center;
 }
 
@@ -494,18 +658,25 @@ h1{
   height:48px;
 
   border-radius:50%;
+
   object-fit:cover;
 
-  border:2px solid #d8b45a;
+  border:
+    2px solid
+    #d8b45a;
+
   background:#071522;
 }
 
 .team-image-preview.placeholder{
   display:flex;
+
   align-items:center;
+
   justify-content:center;
 
   color:#fff;
+
   font-weight:900;
 }
 
@@ -529,6 +700,7 @@ h1{
 
 #raceCurtain{
   position:fixed;
+
   inset:0;
 
   z-index:9999;
@@ -537,9 +709,11 @@ h1{
 
   pointer-events:auto;
 
-  background:rgba(3,10,17,.84);
+  background:
+    rgba(3,10,17,.84);
 
   backdrop-filter:blur(4px);
+
   -webkit-backdrop-filter:blur(4px);
 
   transition:
@@ -549,15 +723,19 @@ h1{
 
 #raceCurtain.hidden{
   opacity:0;
+
   visibility:hidden;
+
   pointer-events:none;
 }
 
 .curtain-panel{
   position:absolute;
+
   top:0;
 
   width:50.5%;
+
   height:100%;
 
   z-index:1;
@@ -613,12 +791,18 @@ h1{
 
 .curtain-panel.left-panel{
   left:0;
-  border-right:1px solid rgba(216,180,90,.25);
+
+  border-right:
+    1px solid
+    rgba(216,180,90,.25);
 }
 
 .curtain-panel.right-panel{
   right:0;
-  border-left:1px solid rgba(216,180,90,.25);
+
+  border-left:
+    1px solid
+    rgba(216,180,90,.25);
 }
 
 .curtain-panel.left-panel::after{
@@ -630,38 +814,52 @@ h1{
 }
 
 #raceCurtain.open .left-panel{
-  transform:translateX(-102%);
+  transform:
+    translateX(-102%);
 }
 
 #raceCurtain.open .right-panel{
-  transform:translateX(102%);
+  transform:
+    translateX(102%);
 }
 
 .race-curtain-content{
   position:absolute;
+
   inset:0;
 
   z-index:3;
 
   display:flex;
+
   align-items:center;
+
   justify-content:center;
 
   padding:24px;
 
-  transition:opacity .35s ease;
+  transition:
+    opacity .35s ease;
 }
 
 #raceCurtain.open .race-curtain-content{
   opacity:0;
+
   pointer-events:none;
 }
 
 .curtain-card{
-  width:min(720px,92vw);
+  width:min(
+    720px,
+    92vw
+  );
 
   padding:
-    clamp(24px,5vw,52px);
+    clamp(
+      24px,
+      5vw,
+      52px
+    );
 
   border:
     1px solid
@@ -776,6 +974,7 @@ h1{
   display:flex;
 
   justify-content:center;
+
   align-items:center;
 
   flex-wrap:wrap;
@@ -814,11 +1013,15 @@ h1{
 
 .flow-arrow{
   color:#d8b45a;
+
   font-weight:900;
 }
 
 .race-note{
-  margin:0 0 22px;
+  margin:
+    0
+    0
+    22px;
 
   color:#9fb0ba;
 
@@ -835,6 +1038,7 @@ h1{
     24px;
 
   background:#d8b45a;
+
   color:#071522;
 
   font:
@@ -853,7 +1057,8 @@ h1{
 }
 
 #startDashBtn:hover:not(:disabled){
-  transform:translateY(-2px);
+  transform:
+    translateY(-2px);
 
   box-shadow:
     0
@@ -869,17 +1074,21 @@ h1{
 
 #countdownView{
   position:absolute;
+
   inset:0;
 
   z-index:5;
 
   display:flex;
+
   flex-direction:column;
 
   align-items:center;
+
   justify-content:center;
 
   opacity:0;
+
   pointer-events:none;
 }
 
@@ -887,8 +1096,10 @@ h1{
   opacity:1;
 }
 
-#raceCurtain.countdown .race-curtain-content{
+#raceCurtain.countdown
+.race-curtain-content{
   opacity:0;
+
   pointer-events:none;
 }
 
@@ -925,7 +1136,9 @@ h1{
     40px
     rgba(216,180,90,.4);
 
-  transform:scale(.7);
+  transform:
+    scale(.7);
+
   opacity:0;
 }
 
@@ -945,17 +1158,23 @@ h1{
 
   0%{
     opacity:0;
-    transform:scale(.65);
+
+    transform:
+      scale(.65);
   }
 
   30%{
     opacity:1;
-    transform:scale(1.08);
+
+    transform:
+      scale(1.08);
   }
 
   100%{
     opacity:0;
-    transform:scale(1.25);
+
+    transform:
+      scale(1.25);
   }
 
 }
@@ -976,7 +1195,8 @@ h1{
   }
 
   .permanent-labels{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:
+      repeat(2,1fr);
   }
 
 }
@@ -1026,12 +1246,19 @@ h1{
     height:44px;
   }
 
+  .runner{
+    width:50px;
+    height:50px;
+  }
+
   .permanent-labels{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
   #commissionerPassword{
     min-width:170px;
+
     width:100%;
   }
 
@@ -1040,11 +1267,56 @@ h1{
   }
 
   .flow-box{
-    padding:8px 9px;
+    padding:
+      8px
+      9px;
+
     font-size:10px;
   }
 
 }
+
+
+/* =========================================================
+   FINISH POSITION VISUALIZATION
+   ========================================================= */
+
+/*
+   IMPORTANT:
+
+   The finish is NOT one shared X position anymore.
+
+   This gives every draft position its own finish point.
+
+   Pick #1:
+       96%
+
+   Pick #2:
+       93.8%
+
+   Pick #3:
+       91.6%
+
+   Pick #4:
+       89.4%
+
+   Pick #5:
+       87.2%
+
+   Pick #6:
+       85%
+
+   Pick #7:
+       82.8%
+
+   Pick #8:
+       80.6%
+
+   This means EVERY player gets beyond the goal line,
+   but they are no longer sitting directly on top of
+   one another when the draft order is revealed.
+*/
+
 
 </style>
 
@@ -1055,7 +1327,7 @@ h1{
 
 
 <!-- =========================================================
-     PRE-RACE OVERLAY
+     PRE-RACE CURTAIN
      ========================================================= -->
 
 <div
@@ -1125,31 +1397,45 @@ h1{
         class="race-flow"
       >
 
-        <div class="flow-box">
+        <div
+          class="flow-box"
+        >
           FIRST ACROSS
         </div>
 
-        <div class="flow-arrow">
+        <div
+          class="flow-arrow"
+        >
           →
         </div>
 
-        <div class="flow-box">
+        <div
+          class="flow-box"
+        >
           PICK #1
         </div>
 
-        <div class="flow-arrow">
+        <div
+          class="flow-arrow"
+        >
           •
         </div>
 
-        <div class="flow-box">
+        <div
+          class="flow-box"
+        >
           LAST ACROSS
         </div>
 
-        <div class="flow-arrow">
+        <div
+          class="flow-arrow"
+        >
           →
         </div>
 
-        <div class="flow-box">
+        <div
+          class="flow-box"
+        >
           PICK #8
         </div>
 
@@ -1227,7 +1513,7 @@ h1{
 
 
   <!-- =======================================================
-       COMMISSIONER TEAM SETTINGS
+       COMMISSIONER SETTINGS
        ======================================================= -->
 
   <div
@@ -1252,7 +1538,7 @@ h1{
 
 
   <!-- =======================================================
-       RACE + DRAFT ORDER
+       RACE
        ======================================================= -->
 
   <div
@@ -1407,12 +1693,14 @@ h1{
 
 
 /* =========================================================
-   TCWR 100-YARD DRAFT DASH
+   SUPABASE
    ========================================================= */
 
 import {
   createClient
-} from "https://esm.sh/@supabase/supabase-js@2";
+}
+from
+"https://esm.sh/@supabase/supabase-js@2";
 
 
 /* =========================================================
@@ -1424,7 +1712,7 @@ const COMMISSIONER_PASSWORD =
 
 
 /* =========================================================
-   SUPABASE
+   SUPABASE CONFIG
    ========================================================= */
 
 const SUPABASE_URL =
@@ -1550,47 +1838,33 @@ let teams =
 
 let runners = [];
 
-
 let savedDraftOrder = [];
 
+let raceRunning = false;
 
-let raceRunning =
-  false;
+let commissionerUnlocked = false;
 
-
-let commissionerUnlocked =
-  false;
-
-
-let raf =
-  0;
+let raf = 0;
 
 
 /* =========================================================
-   RACE POSITION SETTINGS
+   RACE SETTINGS
    ========================================================= */
-
-/*
-   START_POSITION = where the players begin.
-
-   FINISH_POSITION = where the CENTER of the player
-   image is when that player's pick is revealed.
-
-   88% deliberately pushes the runner farther into
-   the blue end-zone area while keeping the player
-   inside the visible field.
-*/
 
 const START_POSITION =
   8;
 
 
-const FINISH_POSITION =
-  88;
+/*
+   This is no longer a single finish point.
+
+   Instead each draft position gets its own finish
+   position using getFinishPosition() below.
+*/
 
 
 /* =========================================================
-   DOM ELEMENTS
+   DOM
    ========================================================= */
 
 const field =
@@ -1709,20 +1983,14 @@ function showStatus(
   message
 ){
 
-  if(
-    statusElement
-  ){
-
-    statusElement.textContent =
-      message;
-
-  }
+  statusElement.textContent =
+    message;
 
 }
 
 
 /* =========================================================
-   HTML ESCAPE
+   ESCAPE HTML
    ========================================================= */
 
 function escapeHTML(
@@ -1822,15 +2090,6 @@ function normalizeImage(
 
 function renderInputs(){
 
-  if(
-    !teamInputs
-  ){
-
-    return;
-
-  }
-
-
   teamInputs.innerHTML =
     "";
 
@@ -1900,7 +2159,7 @@ function renderInputs(){
                   value="${escapeHTML(file)}"
                   ${selected}
                 >
-                  Image ${index + 1} — ${escapeHTML(file)}
+                  Image ${index + 1}
                 </option>
 
               `;
@@ -1947,7 +2206,10 @@ function renderInputs(){
             id="image-preview-${team.id}"
             src="${escapeHTML(normalizeImage(team.image,team.id))}"
             alt=""
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+            onerror="
+              this.style.display='none';
+              this.nextElementSibling.style.display='flex';
+            "
           >
 
 
@@ -1992,34 +2254,32 @@ function renderInputs(){
 
 function attachEditorListeners(){
 
-  const inputs =
-    teamInputs.querySelectorAll(
+  teamInputs
+    .querySelectorAll(
       "input, select"
+    )
+    .forEach(
+      element => {
+
+        element.addEventListener(
+          "input",
+          updateTeamFromEditor
+        );
+
+
+        element.addEventListener(
+          "change",
+          updateTeamFromEditor
+        );
+
+      }
     );
-
-
-  inputs.forEach(
-    element => {
-
-      element.addEventListener(
-        "input",
-        updateTeamFromEditor
-      );
-
-
-      element.addEventListener(
-        "change",
-        updateTeamFromEditor
-      );
-
-    }
-  );
 
 }
 
 
 /* =========================================================
-   UPDATE TEAM FROM EDITOR
+   UPDATE TEAM
    ========================================================= */
 
 function updateTeamFromEditor(
@@ -2043,8 +2303,7 @@ function updateTeamFromEditor(
   const team =
     teams.find(
       item =>
-        String(item.id) ===
-        id
+        String(item.id) === id
     );
 
 
@@ -2133,10 +2392,8 @@ function updateTeamFromEditor(
       preview.src =
         team.image;
 
-
       preview.style.display =
         "block";
-
 
       if(
         preview.nextElementSibling
@@ -2158,19 +2415,10 @@ function updateTeamFromEditor(
 
 
 /* =========================================================
-   PERMANENT KEY
+   PERMANENT LABELS
    ========================================================= */
 
 function renderPermanentLabels(){
-
-  if(
-    !permanentLabels
-  ){
-
-    return;
-
-  }
-
 
   permanentLabels.innerHTML =
     "";
@@ -2212,7 +2460,10 @@ function renderPermanentLabels(){
         <img
           src="${escapeHTML(image)}"
           alt=""
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          onerror="
+            this.style.display='none';
+            this.nextElementSibling.style.display='flex';
+          "
         >
 
         <div
@@ -2297,7 +2548,8 @@ function weightedPick(
           Math.random() *
           pool.length
         )
-      ] || null
+      ] ||
+      null
     );
 
   }
@@ -2338,7 +2590,7 @@ function weightedPick(
 
 
 /* =========================================================
-   CREATE OFFICIAL DRAFT ORDER
+   CREATE DRAFT ORDER
    ========================================================= */
 
 function createDraftOrder(){
@@ -2419,7 +2671,7 @@ function createDraftOrder(){
 
 
 /* =========================================================
-   SAVE TEAM CONFIGURATION
+   SAVE TEAMS
    ========================================================= */
 
 async function saveTeamsToSupabase(){
@@ -2509,7 +2761,7 @@ async function saveTeamsToSupabase(){
 
 
 /* =========================================================
-   LOAD TEAM CONFIGURATION
+   LOAD TEAMS
    ========================================================= */
 
 async function loadTeamsFromSupabase(){
@@ -2638,7 +2890,7 @@ async function loadTeamsFromSupabase(){
 
 
 /* =========================================================
-   SAVE OFFICIAL DRAFT ORDER
+   SAVE DRAFT ORDER
    ========================================================= */
 
 async function saveDraftOrderToSupabase(
@@ -2720,7 +2972,7 @@ async function saveDraftOrderToSupabase(
 
 
 /* =========================================================
-   LOAD OFFICIAL DRAFT ORDER
+   LOAD DRAFT ORDER
    ========================================================= */
 
 async function loadDraftOrderFromSupabase(){
@@ -2844,7 +3096,7 @@ async function loadDraftOrderFromSupabase(){
 
 
 /* =========================================================
-   CLEAR SAVED DRAFT
+   CLEAR DRAFT
    ========================================================= */
 
 async function clearDraftOrderFromSupabase(){
@@ -2921,24 +3173,12 @@ function resetVisuals(){
   );
 
 
-  if(
-    field
-  ){
-
-    field.innerHTML =
-      "";
-
-  }
+  field.innerHTML =
+    "";
 
 
-  if(
-    draftOrderList
-  ){
-
-    draftOrderList.innerHTML =
-      "";
-
-  }
+  draftOrderList.innerHTML =
+    "";
 
 
   runners =
@@ -2952,7 +3192,7 @@ function resetVisuals(){
 
 
 /* =========================================================
-   ADD RUNNER
+   RUNNER
    ========================================================= */
 
 function addRunner(
@@ -2970,8 +3210,15 @@ function addRunner(
     "runner";
 
 
+  /*
+     Eight runners receive their own lane.
+
+     More vertical spacing makes the individual
+     racers easier to distinguish.
+  */
+
   runner.style.top =
-    `${12 + index * 10.8}%`;
+    `${7 + index * 12.25}%`;
 
 
   runner.style.left =
@@ -2991,7 +3238,9 @@ function addRunner(
       class="player-image"
       src="${escapeHTML(image)}"
       alt=""
-      onerror="this.style.display='none';"
+      onerror="
+        this.style.display='none';
+      "
     >
 
   `;
@@ -3008,7 +3257,70 @@ function addRunner(
 
 
 /* =========================================================
-   INITIALIZE DRAFT ORDER DISPLAY
+   FINISH POSITION
+   ========================================================= */
+
+/*
+   THIS IS THE BIG CHANGE.
+
+   We no longer send everyone to one identical finish
+   position.
+
+   The finish positions intentionally create space
+   between the draft picks.
+
+   Pick #1 = 96%
+   Pick #2 = 93.8%
+   Pick #3 = 91.6%
+   Pick #4 = 89.4%
+   Pick #5 = 87.2%
+   Pick #6 = 85%
+   Pick #7 = 82.8%
+   Pick #8 = 80.6%
+
+   All of these are beyond the goal line and inside
+   the end-zone portion of the field.
+
+   Because the positions are separated, the first and
+   second-place runners won't be sitting directly
+   on top of each other.
+*/
+
+function getFinishPosition(
+  rank
+){
+
+  const positions = [
+
+    96.0,
+
+    93.8,
+
+    91.6,
+
+    89.4,
+
+    87.2,
+
+    85.0,
+
+    82.8,
+
+    80.6
+
+  ];
+
+
+  return (
+    positions[rank] ??
+    80.6
+  );
+
+}
+
+
+/* =========================================================
+   DRAFT ORDER DISPLAY
    ========================================================= */
 
 function initializeDraftOrderDisplay(){
@@ -3036,9 +3348,11 @@ function initializeDraftOrderDisplay(){
     li.innerHTML = `
 
       <span>
+
         <strong>
           PICK #${pick}
         </strong>
+
       </span>
 
       <span
@@ -3060,7 +3374,7 @@ function initializeDraftOrderDisplay(){
 
 
 /* =========================================================
-   REVEAL ONE RESULT
+   REVEAL RESULT
    ========================================================= */
 
 function revealDraftResult(
@@ -3094,6 +3408,7 @@ function revealDraftResult(
 
     </span>
 
+
     <span>
       ${Number(item.team.weight)}%
     </span>
@@ -3104,7 +3419,7 @@ function revealDraftResult(
 
 
 /* =========================================================
-   RENDER RESULTS
+   RENDER FINAL RESULTS
    ========================================================= */
 
 function renderResults(
@@ -3144,6 +3459,7 @@ function renderResults(
             ${escapeHTML(item.team.name)}
 
           </span>
+
 
           <span>
             ${Number(item.team.weight)}%
@@ -3196,8 +3512,28 @@ function showSavedDraft(){
           );
 
 
+        const saved =
+          savedDraftOrder.find(
+            item =>
+              String(item.team.id) ===
+              String(team.id)
+          );
+
+
+        const rank =
+          saved
+            ? Number(saved.pick) - 1
+            : index;
+
+
+        const finishPosition =
+          getFinishPosition(
+            rank
+          );
+
+
         el.style.left =
-          `${FINISH_POSITION}%`;
+          `${finishPosition}%`;
 
 
         el.classList.add(
@@ -3213,7 +3549,11 @@ function showSavedDraft(){
 
           el,
 
-          revealed:true
+          revealed:true,
+
+          rank,
+
+          finishPosition
 
         };
 
@@ -3254,9 +3594,9 @@ async function start(){
   initializeDraftOrderDisplay();
 
 
-  /* =========================================================
-     GET OFFICIAL DRAFT ORDER
-     ========================================================= */
+  /* =======================================================
+     OFFICIAL ORDER
+     ======================================================= */
 
   let officialOrder =
     savedDraftOrder &&
@@ -3264,10 +3604,14 @@ async function start(){
     teams.length
       ? savedDraftOrder.map(
           item => ({
-            pick:item.pick,
+
+            pick:
+              item.pick,
+
             team:{
               ...item.team
             }
+
           })
         )
       : [];
@@ -3328,7 +3672,7 @@ async function start(){
     ){
 
       console.warn(
-        "Supabase could not save the draft. Continuing with the locally generated order."
+        "Supabase could not save the draft. Continuing with the local draft order."
       );
 
 
@@ -3365,9 +3709,9 @@ async function start(){
   );
 
 
-  /* =========================================================
+  /* =======================================================
      CREATE RUNNERS
-     ========================================================= */
+     ======================================================= */
 
   runners =
     teams.map(
@@ -3398,15 +3742,18 @@ async function start(){
 
         raceStartTime:0,
 
+        finishPosition:
+          80.6,
+
         behavior:null
 
       })
     );
 
 
-  /* =========================================================
-     60-SECOND RACE
-     ========================================================= */
+  /* =======================================================
+     60 SECOND RACE
+     ======================================================= */
 
   const baseFinish =
     53000;
@@ -3414,8 +3761,15 @@ async function start(){
 
   const finishGap =
     order.length > 1
-      ? (60000 - baseFinish) /
-        (order.length - 1)
+
+      ? (
+          60000 -
+          baseFinish
+        ) /
+        (
+          order.length - 1
+        )
+
       : 0;
 
 
@@ -3450,6 +3804,17 @@ async function start(){
         rank;
 
 
+      /*
+         The actual reveal time remains what determines
+         the official draft order.
+
+         Rank 0:
+             53 seconds
+
+         Rank 7:
+             60 seconds
+      */
+
       runner.finish =
         baseFinish +
         rank *
@@ -3457,49 +3822,49 @@ async function start(){
 
 
       /*
-         Each runner receives a different momentum pattern.
+         Each runner gets a different finish location.
 
-         They can:
-         - start hot
-         - fade
-         - surge
-         - fade again
-         - make a late push
-
-         BUT they can never actually travel backward.
+         This is what creates visual separation at the
+         end of the race.
       */
+
+      runner.finishPosition =
+        getFinishPosition(
+          rank
+        );
+
 
       runner.behavior = {
 
         earlySurge:
-          1.20 +
-          Math.random() *
-          .75,
-
-        earlyFade:
-          .38 +
-          Math.random() *
-          .42,
-
-        midSurge:
-          1.35 +
-          Math.random() *
-          .90,
-
-        midFade:
-          .42 +
-          Math.random() *
-          .48,
-
-        lateSurge:
           1.45 +
           Math.random() *
-          1.00,
+          .95,
+
+        earlyFade:
+          .55 +
+          Math.random() *
+          .55,
+
+        midSurge:
+          1.65 +
+          Math.random() *
+          1.10,
+
+        midFade:
+          .55 +
+          Math.random() *
+          .65,
+
+        lateSurge:
+          1.80 +
+          Math.random() *
+          1.20,
 
         lateFade:
-          .35 +
+          .45 +
           Math.random() *
-          .45,
+          .65,
 
         phase:
           Math.random() *
@@ -3507,21 +3872,21 @@ async function start(){
           2,
 
         waveSpeed:
-          2.0 +
+          2.5 +
           Math.random() *
-          1.8,
+          2.4,
 
         waveAmount:
-          .16 +
+          .22 +
           Math.random() *
-          .12,
+          .18,
 
         timingShift:
           (
             Math.random() -
             .5
           ) *
-          .08,
+          .12,
 
         totalSpeedIntegral:
           1
@@ -3532,13 +3897,17 @@ async function start(){
   );
 
 
+  /* =======================================================
+     RACE START
+     ======================================================= */
+
   const startTime =
     performance.now();
 
 
-  /* =========================================================
-     MOMENTUM PULSE
-     ========================================================= */
+  /* =======================================================
+     PULSE
+     ======================================================= */
 
   function pulse(
     progress,
@@ -3560,9 +3929,9 @@ async function start(){
   }
 
 
-  /* =========================================================
-     SPEED MULTIPLIER
-     ========================================================= */
+  /* =======================================================
+     SPEED
+     ======================================================= */
 
   function speedMultiplier(
     runner,
@@ -3585,60 +3954,60 @@ async function start(){
       b.earlySurge *
       pulse(
         progress,
-        .12 + shift,
-        .085
+        .10 + shift,
+        .075
       );
 
 
     /*
-       EARLY FADE
+       FALL BEHIND
     */
 
     const earlyFade =
       b.earlyFade *
       pulse(
         progress,
-        .27 + shift,
-        .080
+        .23 + shift,
+        .075
       );
 
 
     /*
-       MID-RACE SURGE
+       BIG MID-RACE SURGE
     */
 
     const midSurge =
       b.midSurge *
       pulse(
         progress,
-        .44 - shift,
+        .40 - shift,
         .085
       );
 
 
     /*
-       MID-RACE FADE
+       MID-RACE FALL
     */
 
     const midFade =
       b.midFade *
       pulse(
         progress,
-        .58 + shift,
-        .080
+        .54 + shift,
+        .075
       );
 
 
     /*
-       LATE SURGE
+       SECOND BIG SURGE
     */
 
     const lateSurge =
       b.lateSurge *
       pulse(
         progress,
-        .74 - shift,
-        .090
+        .68 - shift,
+        .085
       );
 
 
@@ -3650,13 +4019,29 @@ async function start(){
       b.lateFade *
       pulse(
         progress,
-        .88 + shift,
-        .065
+        .82 + shift,
+        .070
       );
 
 
     /*
-       Small continuous variation.
+       FINAL PUSH
+    */
+
+    const finalPush =
+      (
+        .55 +
+        Math.random() * .20
+      ) *
+      pulse(
+        progress,
+        .93,
+        .055
+      );
+
+
+    /*
+       Small natural movement variation.
     */
 
     const wave =
@@ -3670,39 +4055,49 @@ async function start(){
 
 
     /*
-       IMPORTANT:
-
-       This is SPEED, not position.
-
-       A fade means slower forward movement.
-
-       It does NOT subtract distance.
-
-       Therefore players cannot move backward.
+       This produces much more visible:
+       
+       SURGE
+          ↓
+       FALL
+          ↓
+       SURGE
+          ↓
+       FALL
+          ↓
+       FINAL PUSH
     */
 
     const rawSpeed =
-      .55 +
+      .42 +
       earlySurge -
       earlyFade +
       midSurge -
       midFade +
       lateSurge -
       lateFade +
+      finalPush +
       wave;
 
 
+    /*
+       Never let speed reach zero.
+
+       The runner may become slow,
+       but they continue moving forward.
+    */
+
     return Math.max(
-      .18,
+      .12,
       rawSpeed
     );
 
   }
 
 
-  /* =========================================================
-     NORMALIZE MOMENTUM
-     ========================================================= */
+  /* =======================================================
+     NORMALIZE EACH RUNNER'S SPEED CURVE
+     ======================================================= */
 
   runners.forEach(
     runner => {
@@ -3712,7 +4107,7 @@ async function start(){
 
 
       const samples =
-        500;
+        800;
 
 
       const step =
@@ -3751,9 +4146,9 @@ async function start(){
   );
 
 
-  /* =========================================================
+  /* =======================================================
      REVEAL RUNNER
-     ========================================================= */
+     ======================================================= */
 
   function revealRunner(
     runner
@@ -3778,16 +4173,19 @@ async function start(){
 
 
     /*
-       The runner is placed at the final finish position.
+       Send the player to THEIR OWN finish position.
 
-       FINISH_POSITION = 88%.
+       This is the important visual change.
 
-       This is deliberately farther into the blue
-       end-zone area than the previous 86% setting.
+       Pick #1 gets the deepest position.
+
+       Pick #8 gets the shallowest position,
+
+       but every runner is still beyond the goal line.
     */
 
     runner.el.style.left =
-      `${FINISH_POSITION}%`;
+      `${runner.finishPosition}%`;
 
 
     const result =
@@ -3811,9 +4209,9 @@ async function start(){
   }
 
 
-  /* =========================================================
+  /* =======================================================
      RACE FRAME
-     ========================================================= */
+     ======================================================= */
 
   function frame(
     now
@@ -3881,9 +4279,13 @@ async function start(){
 
 
         /*
-           Determine current speed.
+           Get current speed.
 
-           This changes continuously throughout the race.
+           IMPORTANT:
+
+           This modifies how FAST the player moves.
+
+           It does not modify their position backward.
         */
 
         const speed =
@@ -3893,14 +4295,6 @@ async function start(){
           );
 
 
-        /*
-           Convert time into forward distance.
-
-           There is NO subtraction from runner.distance.
-
-           Therefore the runner can never move backward.
-        */
-
         const deltaProgress =
           deltaSeconds /
           (
@@ -3908,6 +4302,22 @@ async function start(){
             1000
           );
 
+
+        /*
+           FORWARD ONLY.
+
+           Distance is always increased.
+
+           It is NEVER decreased.
+
+           Therefore a player can:
+             - surge
+             - slow down
+             - fall behind
+             - surge again
+
+           but can NEVER physically move backward.
+        */
 
         runner.distance +=
           (
@@ -3917,18 +4327,9 @@ async function start(){
           runner.behavior.totalSpeedIntegral;
 
 
-        /*
-           Keep the runner just short of the finish
-           until the official reveal time.
-        */
-
-        const maximumBeforeFinish =
-          .995;
-
-
         const visualProgress =
           Math.min(
-            maximumBeforeFinish,
+            .995,
             Math.max(
               0,
               runner.distance
@@ -3936,33 +4337,28 @@ async function start(){
           );
 
 
-        /*
-           Convert race progress into the actual
-           left position on the field.
-        */
-
         const currentPosition =
           START_POSITION +
           visualProgress *
           (
-            FINISH_POSITION -
+            runner.finishPosition -
             START_POSITION
           );
 
 
         /*
-           EXTRA SAFETY:
+           Absolute anti-backwards protection.
 
-           Never allow the new position to be less
-           than the previous position.
-
-           This is an explicit anti-backwards safeguard.
+           Even if a calculation somehow produces a
+           smaller position, the player keeps their
+           previous position.
         */
 
         const previousPosition =
           parseFloat(
             runner.el.style.left
-          ) || START_POSITION;
+          ) ||
+          START_POSITION;
 
 
         const safePosition =
@@ -3995,9 +4391,9 @@ async function start(){
     );
 
 
-    /*
-       Everyone has finished.
-    */
+    /* =====================================================
+       RACE COMPLETE
+       ===================================================== */
 
     if(
       runners.every(
@@ -4045,7 +4441,7 @@ async function start(){
 
 
 /* =========================================================
-   OPEN COMMISSIONER
+   COMMISSIONER LOGIN
    ========================================================= */
 
 function openCommissioner(){
@@ -4068,10 +4464,6 @@ function openCommissioner(){
 
 }
 
-
-/* =========================================================
-   CLOSE COMMISSIONER
-   ========================================================= */
 
 function closeCommissioner(){
 
@@ -4100,10 +4492,6 @@ function closeCommissioner(){
 
 }
 
-
-/* =========================================================
-   UNLOCK COMMISSIONER
-   ========================================================= */
 
 function unlockCommissioner(){
 
@@ -4153,10 +4541,6 @@ function unlockCommissioner(){
 
 }
 
-
-/* =========================================================
-   LOCK COMMISSIONER
-   ========================================================= */
 
 function lockCommissioner(){
 
@@ -4332,13 +4716,17 @@ async function runCountdown(){
   );
 
 
-  const sequence =
-    [
-      "3",
-      "2",
-      "1",
-      "GO!"
-    ];
+  const sequence = [
+
+    "3",
+
+    "2",
+
+    "1",
+
+    "GO!"
+
+  ];
 
 
   for(
@@ -4355,7 +4743,8 @@ async function runCountdown(){
     );
 
 
-    void countdownNumber.offsetWidth;
+    void
+      countdownNumber.offsetWidth;
 
 
     countdownNumber.classList.add(
@@ -4387,7 +4776,7 @@ async function runCountdown(){
 
 
 /* =========================================================
-   START FROM OVERLAY
+   START FROM CURTAIN
    ========================================================= */
 
 async function startDashFromOverlay(){
@@ -4423,7 +4812,8 @@ async function startDashFromOverlay(){
 
 
   /*
-     Start race shortly after curtains begin opening.
+     Start race before waiting for the curtain
+     to completely finish opening.
   */
 
   await wait(
@@ -4458,10 +4848,6 @@ async function startDashFromOverlay(){
 
   }
 
-
-  /*
-     Finish opening the curtain.
-  */
 
   await wait(
     900
@@ -4549,7 +4935,7 @@ async function resetSavedDraft(){
 
 
 /* =========================================================
-   EVENT LISTENERS
+   EVENTS
    ========================================================= */
 
 commissionerBottomButton.addEventListener(
@@ -4660,7 +5046,9 @@ async function initialize(){
 
 initialize();
 
+
 </script>
 
 </body>
+
 </html>

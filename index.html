@@ -1609,12 +1609,14 @@ let raf =
    RACE POSITION SETTINGS
    ========================================================= */
 
-/* Goal line in racefield.png is approximately 52% across. */
+/* The 10-yard line in racefield.png is approximately 75%
+   across the playable field. The runner is centered on this
+   coordinate when the pick is revealed. */
 const START_POSITION =
-  10;
+  8;
 
 const FINISH_POSITION =
-  52;
+  75;
 
 
 /* =========================================================
@@ -2403,7 +2405,7 @@ function createDraftOrder(){
     }
 
 
-  order.push({
+    order.push({
 
       pick,
 
@@ -3003,7 +3005,7 @@ function addRunner(
 
 
   runner.style.left =
-    `${START_POSITION}%`;
+    "8%";
 
 
   const image =
@@ -3345,7 +3347,7 @@ async function start(){
     }
 
 
-    /* Keep the local order even if Supabase fails. */
+    /* Keep the locally generated order immediately. */
 
     savedDraftOrder =
       officialOrder.map(
@@ -3362,6 +3364,11 @@ async function start(){
       );
 
 
+    /*
+       Try to save the order, but do not allow a
+       Supabase problem to stop the race.
+    */
+
     const saved =
       await saveDraftOrderToSupabase(
         officialOrder
@@ -3376,6 +3383,7 @@ async function start(){
         "Supabase could not save the draft. Continuing with the locally generated order for this race."
       );
 
+
       showStatus(
         "Draft order created — race starting."
       );
@@ -3384,8 +3392,6 @@ async function start(){
 
   }
 
-
-  /* Separate copy used by the animation. */
 
   const order =
     officialOrder.map(
@@ -3438,6 +3444,12 @@ async function start(){
 
         rank:-1,
 
+        distance:0,
+
+        lastFrameTime:0,
+
+        raceStartTime:0,
+
         behavior:null
 
       })
@@ -3445,13 +3457,14 @@ async function start(){
 
 
   /* =========================================================
-     60-SECOND FINISH TIMING
+     60-SECOND RACE
      =========================================================
 
-     The first runner finishes at 53 seconds.
-     Each following runner is one second later.
-     With 8 teams, the final runner finishes
-     at exactly 60 seconds.
+     The first official finisher is at 53 seconds.
+     The final official finisher is at exactly 60 seconds.
+
+     The finish time determines when the pick is revealed.
+     It does NOT force the player to move backward.
      ========================================================= */
 
   const baseFinish =
@@ -3503,50 +3516,50 @@ async function start(){
 
 
       /*
-         STRONGER RACE PERSONALITIES
+         Each runner gets a different momentum profile.
 
-         These values are deliberately much larger
-         than the old .010/.006 movement. This lets
-         a runner jump forward, fade back, then make
-         another charge later in the race.
+         The profile is made from positive speed changes,
+         not negative position changes. Therefore a runner
+         can fall behind the pack, but can NEVER run backward.
       */
 
       runner.behavior = {
 
+        /* Strength of each acceleration/deceleration event. */
         earlySurge:
-          (Math.random() * .24) - .06,
+          1.20 + Math.random() * .75,
 
         earlyFade:
-          -(
-            Math.random() * .20
-          ),
+          .38 + Math.random() * .42,
 
         midSurge:
-          (Math.random() * .28) - .14,
+          1.35 + Math.random() * .90,
 
         midFade:
-          -(
-            Math.random() * .18
-          ),
+          .42 + Math.random() * .48,
 
         lateSurge:
-          (Math.random() * .30) - .08,
+          1.45 + Math.random() * 1.00,
 
         lateFade:
-          -(
-            Math.random() * .16
-          ),
+          .35 + Math.random() * .45,
 
-        waveAmount:
-          .025 +
-          Math.random() * .025,
+        /* Every runner has a different rhythm. */
+        phase:
+          Math.random() * Math.PI * 2,
 
         waveSpeed:
-          5 +
-          Math.random() * 4,
+          2.0 + Math.random() * 1.8,
 
-        phase:
-          Math.random() * Math.PI * 2
+        waveAmount:
+          .16 + Math.random() * .12,
+
+        /* Controls how long each surge/fade lasts. */
+        timingShift:
+          (Math.random() - .5) * .08,
+
+        totalSpeedIntegral:
+          1
 
       };
 
@@ -3558,11 +3571,9 @@ async function start(){
     performance.now();
 
 
-  const raceDuration =
-    60000;
-
-
-  /* Smooth pulse used for each hot/cold stretch. */
+  /* =========================================================
+     MOMENTUM CURVE
+     ========================================================= */
 
   function pulse(
     progress,
@@ -3579,6 +3590,180 @@ async function start(){
     );
 
   }
+
+
+  function speedMultiplier(
+    runner,
+    progress
+  ){
+
+    const b =
+      runner.behavior;
+
+
+    const shift =
+      b.timingShift;
+
+
+    /*
+       These are SPEED changes.
+
+       A positive value means the player moves forward
+       faster during that portion of the race.
+
+       A negative value means the player continues forward,
+       but more slowly than normal.
+    */
+
+    const earlySurge =
+      b.earlySurge *
+      pulse(
+        progress,
+        .12 + shift,
+        .085
+      );
+
+
+    const earlyFade =
+      b.earlyFade *
+      pulse(
+        progress,
+        .27 + shift,
+        .080
+      );
+
+
+    const midSurge =
+      b.midSurge *
+      pulse(
+        progress,
+        .44 - shift,
+        .085
+      );
+
+
+    const midFade =
+      b.midFade *
+      pulse(
+        progress,
+        .58 + shift,
+        .080
+      );
+
+
+    const lateSurge =
+      b.lateSurge *
+      pulse(
+        progress,
+        .74 - shift,
+        .090
+      );
+
+
+    const lateFade =
+      b.lateFade *
+      pulse(
+        progress,
+        .88 + shift,
+        .065
+      );
+
+
+    /*
+       Small ongoing rhythm variation.
+
+       This is intentionally subtle compared with the
+       larger surge/fade events above.
+    */
+
+    const wave =
+      Math.sin(
+        progress *
+        Math.PI *
+        b.waveSpeed +
+        b.phase
+      ) *
+      b.waveAmount;
+
+
+    /*
+       Convert the events into a positive speed.
+
+       The base speed is deliberately below 1 so that
+       the surge events have room to create real separation.
+
+       A fade never becomes a negative speed. The runner is
+       always moving forward, just at a slower rate.
+    */
+
+    const rawSpeed =
+      .55 +
+      earlySurge -
+      earlyFade +
+      midSurge -
+      midFade +
+      lateSurge -
+      lateFade +
+      wave;
+
+
+    return Math.max(
+      .18,
+      rawSpeed
+    );
+
+  }
+
+
+  /*
+     Normalize each runner's full speed curve.
+
+     This lets a runner surge and fade dramatically while
+     still arriving at the official finish time. Because
+     distance is accumulated from a positive speed, the
+     runner can never move backward.
+  */
+
+  runners.forEach(
+    runner => {
+
+      let integral =
+        0;
+
+      const samples =
+        500;
+
+      const step =
+        1 / samples;
+
+
+      for(
+        let i = 0;
+        i <= samples;
+        i++
+      ){
+
+        const p =
+          i * step;
+
+        integral +=
+          speedMultiplier(
+            runner,
+            p
+          ) *
+          step;
+
+      }
+
+
+      runner.behavior.totalSpeedIntegral =
+        Math.max(
+          .001,
+          integral
+        );
+
+    }
+  );
 
 
   function revealRunner(
@@ -3604,8 +3789,8 @@ async function start(){
 
 
     /*
-       The CENTER of the player image lands
-       directly on the goal line.
+       The CENTER of the player image is now exactly
+       on the 10-yard line.
     */
 
     runner.el.style.left =
@@ -3633,6 +3818,10 @@ async function start(){
   }
 
 
+  /* =========================================================
+     RACE FRAME
+     ========================================================= */
+
   function frame(
     now
   ){
@@ -3640,14 +3829,6 @@ async function start(){
     const elapsed =
       now -
       startTime;
-
-
-    const overallProgress =
-      Math.min(
-        1,
-        elapsed /
-        raceDuration
-      );
 
 
     runners.forEach(
@@ -3666,7 +3847,7 @@ async function start(){
           runner.finish;
 
 
-        const individualProgress =
+        const timeProgress =
           Math.min(
             1,
             elapsed /
@@ -3675,122 +3856,92 @@ async function start(){
 
 
         /*
-           Use the official finish time as the
-           underlying pace, but let each runner's
-           momentum move substantially around it.
+           Calculate the frame-to-frame time.
         */
 
-        const progress =
+        if(
+          runner.lastFrameTime === 0
+        ){
+
+          runner.lastFrameTime =
+            now;
+
+          runner.raceStartTime =
+            startTime;
+
+        }
+
+
+        const deltaSeconds =
           Math.min(
-            .985,
+            .05,
             Math.max(
               0,
               (
-                individualProgress *
-                .92
-              ) +
-              (
-                overallProgress *
-                .08
-              )
+                now -
+                runner.lastFrameTime
+              ) /
+              1000
             )
           );
 
 
-        const b =
-          runner.behavior;
+        runner.lastFrameTime =
+          now;
 
 
         /*
-           MULTIPLE SURGE / FADE WINDOWS
+           Convert elapsed time into a tiny amount of the
+           runner's official race progress.
 
-           Early:       hot start / early fade
-           Middle:      big swing in momentum
-           Late:        final surge or fade
+           Then apply the current speed. Because we normalize
+           the entire speed curve above, the accumulated value
+           reaches exactly 1.0 at the runner's official finish.
         */
 
-        const earlySurge =
-          b.earlySurge *
-          pulse(
-            progress,
-            .14,
-            .105
+        const deltaProgress =
+          deltaSeconds /
+          (finishTime / 1000);
+
+
+        const speed =
+          speedMultiplier(
+            runner,
+            timeProgress
           );
 
 
-        const earlyFade =
-          b.earlyFade *
-          pulse(
-            progress,
-            .29,
-            .11
-          );
-
-
-        const midSurge =
-          b.midSurge *
-          pulse(
-            progress,
-            .49,
-            .12
-          );
-
-
-        const midFade =
-          b.midFade *
-          pulse(
-            progress,
-            .64,
-            .105
-          );
-
-
-        const lateSurge =
-          b.lateSurge *
-          pulse(
-            progress,
-            .79,
-            .10
-          );
-
-
-        const lateFade =
-          b.lateFade *
-          pulse(
-            progress,
-            .90,
-            .075
-          );
+        runner.distance +=
+          (
+            deltaProgress *
+            speed
+          ) /
+          runner.behavior.totalSpeedIntegral;
 
 
         /*
-           Continuous momentum swings keep the race
-           from looking like eight straight lines.
+           The runner is allowed to get substantially ahead
+           or behind during the race, but we never let a runner
+           cross the finish before its official reveal time.
         */
 
-        const wave =
-          Math.sin(
-            progress *
-            Math.PI *
-            b.waveSpeed +
-            b.phase
-          ) *
-          b.waveAmount;
+        const maximumBeforeFinish =
+          .995;
 
 
-        const momentumOffset =
-          earlySurge +
-          earlyFade +
-          midSurge +
-          midFade +
-          lateSurge +
-          lateFade +
-          wave;
+        const visualProgress =
+          Math.min(
+            maximumBeforeFinish,
+            Math.max(
+              0,
+              runner.distance
+            )
+          );
 
 
-        const basePosition =
+        const currentPosition =
           START_POSITION +
-          progress *
+          visualProgress *
           (
             FINISH_POSITION -
             START_POSITION
@@ -3798,29 +3949,14 @@ async function start(){
 
 
         /*
-           Convert the momentum offset into field
-           position. A strong surge can put a runner
-           noticeably ahead; a fade can drop them back.
+           CRITICAL:
 
-           The finish is protected so nobody can
-           visually cross the goal line before their
-           official reveal time.
+           currentPosition can ONLY increase because
+           runner.distance only ever increases.
+
+           A slow runner falls behind by moving forward
+           more slowly. It never moves backward.
         */
-
-        const currentPosition =
-          Math.min(
-            FINISH_POSITION - .75,
-            Math.max(
-              START_POSITION,
-              basePosition +
-              momentumOffset *
-              (
-                FINISH_POSITION -
-                START_POSITION
-              )
-            )
-          );
-
 
         runner.el.style.left =
           `${currentPosition}%`;
@@ -3885,10 +4021,6 @@ async function start(){
 
 }
 
-
-/* =========================================================
-   COMMISSIONER OPEN
-   ========================================================= */
 
 function openCommissioner(){
 

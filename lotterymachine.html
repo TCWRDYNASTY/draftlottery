@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:,">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Football Draft Lottery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+<style>
+
+    :root {
+     --primary-dark: #1e3159; 
+     --accent-gold: #FFD700; 
+     --light-text: #f0f4f8; 
+     --container-bg: #2a3d60; 
+     --section-bg: #3c5283; 
+     --highlight-blue: #6495ed; 
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--primary-dark);
+    color: var(--light-text);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+    background-image:
+        radial-gradient(circle at 10% 90%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 90% 10%, rgba(255, 215, 0, 0.05) 0%, transparent 50%); 
+}
+
+.container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    background-color: #2a3d60;
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.2);
+    border: 4px solid var(--accent-gold);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: auto;
+    position: relative;
+    z-index: 1; 
+}
+
+h1, h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.1em;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    -webkit-text-stroke: 1px var(--primary-dark);
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #FFD700, #FFEF9F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+h2 {
+    font-size: 2.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--light-text);
+}
+
+#curtainWrapper {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+#curtainWrapper.open {
+    pointer-events: none;
+}
+
+.curtain-panel {
+    position: absolute;
+    top: 0;
+    width: 50.5%;
+    height: 100%;
+    background: linear-gradient(90deg, #061126 0%, #0b1b38 45%, #07142b 100%);
+    transition: transform 3s cubic-bezier(0.7, 0, 0.3, 1);
+    z-index: 100;
+    will-change: transform;
+    pointer-events: none;
+}
+
+.left-panel {
+    left: 0;
+    border-right: 1px solid rgba(255, 215, 0, 0.18);
+    transform: translateX(0);
+}
+
+.right-panel {
+    right: 0;
+    border-left: 1px solid rgba(255, 215, 0, 0.18);
+    transform: translateX(0);
+}
+
+.curtain-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent, rgba(0,0,0,0.2) 20px, transparent 40px);
+}
+
+#curtainWrapper.open .left-panel { transform: translateX(-100%); }
+#curtainWrapper.open .right-panel { transform: translateX(100%); }
+
+.curtain-content {
+    position: absolute;
+    inset: 0;
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(20px, 4vw, 64px);
+    text-align: center;
+    color: #fff;
+    transition: opacity .45s ease, transform .45s ease;
+    pointer-events: auto;
+}
+#curtainWrapper.open .curtain-content {
+    opacity: 0;
+    transform: scale(.97);
+}
+.curtain-card {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+    width: min(980px, 90vw);
+    max-height: 88vh;
+    overflow: auto;
+    padding: clamp(24px, 4vw, 54px);
+    border-radius: 24px;
+    background: rgba(5, 15, 34, .88);
+    box-shadow: 0 22px 70px rgba(0,0,0,.55), inset 0 0 35px rgba(30,115,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(8px);
+}
+.curtain-card h2 {
+    margin: 0 0 24px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    letter-spacing: .08em;
+    color: #ffd54a;
+}
+.curtain-rules {
+    text-align: left;
+    font-size: clamp(1rem, 1.7vw, 1.35rem);
+    line-height: 1.65;
+}
+.curtain-rules p { margin: 0 0 18px; }
+.curtain-rules ul { margin: 0; padding-left: 1.25em; }
+.curtain-rules li { margin: 12px 0; }
+.final-order-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    text-align: left;
+}
+.final-order-row {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: rgba(20, 43, 78, .8);
+    border-left: 4px solid #ffd700;
+}
+.final-order-row .pick { color: #ffd54a; font: 700 1.45rem 'Bebas Neue', sans-serif; }
+.final-order-row .team { font-weight: 800; text-transform: uppercase; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .final-order-grid { grid-template-columns: 1fr; }
+  .curtain-card { padding: 22px; }
+}
+
+
+.lottery-stage {
+    position: relative;
+    width: 100%;
+    min-height: 560px;
+    max-height: calc(100vh - 145px);
+    margin: 1.5rem auto 0;
+    display: grid;
+    grid-template-columns: clamp(180px, 18vw, 230px) minmax(390px, 1fr) clamp(210px, 21vw, 260px);
+    align-items: end;
+    gap: 1.25rem;
+    padding: 1.1rem;
+    border-radius: 1.75rem;
+    background:
+        radial-gradient(circle at 55% 42%, rgba(35,86,170,.28), transparent 34%),
+        linear-gradient(180deg, #071326 0%, #0a1830 55%, #07101f 100%);
+    border: 2px solid rgba(208,222,239,.34);
+    box-shadow: inset 0 0 70px rgba(0,0,0,.62), 0 24px 50px rgba(0,0,0,.4);
+    overflow: hidden;
+}
+
+.lottery-stage::before,
+.lottery-stage::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255,190,65,.9), transparent);
+    box-shadow: 0 0 14px rgba(255,190,65,.45);
+}
+.lottery-stage::before { top: 72px; }
+.lottery-stage::after { bottom: 42px; }
+
+.draw-order-panel,
+.pick-console {
+    position: relative;
+    z-index: 10;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(12,28,53,.96), rgba(4,12,25,.96));
+    border: 2px solid rgba(255,196,73,.72);
+    box-shadow: 0 18px 38px rgba(0,0,0,.42), inset 0 0 22px rgba(70,126,220,.1);
+    overflow: hidden;
+}
+
+.draw-order-panel { align-self: center; }
+.panel-title {
+    padding: .95rem .7rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: .12em;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.order-slots { display: grid; }
+.order-slot {
+    height: 52px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    padding: 0 .7rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    color: rgba(180,200,230,.55);
+    font-weight: 900;
+}
+.order-slot .order-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+}
+.order-slot.active {
+    color: #ffd35d;
+    background: linear-gradient(90deg, rgba(255,188,45,.16), transparent);
+    box-shadow: inset 4px 0 #ffd35d;
+}
+.order-slot .order-status { font-size: .72rem; letter-spacing: .04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-slot.filled { color: #fff; background: linear-gradient(90deg, rgba(31,120,255,.20), transparent); }
+.order-slot.filled .order-status { font-size: .78rem; font-weight: 800; letter-spacing: .02em; }
+
+.machine-column {
+    position: relative;
+    min-height: 560px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.machine-frame {
+    position: relative;
+    width: 500px;
+    height: 555px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.lottery-machine {
+    position: absolute;
+    left: 50%;
+    bottom: 78px;
+    transform: translateX(-50%);
+    width: 390px;
+    height: 390px;
+    border-radius: 50%;
+    overflow: hidden !important;
+    border: 10px solid rgba(223,233,244,.93);
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.52), transparent 16%),
+        radial-gradient(circle at center, rgba(88,139,206,.16), rgba(7,22,44,.58) 70%);
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,.11),
+        0 0 38px rgba(53,132,255,.24),
+        inset 0 0 55px rgba(255,255,255,.14),
+        inset 0 -55px 85px rgba(0,0,0,.62);
+    z-index: 5;
+}
+
+.lottery-machine::before {
+    content: '';
+    position: absolute;
+    inset: 6%;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.2);
+    box-shadow: inset 0 0 30px rgba(255,255,255,.08);
+    pointer-events: none;
+    z-index: 40;
+}
+
+.lottery-machine::after {
+    content: '';
+    position: absolute;
+    left: 11%;
+    right: 11%;
+    bottom: 5%;
+    height: 18%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(49,125,255,.42), rgba(49,125,255,.04) 68%, transparent 72%);
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.globe-brace {
+    position: absolute;
+    width: 54px;
+    height: 90px;
+    bottom: 78px;
+    border: 5px solid rgba(218,229,241,.8);
+    background: linear-gradient(90deg, rgba(255,255,255,.2), rgba(72,98,130,.28));
+    z-index: 3;
+}
+.globe-brace.left { left: 28px; border-radius: 20px 0 0 20px; }
+.globe-brace.right { right: 28px; border-radius: 0 20px 20px 0; }
+
+.machine-base {
+    position: absolute;
+    bottom: 0;
+    width: 430px;
+    height: 92px;
+    border-radius: 48% 48% 18px 18px / 32px 32px 18px 18px;
+    background: linear-gradient(#202b3a 0%, #070b11 70%);
+    border: 4px solid #52647a;
+    box-shadow: 0 16px 22px rgba(0,0,0,.55), inset 0 5px 8px rgba(255,255,255,.17), 0 0 0 7px rgba(8,13,21,.8);
+    z-index: 4;
+}
+.machine-base::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 12px;
+    height: 10px;
+    border-radius: 999px;
+    background: #1f78ff;
+    box-shadow: 0 0 18px #1f78ff;
+}
+.machine-base::after {
+    content: '';
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    top: 29px;
+    height: 24px;
+    border-radius: 7px;
+    background: repeating-linear-gradient(90deg, #111 0 7px, #263242 7px 11px);
+    border: 2px solid #35445a;
+}
+
+.intake-neck {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 82px;
+    height: 135px;
+    border: 8px solid rgba(225,235,245,.9);
+    border-bottom: none;
+    background: linear-gradient(90deg, rgba(255,255,255,.3), rgba(93,139,185,.08), rgba(255,255,255,.28));
+    box-shadow: inset 0 0 16px rgba(255,255,255,.12);
+    z-index: 7;
+}
+
+ .chute-system {
+    position: absolute;
+    left: calc(50% + 36px);
+    top: 36px;
+    width: 390px;
+    height: 78px;
+    z-index: 6;
+    pointer-events: none;
+}
+.chute-segment {
+    position: absolute;
+    border: 8px solid rgba(225,235,245,.9);
+    background: linear-gradient(180deg, rgba(255,255,255,.21), rgba(76,134,198,.07));
+    box-shadow: inset 0 0 15px rgba(255,255,255,.15), 0 0 8px rgba(90,150,240,.13);
+}
+.chute-top {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 72px;
+    border-left: none;
+    border-radius: 0 40px 40px 0;
+}
+
+.pick-console {
+    min-height: 260px;
+    padding-top: 92px;
+    align-self: end;
+    overflow: visible;
+    border: none;
+}
+.reveal-tray {
+    position: absolute;
+    top: -56px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 132px;
+    height: 96px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+.reveal-tray::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 92px;
+    height: 24px;
+    transform: translateX(-50%);
+    border-radius: 0 0 48px 48px;
+    background: linear-gradient(180deg, rgba(32,50,76,.96), rgba(8,14,25,.98));
+    border-bottom: 3px solid rgba(225,235,245,.56);
+    box-shadow: 0 10px 20px rgba(0,0,0,.38), inset 0 -4px 8px rgba(0,0,0,.42);
+    z-index: 1;
+}
+.reveal-tray::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 104px;
+    height: 15px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: #1f78ff;
+    box-shadow: 0 0 18px #1f78ff;
+    z-index: 0;
+}
+.console-label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: .11em;
+    text-align: center;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,.78);
+}
+.console-pick {
+    font-family: 'Bebas Neue', sans-serif;
+    text-align: center;
+    font-size: 3.2rem;
+    line-height: 1;
+    color: #ffd35d;
+    margin: .15rem 0 .65rem;
+}
+.console-screen {
+    margin: 0 1rem 1rem;
+    min-height: 80px;
+    border-radius: .65rem;
+    border: 2px solid rgba(255,196,73,.58);
+    background: #020407;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: .75rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: .06em;
+    color: #ffd35d;
+    box-shadow: inset 0 0 18px rgba(255,190,45,.08);
+}
+
+.tray-ball,
+.travel-ball,
+.ball {
+    --ball-color: #d7263d;
+    --ball-dark: #76101f;
+    --ball-highlight: rgba(255,255,255,.92);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 31% 25%, var(--ball-highlight) 0 10%, rgba(255,255,255,.45) 11% 18%, transparent 19%),
+        radial-gradient(circle at 35% 30%, var(--ball-color) 0 45%, var(--ball-dark) 78% 100%);
+    border: 2px solid rgba(255,255,255,.78);
+    box-shadow: inset -8px -10px 13px rgba(0,0,0,.28), 0 8px 16px rgba(0,0,0,.46);
+}
+.tray-ball,
+.travel-ball {
+    width: 62px;
+    height: 62px;
+}
+.tray-ball {
+    opacity: 0;
+    transform: translateY(-34px) scale(.65);
+    transition: opacity .25s ease, transform .48s cubic-bezier(.2,.8,.25,1.2);
+    z-index: 3;
+    flex: 0 0 auto;
+}
+.reveal-tray.has-ball .tray-ball { opacity: 1; transform: translateY(-8px) scale(1); }
+.travel-ball { position: absolute; left: 0; top: 0; z-index: 300; display: none; pointer-events: none; will-change: transform; }
+
+.ball {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    z-index: 20;
+    will-change: transform;
+}
+.ball.striped::after,
+.travel-ball.striped::after,
+.tray-ball.striped::after {
+    content: '';
+    position: absolute;
+    left: 7%;
+    right: 7%;
+    top: 35%;
+    height: 30%;
+    border-radius: 40%;
+    background: rgba(255,255,255,.88);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
+}
+.ball.selected-source { box-shadow: 0 0 20px #ffd35d, 0 0 42px rgba(255,211,93,.8), inset -5px -6px 8px rgba(0,0,0,.2); }
+
+.air-glow {
+    position: absolute;
+    left: 50%;
+    bottom: 86px;
+    width: 190px;
+    height: 40px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(41,123,255,.62), rgba(41,123,255,.08) 65%, transparent 72%);
+    animation: blowerPulse 1.1s ease-in-out infinite alternate;
+    z-index: 6;
+    pointer-events: none;
+}
+@keyframes blowerPulse { from { opacity:.45; transform:translateX(-50%) scale(.92); } to { opacity:1; transform:translateX(-50%) scale(1.08); } }
+
+@media (max-height: 900px) and (min-width: 981px) {
+    .lottery-stage { min-height: 500px; max-height: calc(100vh - 115px); margin-top: .6rem; }
+    .machine-column { min-height: 485px; }
+    .machine-frame { transform: scale(.82); transform-origin: bottom center; }
+    .pick-console { min-height: 230px; padding-top: 82px; }
+    .order-slot { height: 46px; }
+    .panel-title { padding: .7rem .6rem; }
+}
+
+@media (max-width: 980px) {
+    .lottery-stage { grid-template-columns: 140px minmax(390px,1fr); }
+    .pick-console { grid-column: 1 / -1; width: min(100%, 520px); justify-self: center; min-height: 220px; margin-top: 2rem; }
+    .machine-frame { transform: scale(.92); transform-origin: bottom center; }
+}
+@media (max-width: 700px) {
+    .lottery-stage { display: flex; flex-direction: column; align-items: center; min-height: 1000px; padding: 1rem; overflow: hidden; }
+    .draw-order-panel { width: 100%; }
+    .order-slots { grid-template-columns: repeat(4,1fr); }
+    .order-slot { grid-template-columns: 30px 1fr; height: 48px; }
+    .machine-column { min-height: 570px; width: 100%; transform: scale(.78); transform-origin: top center; margin-bottom: -110px; }
+    .pick-console { width: 100%; position: relative; }
+}
+
+.team-odds-section, .results-section {
+    margin-top: 2rem;
+    background-color: var(--section-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--highlight-blue);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#teamOddsList, .results-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+#teamOddsList li, .results-list li {
+    background-color: var(--container-bg);
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    border-left: 5px solid var(--accent-gold);
+    transition: all 0.5s ease;
+    flex-wrap: nowrap; 
+    gap: 12px;
+    height: auto;
+    min-height: 60px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#teamOddsList li span, .results-list li span {
+    word-break: break-word;
+    font-size: clamp(0.9rem, 3vw, 1.3rem); 
+    line-height: 1.2;
+}
+
+.results-list li span:last-child {
+    text-align: right;
+    color: var(--light-text);
+    flex: 1; 
+}
+
+.results-list li span:first-child {
+    color: var(--accent-gold);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#teamOddsList li.picked-team {
+    background-color: var(--container-bg) !important; 
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+#teamOddsList li.picked-team .team-name,
+#teamOddsList li.picked-team .odds-percent {
+    color: rgba(255, 255, 255, 0.6) !important; 
+    text-decoration: line-through !important;
+    text-decoration-color: #ff4444 !important; 
+    text-decoration-thickness: 2px !important; 
+}
+
+.drawn-ball-display {
+    min-height: 120px;
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--section-bg);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin: 2rem auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 4px dashed var(--accent-gold);
+    box-sizing: border-box;
+}
+
+.drawn-ball-display .drawn-team-name {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 900;
+    font-family: 'Bebas Neue', sans-serif;
+    color: #FFD700;
+    text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255, 215, 0, 0.6);
+    text-align: center;
+    word-break: break-word;
+}
+
+.btn {
+    background: linear-gradient(90deg, #FFD700, #FFEF9F);
+    color: var(--primary-dark);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    font-weight: 900;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: 'Bebas Neue', sans-serif;
+    transition: all 0.3s ease;
+    border: none;
+}
+.btn:hover:not(:disabled) {
+    transform: translateY(-5px) scale(1.05);
+}
+.hidden { display: none !important; }
+
+@keyframes circle-motion {
+    0% { transform: rotate(0deg) translateX(var(--circle-radius, 50px)) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(var(--circle-radius, 50px)) rotate(-360deg); }
+}
+
+@media (max-width: 480px) {
+    .container { padding: 1.5rem 1rem; }
+    h1 { font-size: 2.2rem; }
+    .lottery-machine { width: 70vw; border-width: 8px; }
+}
+
+
+/* v7 responsive layout and simplified drop chute */
+@media (max-width: 1120px) {
+    .lottery-stage {
+        grid-template-columns: 190px minmax(360px, 1fr) 220px;
+        gap: .75rem;
+        padding: .8rem;
+    }
+    .machine-frame { transform: scale(.88); transform-origin: bottom center; }
+    .chute-system { width: 350px; }
+}
+
+@media (max-width: 900px) {
+    .container { padding: 1.25rem; border-width: 3px; }
+    .lottery-stage {
+        display: grid;
+        grid-template-columns: minmax(155px, 190px) minmax(330px, 1fr);
+        min-height: 620px;
+        max-height: none;
+        overflow: hidden;
+    }
+    .pick-console {
+        grid-column: 1 / -1;
+        width: min(100%, 520px);
+        justify-self: center;
+        min-height: 210px;
+        margin-top: .5rem;
+    }
+    .machine-column { min-height: 500px; }
+    .machine-frame { transform: scale(.80); transform-origin: bottom center; }
+}
+
+@media (max-width: 650px) {
+    body { padding: .5rem; }
+    .container { padding: .75rem; border-radius: 1.25rem; }
+    .lottery-stage {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+        gap: 1rem;
+        overflow: hidden;
+    }
+    .draw-order-panel, .pick-console { width: 100%; }
+    .order-slots { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .machine-column { min-height: 430px; width: 100%; margin-bottom: -40px; }
+    .machine-frame { transform: scale(.67); transform-origin: top center; }
+    #teamOddsList { grid-template-columns: 1fr; }
+}
+
+.team-odds-section { align-self: stretch; }
+#teamOddsList { align-items: stretch; }
+#teamOddsList li { min-width: 0; }
+#teamOddsList .team-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+
+.curtain-start-button {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    margin-top: 1.4rem;
+    padding: 0.9rem 1.6rem;
+    border: 2px solid #ffd54a;
+    border-radius: 0.8rem;
+    background: linear-gradient(180deg, #ffd84f, #e5ad12);
+    color: #081426;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(255, 205, 48, 0.28);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.curtain-start-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 32px rgba(255, 205, 48, 0.45);
+}
+.curtain-start-button:disabled { opacity: .55; cursor: default; transform: none; }
+
+
+
+/* v15: responsive team odds and compact current-pick name box */
+#teamOddsList li {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: clamp(.65rem, 1.6vw, 1.25rem);
+    min-height: clamp(56px, 6vw, 72px);
+    padding: clamp(.75rem, 1.6vw, 1rem) clamp(.9rem, 2vw, 1.25rem);
+    overflow: hidden;
+}
+
+#teamOddsList .team-name {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: normal;
+    overflow-wrap: normal;
+    font-size: clamp(.82rem, 1.45vw, 1.25rem) !important;
+    line-height: 1.08;
+}
+
+#teamOddsList .odds-percent {
+    display: block;
+    min-width: 4.4ch;
+    white-space: nowrap;
+    text-align: right;
+    font-size: clamp(.9rem, 1.4vw, 1.25rem) !important;
+    line-height: 1;
+}
+
+.console-screen {
+    width: min(72%, 210px);
+    min-width: 150px;
+    margin: 0 auto 1rem;
+    min-height: clamp(68px, 8vw, 82px);
+    padding: .7rem 1rem;
+    font-size: clamp(0.95rem, 1.8vw, 1.5rem);
+    line-height: 1.05;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    #teamOddsList .team-name {
+        font-size: clamp(.82rem, 2.2vw, 1.1rem) !important;
+    }
+    #teamOddsList .odds-percent {
+        font-size: clamp(.9rem, 2vw, 1.1rem) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    #teamOddsList li {
+        min-height: 58px;
+        column-gap: .75rem;
+    }
+    #teamOddsList .team-name {
+        font-size: clamp(.9rem, 4.2vw, 1.15rem) !important;
+    }
+    #teamOddsList .odds-percent {
+        font-size: clamp(.95rem, 4vw, 1.1rem) !important;
+    }
+    .console-screen {
+        width: min(76%, 240px);
+    }
+}
+
+
+
+/* =========================================================
+   TCWR COUNTDOWN-MATCHING VISUAL PATCH
+   Fonts and surface styling only.
+   No layout structure, machine geometry, animation, timing,
+   Supabase logic, or draft behavior has been changed.
+   ========================================================= */
+
+:root {
+    --primary-dark: #061426;
+    --accent-gold: #f4be3d;
+    --light-text: #f7fbff;
+    --container-bg: #081b31;
+    --section-bg: #0b2440;
+    --highlight-blue: #45a8ef;
+
+    --tcwr-navy-950: #020914;
+    --tcwr-navy-900: #061426;
+    --tcwr-navy-850: #081b31;
+    --tcwr-navy-800: #0b2440;
+    --tcwr-blue-500: #2386d8;
+    --tcwr-blue-400: #45a8ef;
+    --tcwr-cyan-300: #79d8ff;
+    --tcwr-gold-500: #f4be3d;
+    --tcwr-gold-400: #ffd56b;
+    --tcwr-gold-300: #ffe39a;
+    --tcwr-white: #f7fbff;
+    --tcwr-muted: #a8bdd2;
+    --tcwr-line: rgba(142, 205, 255, .20);
+}
+
+html {
+    background: var(--tcwr-navy-950);
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--tcwr-white);
+    background:
+        radial-gradient(circle at 50% 7%, rgba(35, 134, 216, .18), transparent 30%),
+        radial-gradient(circle at 10% 90%, rgba(244, 190, 61, .07), transparent 24%),
+        linear-gradient(155deg, var(--tcwr-navy-950) 0%, var(--tcwr-navy-900) 48%, #071d34 100%);
+    background-attachment: fixed;
+}
+
+.container {
+    background:
+        linear-gradient(145deg, rgba(15, 48, 80, .68), rgba(4, 18, 33, .88));
+    border: 1px solid rgba(142, 205, 255, .20);
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .48),
+        inset 0 1px 0 rgba(255, 255, 255, .04);
+    backdrop-filter: blur(16px);
+}
+
+/* Main title */
+h1,
+h2,
+h3,
+.panel-title,
+.console-label,
+.console-pick,
+.console-screen,
+.final-order-row .pick,
+.curtain-start-button,
+.btn {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+h1 {
+    color: var(--tcwr-white) !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    font-weight: 900 !important;
+    letter-spacing: .04em !important;
+    text-shadow: 0 10px 30px rgba(0,0,0,.34) !important;
+}
+
+h2 {
+    color: var(--tcwr-white);
+    font-weight: 900;
+    letter-spacing: .045em;
+}
+
+/* Lottery stage */
+.lottery-stage {
+    background:
+        radial-gradient(circle at 55% 42%, rgba(35, 134, 216, .22), transparent 34%),
+        linear-gradient(180deg, #04101f 0%, #061426 55%, #020914 100%);
+    border: 1px solid rgba(142, 205, 255, .24);
+    box-shadow:
+        inset 0 0 70px rgba(0,0,0,.58),
+        0 24px 50px rgba(0,0,0,.38);
+}
+
+.lottery-stage::before,
+.lottery-stage::after {
+    background: linear-gradient(90deg, transparent, rgba(244,190,61,.85), transparent);
+    box-shadow: 0 0 14px rgba(244,190,61,.32);
+}
+
+/* Side panels */
+.draw-order-panel,
+.pick-console {
+    background:
+        linear-gradient(180deg, rgba(10,34,59,.98), rgba(3,14,27,.98));
+    border-color: rgba(244,190,61,.62);
+    box-shadow:
+        0 18px 38px rgba(0,0,0,.40),
+        inset 0 1px 0 rgba(255,255,255,.035),
+        inset 0 0 22px rgba(69,168,239,.07);
+}
+
+.panel-title {
+    color: var(--tcwr-white);
+    font-weight: 800;
+    letter-spacing: .13em;
+    border-bottom-color: rgba(142,205,255,.16);
+}
+
+.order-slot {
+    color: rgba(168,189,210,.52);
+    border-bottom-color: rgba(142,205,255,.10);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.order-slot .order-number {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    color: rgba(189,211,229,.54);
+}
+
+.order-slot.active {
+    color: var(--tcwr-gold-400);
+    background: linear-gradient(90deg, rgba(244,190,61,.14), transparent);
+    box-shadow: inset 4px 0 var(--tcwr-gold-500);
+}
+
+.order-slot.active .order-number {
+    color: var(--tcwr-white);
+}
+
+.order-slot.filled {
+    color: var(--tcwr-white);
+    background: linear-gradient(90deg, rgba(35,134,216,.18), transparent);
+}
+
+.order-slot .order-status {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+/* Machine cosmetic surfaces only */
+.lottery-machine {
+    border-color: rgba(214,237,250,.84);
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.48), transparent 16%),
+        radial-gradient(circle at center, rgba(69,168,239,.15), rgba(5,23,42,.57) 70%);
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,.08),
+        0 0 38px rgba(69,168,239,.22),
+        inset 0 0 55px rgba(255,255,255,.12),
+        inset 0 -55px 85px rgba(0,0,0,.62);
+}
+
+.globe-brace,
+.intake-neck,
+.chute-segment {
+    border-color: rgba(214,237,250,.82);
+}
+
+.machine-base {
+    background: linear-gradient(#163858 0%, #06101d 72%);
+    border-color: #426985;
+    box-shadow:
+        0 16px 22px rgba(0,0,0,.55),
+        inset 0 5px 8px rgba(255,255,255,.12),
+        0 0 0 7px rgba(4,13,23,.80);
+}
+
+.machine-base::before,
+.reveal-tray::after {
+    background: var(--tcwr-blue-400);
+    box-shadow: 0 0 18px rgba(69,168,239,.85);
+}
+
+.air-glow {
+    background: radial-gradient(
+        ellipse,
+        rgba(69,168,239,.62),
+        rgba(69,168,239,.08) 65%,
+        transparent 72%
+    );
+}
+
+/* Current pick */
+.console-label {
+    color: var(--tcwr-muted);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.console-pick {
+    color: var(--tcwr-gold-400);
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(244,190,61,.18);
+}
+
+.console-screen {
+    color: var(--tcwr-gold-400);
+    background:
+        radial-gradient(circle at 50% 0%, rgba(244,190,61,.06), transparent 55%),
+        #010407;
+    border-color: rgba(244,190,61,.58);
+    font-weight: 900;
+    letter-spacing: .055em;
+    box-shadow:
+        inset 0 0 18px rgba(244,190,61,.08),
+        0 7px 20px rgba(0,0,0,.24);
+}
+
+/* Team odds */
+.team-odds-section,
+.results-section {
+    background:
+        linear-gradient(145deg, rgba(15,48,80,.62), rgba(4,18,33,.82));
+    border: 1px solid rgba(142,205,255,.20);
+    box-shadow:
+        0 16px 36px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.team-odds-section h3 {
+    color: var(--tcwr-white) !important;
+    font-weight: 800;
+    letter-spacing: .13em;
+}
+
+#teamOddsList li,
+.results-list li {
+    background: rgba(5,22,40,.72);
+    border: 1px solid rgba(142,205,255,.13);
+    border-left: 4px solid var(--tcwr-gold-500);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+#teamOddsList .team-name {
+    color: #eaf5fc;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+#teamOddsList .odds-percent {
+    color: var(--tcwr-gold-400);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+}
+
+#teamOddsList li.picked-team {
+    background: rgba(5,22,40,.48) !important;
+}
+
+/* Curtain */
+.curtain-panel {
+    background:
+        linear-gradient(90deg, #020914 0%, #081b31 45%, #041120 100%);
+}
+
+.curtain-card {
+    background:
+        linear-gradient(145deg, rgba(15,48,80,.72), rgba(4,18,33,.92));
+    border: 1px solid rgba(142,205,255,.20);
+    box-shadow:
+        0 24px 74px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter: blur(18px);
+}
+
+.curtain-card h2 {
+    color: var(--tcwr-white);
+    font-weight: 900;
+    letter-spacing: .02em;
+    text-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+.curtain-rules {
+    color: #bfd1e2;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.curtain-rules strong {
+    color: var(--tcwr-gold-400);
+}
+
+.curtain-rules li::marker {
+    color: var(--tcwr-gold-500);
+}
+
+.curtain-start-button,
+.btn {
+    color: #08111c;
+    background: linear-gradient(180deg, var(--tcwr-gold-300), var(--tcwr-gold-500));
+    border-color: var(--tcwr-gold-300);
+    font-weight: 900;
+    box-shadow:
+        0 15px 32px rgba(244,190,61,.18),
+        inset 0 1px 0 rgba(255,255,255,.52);
+}
+
+.curtain-start-button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+    filter: brightness(1.05);
+    box-shadow:
+        0 18px 38px rgba(244,190,61,.25),
+        inset 0 1px 0 rgba(255,255,255,.52);
+}
+
+.final-order-row {
+    background: rgba(5,22,40,.74);
+    border-left-color: var(--tcwr-gold-500);
+}
+
+.final-order-row .pick {
+    color: var(--tcwr-gold-400);
+    font-weight: 900;
+}
+
+.final-order-row .team {
+    color: var(--tcwr-white);
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Commissioner area */
+.commissioner-tools {
+    border-color: rgba(142,205,255,.12) !important;
+}
+
+#commissionerLoginForm,
+#commissionerPanel {
+    background: rgba(3,14,27,.94) !important;
+    border-color: rgba(142,205,255,.18) !important;
+}
+
+#commissionerPanel input,
+#commissionerLoginForm input {
+    background: rgba(1,8,16,.94) !important;
+    border-color: rgba(142,205,255,.22) !important;
+    color: var(--tcwr-white) !important;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid rgba(121,216,255,.78);
+    outline-offset: 3px;
+}
+
+
+
+/* FINAL CURRENT-PICK NAME FIX
+   This overrides all earlier .console-screen rules. */
+.console-screen {
+    width: calc(100% - 1rem) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 .5rem 1rem !important;
+    padding: .7rem .45rem !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-overflow: clip !important;
+
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: clamp(1.15rem, 1.65vw, 1.45rem) !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: .01em !important;
+}
+
+</style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+</head>
+<body>
+<audio id="lotteryMusic" preload="auto">
+    <source src="Lottery War Room.mp3" type="audio/mpeg">
+</audio>
+<div id="curtainWrapper" class="curtain-wrapper">
+    <div class="curtain-panel left-panel"></div>
+    <div class="curtain-panel right-panel"></div>
+    <div class="curtain-content" id="curtainContent">
+        <div class="curtain-card">
+            <div id="curtainRulesView">
+                <h2>How the Lottery Works</h2>
+                <div class="curtain-rules">
+                    <p>Suspense builds as the draft order is revealed in reverse, from <strong>Pick #8</strong> down to <strong>Pick #1</strong>.</p>
+                    <ul>
+                        <li><strong>Reverse Reveal:</strong> Once a team is drawn, it receives the current pick and is removed from the lottery.</li>
+                        <li><strong>High Odds:</strong> Teams with higher weights are more likely to be drawn early for Pick #8.</li>
+                        <li><strong>The Jackpot:</strong> A low-odds team that survives the early rounds gains a much stronger chance at Pick #1.</li>
+                    </ul>
+                </div>
+                <button id="startDraftBtn" class="curtain-start-button" type="button">COMMENCE THE DRAFT</button>
+            </div>
+            <div id="curtainFinalView" hidden>
+                <h2>Final Draft Order</h2>
+                <div class="final-order-grid" id="curtainFinalOrder"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+ <h1 class="text-5xl md:text-6xl mb-8 tracking-widest uppercase text-center mx-auto" style="font-family: 'Bebas Neue', sans-serif; color: #FFD700; letter-spacing: 0.1em; width: 100%;">
+    TCWR DY-NASTY Draft Lottery
+</h1>
+
+    <div class="lottery-stage" id="lotteryStage">
+        <aside class="draw-order-panel" aria-label="Draft order">
+            <div class="panel-title">Draft Order</div>
+            <div class="order-slots" id="machineOrderSlots">
+                <div class="order-slot active" data-machine-pick="8"><span class="order-number">8</span><span class="order-status">UP NEXT</span></div>
+                <div class="order-slot" data-machine-pick="7"><span class="order-number">7</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="6"><span class="order-number">6</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="5"><span class="order-number">5</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="4"><span class="order-number">4</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="3"><span class="order-number">3</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="2"><span class="order-number">2</span><span class="order-status"></span></div>
+                <div class="order-slot" data-machine-pick="1"><span class="order-number">1</span><span class="order-status"></span></div>
+            </div>
+        </aside>
+
+        <div class="machine-column">
+            <div class="machine-frame">
+                <div class="intake-neck"></div>
+                <div class="chute-system" aria-hidden="true">
+                    <div class="chute-segment chute-top"></div>
+                </div>
+                <div class="lottery-machine" id="lotteryMachine">
+                    <div class="text-xl font-semibold text-gray-400">Loading draft state...</div>
+                </div>
+                <div class="globe-brace left"></div>
+                <div class="globe-brace right"></div>
+                <div class="air-glow"></div>
+                <div class="machine-base"></div>
+            </div>
+        </div>
+
+        <section class="pick-console" aria-label="Current pick reveal">
+            <div class="reveal-tray" id="revealTray"><div class="tray-ball" id="trayBall"></div></div>
+            <div class="console-label">Current Pick</div>
+            <div class="console-pick" id="machineCurrentPick">#8</div>
+            <div class="console-screen" id="machineConsoleScreen">READY</div>
+        </section>
+        <div class="travel-ball" id="travelBall"></div>
+    </div>
+
+    <!-- Hidden compatibility list: the visible draft order now lives only in the left machine panel. -->
+    <ul id="resultsList" class="results-list" aria-hidden="true" style="display:none !important;"></ul>
+
+    <div class="team-odds-section">
+        <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-center">Team Odds</h3>
+        <ul id="teamOddsList" class="team-odds-list">
+            </ul>
+    </div>
+
+    <div class="commissioner-tools mt-12 p-4 border-t border-gray-800">
+        <button id="commissionerLogin" type="button" class="text-xs opacity-60 hover:opacity-100 text-white">Commissioner Login</button>
+
+        <form id="commissionerLoginForm" class="hidden mt-4 max-w-md p-4 bg-gray-900 rounded-lg border border-gray-700" autocomplete="off">
+            <label for="commissionerPassword" class="block text-xs uppercase tracking-wider text-gray-300 mb-2">Commissioner Password</label>
+            <div class="flex gap-2">
+                <input id="commissionerPassword" type="password" class="flex-1 p-2 rounded bg-black border border-gray-600 text-white" placeholder="Enter password" autocomplete="current-password">
+                <button id="unlockCommissionerBtn" type="submit" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded">Unlock</button>
+                <button id="cancelCommissionerBtn" type="button" class="px-3 py-2 bg-gray-700 text-white rounded">Cancel</button>
+            </div>
+        </form>
+        
+        <div id="commissionerPanel" class="hidden mt-4 p-6 bg-gray-900 rounded-lg border border-gray-700">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <h3 class="text-yellow-400 font-bold">Commissioner Controls</h3>
+                <button id="lockCommissionerBtn" type="button" class="text-xs text-gray-300 hover:text-white">Lock</button>
+            </div>
+            <p class="text-sm text-gray-400 mb-4">Update team names and lottery weights, then save directly to Supabase.</p>
+            <div id="memberConfigInputs" class="space-y-4 mb-6"></div>
+            <div class="flex flex-wrap gap-4">
+                <button id="saveConfigBtn" type="button" class="px-4 py-2 bg-green-600 text-white rounded">Save Configuration</button>
+                <button id="resetDraftBtn" type="button" class="px-4 py-2 bg-red-600 text-white rounded">Reset Draft</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const COMMISSIONER_PASSWORD = 'Asher'; 
+const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+const SUPABASE_TABLE_NAME = 'draft_configs';
+const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let members = []; 
+let availableMembers = [];
+let draftOrder = [];
+let drawing = false;
+let pickCounter = 8;
+let isDraftSaved = false;
+const lotteryMachine = document.getElementById('lotteryMachine');
+const lotteryStage = document.getElementById('lotteryStage');
+const revealTray = document.getElementById('revealTray');
+const trayBall = document.getElementById('trayBall');
+const travelBall = document.getElementById('travelBall');
+const memberConfigInputs = document.getElementById('memberConfigInputs');
+let ballMotionFrame = null;
+let ballPhysicsRunning = false;
+let lastPhysicsTime = 0;
+const runFullDraftBtn = document.getElementById('runFullDraftBtn');
+const currentPickLabel = document.getElementById('currentPickLabel');
+const drawnTeamNameDisplay = document.getElementById('drawnTeamName');
+const resultsList = document.getElementById('resultsList');
+const teamOddsList = document.getElementById('teamOddsList');
+const commissionerLogin = document.getElementById('commissionerLogin');
+const commissionerLoginForm = document.getElementById('commissionerLoginForm');
+const commissionerPasswordInput = document.getElementById('commissionerPassword');
+const unlockCommissionerBtn = document.getElementById('unlockCommissionerBtn');
+const cancelCommissionerBtn = document.getElementById('cancelCommissionerBtn');
+const lockCommissionerBtn = document.getElementById('lockCommissionerBtn');
+const commissionerPanel = document.getElementById('commissionerPanel');
+const saveConfigBtn = document.getElementById('saveConfigBtn');
+const resetDraftBtn = document.getElementById('resetDraftBtn');
+const commissionerLoginContainer = document.querySelector('.commissioner-tools');
+const lotteryMusic = document.getElementById('lotteryMusic');
+
+async function startLotteryMusic() {
+    if (!lotteryMusic) return;
+    lotteryMusic.volume = 0.55;
+    lotteryMusic.currentTime = 0;
+    try {
+        await lotteryMusic.play();
+    } catch (error) {
+        console.warn('Lottery music could not start:', error);
+    }
+}
+
+function stopLotteryMusic() {
+    if (!lotteryMusic) return;
+    lotteryMusic.pause();
+    lotteryMusic.currentTime = 0;
+    lotteryMusic.volume = 0.55;
+}
+
+let lotteryMusicFadeFrame = null;
+
+function fadeOutLotteryMusic(duration = 2000) {
+    if (!lotteryMusic || lotteryMusic.paused) return;
+
+    if (lotteryMusicFadeFrame) {
+        cancelAnimationFrame(lotteryMusicFadeFrame);
+        lotteryMusicFadeFrame = null;
+    }
+
+    const startingVolume = lotteryMusic.volume;
+    const startTime = performance.now();
+
+    const fadeStep = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        lotteryMusic.volume = Math.max(0, startingVolume * (1 - progress));
+
+        if (progress < 1) {
+            lotteryMusicFadeFrame = requestAnimationFrame(fadeStep);
+        } else {
+            lotteryMusicFadeFrame = null;
+            stopLotteryMusic();
+        }
+    };
+
+    lotteryMusicFadeFrame = requestAnimationFrame(fadeStep);
+}
+
+function fitConsoleScreenText(element, text) {
+    if (!element) return;
+    element.textContent = String(text ?? '').trim();
+}
+
+
+
+
+
+function openCommissionerLogin() {
+    commissionerLoginForm?.classList.remove('hidden');
+    commissionerLogin?.classList.add('hidden');
+    setTimeout(() => commissionerPasswordInput?.focus(), 0);
+}
+
+function closeCommissionerLogin() {
+    commissionerLoginForm?.classList.add('hidden');
+    commissionerLogin?.classList.remove('hidden');
+    if (commissionerPasswordInput) commissionerPasswordInput.value = '';
+}
+
+function lockCommissionerPanel() {
+    commissionerPanel?.classList.add('hidden');
+    closeCommissionerLogin();
+}
+
+function handleCommissionerUnlock(e) {
+    if (e) e.preventDefault();
+    if (!commissionerPasswordInput) return;
+
+    if (commissionerPasswordInput.value === COMMISSIONER_PASSWORD) {
+        commissionerPanel?.classList.remove('hidden');
+        commissionerLoginForm?.classList.add('hidden');
+        commissionerLogin?.classList.add('hidden');
+        commissionerPasswordInput.value = '';
+        initializeMemberConfigInputs();
+        showMessage("Commissioner tools unlocked!", "success");
+        console.log("Commissioner panel unlocked.");
+    } else {
+        showMessage("Incorrect password. Please try again.", "error");
+        commissionerPasswordInput.select();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const initialConsoleScreen = document.getElementById('machineConsoleScreen');
+    if (initialConsoleScreen) {
+        fitConsoleScreenText(initialConsoleScreen, initialConsoleScreen.textContent);
+    }
+    console.log("Initializing Draft Room...");
+    if (typeof initializeDraftState === 'function') {
+        await initializeDraftState();
+    } else {
+        // Fallbacks if initializeDraftState isn't doing it all
+        if (typeof fetchDraftState === 'function') await fetchDraftState();
+        if (typeof populateBalls === 'function') populateBalls();
+    }
+    if (commissionerLogin) commissionerLogin.addEventListener('click', openCommissionerLogin);
+    if (commissionerLoginForm) commissionerLoginForm.addEventListener('submit', handleCommissionerUnlock);
+    if (cancelCommissionerBtn) cancelCommissionerBtn.addEventListener('click', closeCommissionerLogin);
+    if (lockCommissionerBtn) lockCommissionerBtn.addEventListener('click', lockCommissionerPanel);
+    
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await saveConfig(); 
+        });
+    }
+
+    if (resetDraftBtn) {
+        resetDraftBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (typeof clearDraftOrderFromSupabase === 'function') {
+                const success = await clearDraftOrderFromSupabase();
+                if (success) {
+                    initializeDraftState();
+                    showMessage('Draft has been reset. A new random draft can now be run.');
+                }
+            }
+        });
+    }
+    const startDraftBtn = document.getElementById('startDraftBtn');
+    const curtains = document.getElementById('curtainWrapper');
+
+    if (startDraftBtn) {
+        startDraftBtn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            await startLotteryMusic();
+            startDraftBtn.disabled = true;
+            startDraftBtn.textContent = 'OPENING...';
+            if (curtains) {
+                curtains.classList.add('open');
+                setTimeout(() => {
+                    console.log('Curtains open. Starting draft simulation...');
+                    if (typeof runFullDraftSimulation === 'function') {
+                        runFullDraftSimulation();
+                    }
+                }, 1200);
+                setTimeout(() => {
+                    curtains.style.display = 'none';
+                }, 3100);
+            }
+        }, { once: true });
+    }
+});
+async function saveDraftOrderToSupabase(draftOrder) {
+    console.log('Saving draft order to Supabase...', draftOrder);
+    
+    const formattedData = draftOrder.map(pick => ({
+        id: `pick_${pick.pick}`,
+        order_data: {
+            pick: pick.pick,
+            member: pick.member,
+            originalWeightDisplay: pick.originalWeightDisplay
+        }
+    }));
+
+    const { data, error } = await supabase
+        .from('draft_orders')
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving draft order to Supabase:', error);
+        return false;
+    }
+    console.log('Draft order saved successfully:', data);
+    return true;
+}
+
+async function clearDraftOrderFromSupabase() {
+    showMessage('Clearing old draft order from the database...');
+    const { error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .delete()
+        .not('id', 'is', null);
+    
+    if (error) {
+        console.error('Error clearing draft order:', error);
+        showMessage('Error clearing draft order. Check console.');
+        return false;
+    }
+    console.log('Draft order cleared successfully.');
+    sessionStorage.removeItem('hasSeenDraftAnimation');
+    return true;
+}
+
+async function initializeDraftState() {
+    members = await fetchMembersFromSupabase();
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+
+    const savedDraftOrder = await loadDraftOrderFromSupabase();
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenDraftAnimation');
+    initializeResultsList(); 
+    displayTeamOdds();
+    initializeMemberConfigInputs();
+
+    if (savedDraftOrder && savedDraftOrder.length > 0) {
+        isDraftSaved = true;
+        draftOrder = savedDraftOrder.sort((a, b) => a.pick - b.pick);
+        
+        if (hasSeenAnimation) {
+            console.log('Saved draft found, showing final results.');
+            showResults();
+            if (runFullDraftBtn) runFullDraftBtn.textContent = 'Replay Draft Animation';
+            if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+        } else {
+            console.log('Saved draft found, preparing for FIRST reveal.');
+            if (resultsList) resultsList.style.display = 'none'; 
+            if (runFullDraftBtn) runFullDraftBtn.textContent = 'Run Draft';
+            if (currentPickLabel) currentPickLabel.textContent = "";
+        }
+    } else {
+        console.log('New run setup.');
+        isDraftSaved = false;
+        draftOrder = [];
+        if (resultsList) resultsList.style.display = 'none';
+        if (currentPickLabel) currentPickLabel.textContent = `Ready for Pick #${members.length}...`;
+    }
+    pickCounter = members.length;
+    availableMembers = members.map(member => ({ ...member }));
+    populateBalls();
+}
+
+function initializeMemberConfigInputs() {
+    if (!memberConfigInputs) return;
+    memberConfigInputs.innerHTML = '';
+    members.forEach(member => {
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-gray-800 rounded-lg border border-gray-700 flex flex-wrap gap-4 items-end mb-3';
+        div.innerHTML = `
+            <div class="flex flex-col flex-1 min-w-[200px]">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Team Name</label>
+                <input type="text" id="name-${member.id}" value="${member.name}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-24">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Math Weight</label>
+                <input type="number" id="weight-${member.id}" value="${member.weight}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+            <div class="flex flex-col w-32">
+                <label class="text-xs text-orange-400 uppercase font-bold mb-1">Label (e.g. 10%)</label>
+                <input type="text" id="display-${member.id}" value="${member.originalWeightDisplay || ''}" 
+                       class="p-2 rounded bg-gray-900 border border-gray-600 text-white">
+            </div>
+        `;
+        memberConfigInputs.appendChild(div);
+    });
+}
+
+function initializeResultsList() {
+    if (!resultsList) return;
+    resultsList.innerHTML = '';
+    for (let i = members.length; i >= 1; i--) {
+        const li = document.createElement('li');
+        li.setAttribute('data-pick-num', i); 
+        li.className = 'flex justify-between items-center p-4 mb-3 bg-gray-700 text-gray-400 rounded-xl border-l-4 border-gray-600 opacity-50 transition-all duration-500 shadow-md';
+        li.innerHTML = `
+            <span class="font-mono font-bold">PICK #${i}:</span> 
+            <span class="italic text-sm tracking-wide">Pending...</span>
+        `;
+        
+        resultsList.appendChild(li);
+    }
+}
+function stopBallPhysics() {
+    ballPhysicsRunning = false;
+    if (ballMotionFrame) cancelAnimationFrame(ballMotionFrame);
+    ballMotionFrame = null;
+}
+
+function startBallPhysics() {
+    stopBallPhysics();
+    ballPhysicsRunning = true;
+    lastPhysicsTime = performance.now();
+
+    const tick = (now) => {
+        if (!ballPhysicsRunning || !lotteryMachine) return;
+        const dt = Math.min((now - lastPhysicsTime) / 16.67, 2.2);
+        lastPhysicsTime = now;
+
+        const width = lotteryMachine.clientWidth;
+        const height = lotteryMachine.clientHeight;
+        const cx = width / 2;
+        const cy = height / 2;
+        const chamberRadius = Math.min(width, height) / 2 - 25;
+
+        lotteryMachine.querySelectorAll('.ball').forEach((ball, index) => {
+            let x = Number(ball.dataset.x || cx);
+            let y = Number(ball.dataset.y || cy);
+            let vx = Number(ball.dataset.vx || 0);
+            let vy = Number(ball.dataset.vy || 0);
+
+            // Blower turbulence: upward push near the center and a gentle swirl.
+            const dx = x - cx;
+            const dy = y - cy;
+            const dist = Math.max(Math.hypot(dx, dy), 1);
+            const swirl = 0.035;
+            vx += (-dy / dist) * swirl * dt;
+            vy += (dx / dist) * swirl * dt;
+            vy -= (0.018 + Math.random() * 0.018) * dt;
+            vx += (Math.random() - 0.5) * 0.055 * dt;
+            vy += (Math.random() - 0.5) * 0.045 * dt;
+
+            const speed = Math.hypot(vx, vy);
+            const maxSpeed = 3.4;
+            if (speed > maxSpeed) {
+                vx = vx / speed * maxSpeed;
+                vy = vy / speed * maxSpeed;
+            }
+
+            x += vx * dt;
+            y += vy * dt;
+
+            const ballRadius = (ball.offsetWidth || 34) / 2;
+            const fromCenterX = x + ballRadius - cx;
+            const fromCenterY = y + ballRadius - cy;
+            const centerDistance = Math.hypot(fromCenterX, fromCenterY);
+            const maxDistance = chamberRadius - ballRadius;
+
+            if (centerDistance > maxDistance) {
+                const nx = fromCenterX / centerDistance;
+                const ny = fromCenterY / centerDistance;
+                x = cx + nx * maxDistance - ballRadius;
+                y = cy + ny * maxDistance - ballRadius;
+                const dot = vx * nx + vy * ny;
+                vx -= 1.85 * dot * nx;
+                vy -= 1.85 * dot * ny;
+                vx *= 0.97;
+                vy *= 0.97;
+            }
+
+            ball.dataset.x = x;
+            ball.dataset.y = y;
+            ball.dataset.vx = vx;
+            ball.dataset.vy = vy;
+            ball.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${(now / 7 + index * 19) % 360}deg)`;
+        });
+
+        ballMotionFrame = requestAnimationFrame(tick);
+    };
+
+    ballMotionFrame = requestAnimationFrame(tick);
+}
+
+const poolBallPalette = [
+    { color: '#f2c300', dark: '#9a7400' },
+    { color: '#1f67d2', dark: '#0a347d' },
+    { color: '#d62839', dark: '#7b101c' },
+    { color: '#6f42c1', dark: '#371f70' },
+    { color: '#f07f16', dark: '#914107' },
+    { color: '#1f8f4e', dark: '#0b4e29' },
+    { color: '#8f1d2c', dark: '#4f0c16' },
+    { color: '#222831', dark: '#050608' }
+];
+
+function getBallStyleForMember(memberId) {
+    const memberIndex = Math.max(0, members.findIndex(member => String(member.id) === String(memberId)));
+    const paletteEntry = poolBallPalette[memberIndex % poolBallPalette.length];
+    return {
+        color: paletteEntry.color,
+        dark: paletteEntry.dark,
+        striped: memberIndex >= poolBallPalette.length
+    };
+}
+
+function applyBallStyle(element, memberId) {
+    if (!element) return;
+    const style = getBallStyleForMember(memberId);
+    element.style.setProperty('--ball-color', style.color);
+    element.style.setProperty('--ball-dark', style.dark);
+    element.classList.toggle('striped', style.striped);
+}
+
+function populateBalls() {
+    if (!lotteryMachine) return;
+    stopBallPhysics();
+    lotteryMachine.innerHTML = '';
+
+    if (members.length === 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">No teams configured!</div>';
+        if (runFullDraftBtn) runFullDraftBtn.disabled = true;
+        return;
+    }
+
+    const ballsToRender = [];
+    availableMembers.forEach(member => {
+        const weight = Math.max(0, Number(member.weight) || 0);
+        for (let i = 0; i < weight; i++) ballsToRender.push({ teamId: member.id });
+    });
+
+    if (ballsToRender.length === 0 && pickCounter > 0) {
+        lotteryMachine.innerHTML = '<div class="text-xl font-semibold text-gray-400">All teams have been drawn!</div>';
+        return;
+    }
+
+    // Keeps the chamber readable if the configured weights are unusually large.
+    const visualBallLimit = 110;
+    const visualBalls = ballsToRender.length > visualBallLimit
+        ? [...ballsToRender].sort(() => Math.random() - 0.5).slice(0, visualBallLimit)
+        : ballsToRender;
+
+    const width = lotteryMachine.clientWidth || 330;
+    const height = lotteryMachine.clientHeight || 330;
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = Math.min(width, height) / 2 - 43;
+
+    visualBalls.sort(() => Math.random() - 0.5).forEach(ballData => {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        ball.dataset.teamId = String(ballData.teamId);
+        ball.dataset.id = String(ballData.teamId);
+        applyBallStyle(ball, ballData.teamId);
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.sqrt(Math.random()) * radius;
+        const x = cx + Math.cos(angle) * distance - 17;
+        const y = cy + Math.sin(angle) * distance - 17;
+        const speed = 1.1 + Math.random() * 1.8;
+        const direction = Math.random() * Math.PI * 2;
+
+        ball.dataset.x = x;
+        ball.dataset.y = y;
+        ball.dataset.vx = Math.cos(direction) * speed;
+        ball.dataset.vy = Math.sin(direction) * speed;
+        ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        lotteryMachine.appendChild(ball);
+    });
+
+    startBallPhysics();
+}
+
+async function animateBallThroughChute(drawnMember) {
+    if (!lotteryStage || !travelBall || !revealTray || !trayBall || !lotteryMachine) return;
+
+    stopBallPhysics();
+    revealTray.classList.remove('has-ball');
+    applyBallStyle(travelBall, drawnMember.id);
+    applyBallStyle(trayBall, drawnMember.id);
+
+    const matchingBalls = [...lotteryMachine.querySelectorAll(`.ball[data-id="${String(drawnMember.id)}"]`)];
+    const sourceBall = matchingBalls[0] || lotteryMachine.querySelector('.ball');
+    if (sourceBall) sourceBall.classList.add('selected-source');
+
+    const consoleScreen = document.getElementById('machineConsoleScreen');
+    if (consoleScreen) consoleScreen.textContent = 'SELECTING...';
+    await new Promise(resolve => setTimeout(resolve, 420));
+
+    const stageRect = lotteryStage.getBoundingClientRect();
+    const machineRect = lotteryMachine.getBoundingClientRect();
+    const trayRect = revealTray.getBoundingClientRect();
+    const sourceRect = sourceBall ? sourceBall.getBoundingClientRect() : machineRect;
+    const size = 62;
+
+    const point = (x, y, scale=1, rotate=0, offset=0) => ({
+        transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotate}deg)`, offset
+    });
+
+    const startX = sourceRect.left - stageRect.left + sourceRect.width / 2 - size / 2;
+    const startY = sourceRect.top - stageRect.top + sourceRect.height / 2 - size / 2;
+    const neckX = machineRect.left - stageRect.left + machineRect.width / 2 - size / 2;
+    const neckLowY = machineRect.top - stageRect.top + 24;
+    const neckTopY = machineRect.top - stageRect.top - 112;
+    const dropX = trayRect.left - stageRect.left + trayRect.width / 2 - size / 2;
+    const dropY = trayRect.top - stageRect.top + 4;
+    const tubeExitX = dropX;
+    const tubeExitY = neckTopY;
+    const fallStartY = trayRect.top - stageRect.top - size - 8;
+
+    travelBall.style.display = 'block';
+    travelBall.style.left = '0px';
+    travelBall.style.top = '0px';
+
+    const animation = travelBall.animate([
+        point(startX, startY, .58, 0, 0),
+        point(neckX, neckLowY, .78, 180, .24),
+        point(neckX, neckTopY, 1, 420, .43),
+        point(tubeExitX, tubeExitY, 1, 820, .74),
+        point(tubeExitX, fallStartY, 1, 980, .84),
+        point(dropX, dropY, 1, 1220, 1)
+    ], { duration: 2750, easing: 'cubic-bezier(.32,.04,.18,1)', fill: 'forwards' });
+
+    await animation.finished;
+    travelBall.style.display = 'none';
+    animation.cancel();
+    revealTray.classList.add('has-ball');
+    if (consoleScreen) consoleScreen.textContent = drawnMember.name;
+
+    matchingBalls.forEach(ball => ball.remove());
+    await new Promise(resolve => setTimeout(resolve, 500));
+}
+
+async function runFullDraftSimulation() {
+    if (drawing) return;
+    drawing = true;
+
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = true;
+        runFullDraftBtn.textContent = 'DRAFT IN PROGRESS...';
+    }
+
+    pickCounter = members.length;
+
+    document.querySelectorAll('.order-slot').forEach(slot => {
+        slot.classList.remove('filled', 'active');
+        const status = slot.querySelector('.order-status');
+        if (status) status.textContent = '';
+    });
+    const firstSlot = document.querySelector(`.order-slot[data-machine-pick="${pickCounter}"]`);
+    if (firstSlot) {
+        firstSlot.classList.add('active');
+        const status = firstSlot.querySelector('.order-status');
+        if (status) status.textContent = 'UP NEXT';
+    }
+
+    if (isDraftSaved) {
+        availableMembers = members.map(member => ({ ...member }));
+        populateBalls();
+    } else {
+        draftOrder = [];
+        availableMembers = members.map(member => ({ ...member }));
+        populateBalls();
+    }
+
+    // Give the opening presentation twenty seconds before Pick #8 is drawn.
+    // Wait ten seconds between the normal ball draws.
+    // After Pick #2 is revealed, hold for three seconds before awarding Pick #1
+    // by process of elimination.
+    const firstDrawDelayMs = 20000;
+    const betweenDrawDelayMs = 10000;
+    const finalEliminationDelayMs = 3000;
+    const numberOfReveals = Math.min(members.length, 8);
+
+    await new Promise(resolve => setTimeout(resolve, firstDrawDelayMs));
+
+    for (let i = 0; i < numberOfReveals; i++) {
+        await performSingleDraw();
+
+        const onlyPickOneRemains = pickCounter === 1;
+        const isDraftComplete = pickCounter < 1;
+
+        if (!isDraftComplete) {
+            await new Promise(resolve => setTimeout(
+                resolve,
+                onlyPickOneRemains ? finalEliminationDelayMs : betweenDrawDelayMs
+            ));
+        }
+    }
+
+    if (!isDraftSaved) {
+        await saveDraftOrderToSupabase(draftOrder);
+        isDraftSaved = true;
+    }
+
+    sessionStorage.setItem('hasSeenDraftAnimation', 'true');
+    lotteryMachine.innerHTML = '';
+    drawing = false;
+
+    if (runFullDraftBtn) {
+        runFullDraftBtn.disabled = false;
+        runFullDraftBtn.textContent = 'RUN DRAFT';
+    }
+
+    if (currentPickLabel) currentPickLabel.textContent = "Draft Complete!";
+}
+
+async function performSingleDraw() {
+    if (!lotteryMachine) return;        
+    
+    if (currentPickLabel) currentPickLabel.textContent = `Drawing for Pick #${pickCounter}...`;
+    const machineCurrentPick = document.getElementById('machineCurrentPick');
+    const machineConsoleScreen = document.getElementById('machineConsoleScreen');
+    if (machineCurrentPick) machineCurrentPick.textContent = `#${pickCounter}`;
+    if (machineConsoleScreen) fitConsoleScreenText(machineConsoleScreen, pickCounter === 1 ? 'BY ELIMINATION' : 'MIXING...');
+    document.querySelectorAll('.order-slot').forEach(slot => {
+        const active = Number(slot.dataset.machinePick) === pickCounter;
+        slot.classList.toggle('active', active);
+        const status = slot.querySelector('.order-status');
+        if (status) {
+            if (active) status.textContent = 'UP NEXT';
+            else if (!slot.classList.contains('filled')) status.textContent = '';
+        }
+    });
+    if (drawnTeamNameDisplay) drawnTeamNameDisplay.textContent = '';
+    if (revealTray) revealTray.classList.remove('has-ball');   
+    
+    // Pick #1 is already preceded by the dedicated three-second elimination hold.
+    // Other picks retain the brief machine-mixing pause.
+    if (pickCounter !== 1) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+    
+    let drawnMember;
+    if (isDraftSaved) {
+        const savedPick = draftOrder.find(p => p.pick === pickCounter);
+        if (savedPick) {
+            drawnMember = members.find(
+                m => String(m.id) === String(savedPick.teamId) || m.name === savedPick.member
+            );
+        }
+    } else {
+        drawnMember = (pickCounter === 1 && availableMembers.length === 1)
+            ? availableMembers[0]
+            : drawWeightedMember();
+    }
+
+    if (drawnMember) {
+        availableMembers = availableMembers.filter(m => String(m.id) !== String(drawnMember.id));
+        
+        if (pickCounter === 1 && availableMembers.length === 0) {
+            if (revealTray) revealTray.classList.remove('has-ball');
+            const machineConsoleScreen = document.getElementById('machineConsoleScreen');
+            if (machineConsoleScreen) fitConsoleScreenText(machineConsoleScreen, drawnMember.name);
+        } else {
+            await animateBallThroughChute(drawnMember);
+        }
+        if (drawnTeamNameDisplay) drawnTeamNameDisplay.textContent = drawnMember.name;
+
+        const completedSlot = document.querySelector(`.order-slot[data-machine-pick="${pickCounter}"]`);
+        if (completedSlot) {
+            completedSlot.classList.remove('active');
+            completedSlot.classList.add('filled');
+            const slotStatus = completedSlot.querySelector('.order-status');
+            if (slotStatus) slotStatus.textContent = drawnMember.name;
+            completedSlot.title = drawnMember.name;
+        }
+
+        if (!isDraftSaved) {
+            draftOrder.push({ 
+                pick: pickCounter, 
+                teamId: drawnMember.id, 
+                member: drawnMember.name, 
+                originalWeightDisplay: drawnMember.originalWeightDisplay 
+            });
+        }
+
+        if (resultsList) {
+            let pickElement = resultsList.querySelector(`li[data-pick-num="${pickCounter}"]`);
+            if (pickElement) {
+                pickElement.innerHTML = `
+                    <span class="font-mono text-yellow-300 font-bold text-lg">PICK #${pickCounter}</span> 
+                    <span class="font-sans font-black text-white uppercase tracking-tight text-2xl">${drawnMember.name}</span>
+                `;
+                pickElement.classList.remove('bg-gray-700', 'text-gray-300', 'opacity-50', 'text-gray-400', 'italic');
+                pickElement.className = "flex justify-between items-center p-5 mb-4 bg-green-600 text-white opacity-100 border-l-8 border-yellow-400 shadow-2xl rounded-xl transition-all duration-500";
+            }
+
+            if (typeof updateOddsDisplay === 'function') updateOddsDisplay();
+        }
+    } 
+
+    pickCounter--; 
+    if (pickCounter >= 1) {
+        populateBalls();
+    } else {
+        console.log("Draft Complete! Holding the final board before closing curtains...");
+
+        // Hold the finished board for 3 seconds, then fade the music for
+        // the final 2 seconds so it reaches silence as the curtains close.
+        setTimeout(() => {
+            fadeOutLotteryMusic(2000);
+        }, 3000);
+
+        setTimeout(() => {
+            const curtains = document.getElementById('curtainWrapper');
+            if (curtains) {
+                prepareClosingCurtainOrder();
+                curtains.style.display = 'flex';
+                setTimeout(() => {
+                    curtains.classList.remove('open');
+                    if (typeof showMessage === 'function') {
+                        showMessage("The Draft is Complete! All picks are locked in.", "success");
+                    }
+                }, 50);
+            } else {
+                stopLotteryMusic();
+            }
+        }, 5000);
+    }
+} 
+function prepareClosingCurtainOrder() {
+    const rulesView = document.getElementById('curtainRulesView');
+    const finalView = document.getElementById('curtainFinalView');
+    const finalOrder = document.getElementById('curtainFinalOrder');
+    if (!finalView || !finalOrder) return;
+
+    if (rulesView) rulesView.hidden = true;
+    finalView.hidden = false;
+    finalOrder.innerHTML = '';
+
+    for (let pick = 1; pick <= 8; pick++) {
+        const slot = document.querySelector(`[data-machine-pick="${pick}"] .order-status`);
+        const teamName = slot?.textContent?.trim() || 'Pending';
+        const row = document.createElement('div');
+        row.className = 'final-order-row';
+        row.innerHTML = `<span class="pick">#${pick}</span><span class="team"></span>`;
+        row.querySelector('.team').textContent = teamName;
+        finalOrder.appendChild(row);
+    }
+}
+
+
+function drawWeightedMember() {
+    if (availableMembers.length === 0) {
+        return null;
+    }
+    const totalWeight = availableMembers.reduce((sum, member) => sum + member.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+    for (let i = 0; i < availableMembers.length; i++) {
+        randomWeight -= availableMembers[i].weight;
+        if (randomWeight <= 0) {
+            const selectedMember = availableMembers[i];
+            availableMembers.splice(i, 1);
+            return selectedMember;
+        }
+    }    
+    return availableMembers.pop();
+}
+
+    
+function showResults() {
+    if (resultsList) resultsList.style.display = 'none';
+    updateUIFromCurrentState();
+}
+
+function updateUIFromCurrentState() {
+    initializeResultsList();
+    const sortedDraftOrder = [...draftOrder].sort((a, b) => a.pick - b.pick);
+    sortedDraftOrder.forEach(item => {
+        const originalMember = members.find(m => m.name === item.member);
+        if (originalMember) {
+            const oddsElement = teamOddsList.querySelector(`li[data-team-id="${originalMember.id}"]`);
+            if (oddsElement) {
+                oddsElement.classList.add('picked');
+            }
+        }
+    
+        const pickElement = resultsList.querySelector(`li[data-pick-num="${item.pick}"]`);
+        if (pickElement) {
+            pickElement.innerHTML = `<span>Pick ${item.pick}:</span> <span>${item.member} (${item.originalWeightDisplay})</span>`;
+            pickElement.classList.remove('bg-gray-700', 'text-gray-300');
+            pickElement.classList.add('bg-green-500', 'text-white');
+        }
+    });
+}
+
+function displayTeamOdds() {
+    if (!teamOddsList) return;
+    teamOddsList.innerHTML = '';
+    const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
+
+    sortedMembers.forEach(member => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${member.name}:</span> <span>${member.originalWeightDisplay}</span>`;
+        li.setAttribute('data-team-id', member.id);
+        
+        // Pre-check if already picked (useful for page refreshes)
+        if (draftOrder.some(p => p.member === member.name)) {
+            li.classList.add('picked');
+        }
+        
+        teamOddsList.appendChild(li);
+    });
+}
+
+function showMessage(message) {
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+    if (messageBox && messageText) {
+        messageText.innerText = message;
+        messageBox.style.display = 'flex';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
+    }
+}
+
+async function saveConfig() {
+    const newMembers = [];
+    let isValid = true;
+
+    for (const member of members) {
+        const nameInput = document.getElementById(`name-${member.id}`);
+        const weightInput = document.getElementById(`weight-${member.id}`);
+        const displayInput = document.getElementById(`display-${member.id}`);
+
+        if (nameInput && weightInput && displayInput) {
+            const newWeight = parseInt(weightInput.value, 10);
+            const newName = nameInput.value.trim();
+            const newDisplay = displayInput.value.trim();
+            if (newName === '' || isNaN(newWeight) || newWeight <= 0) {
+                showMessage('All team names must not be empty and weights must be positive.');
+                isValid = false;
+                return;
+            }
+
+            newMembers.push({
+                id: member.id,
+                name: newName,
+                weight: newWeight,
+                originalWeightDisplay: newDisplay || `${newWeight}%`,
+                color: member.color || null
+            });
+        }
+    }
+
+    if (isValid && newMembers.length > 0) {
+        const success = await saveMembersToSupabase(newMembers);
+        
+        if (success) {
+            members = newMembers; 
+            showMessage(`Configuration saved! The draft is ready.`);
+            initializeDraftState(); 
+        }
+    } else if (newMembers.length === 0) {
+        showMessage('At least one team must be configured.');
+    }
+}
+
+async function fetchMembersFromSupabase() {
+    console.log('Fetching members from Supabase...');
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select('id, members_data')
+        .order('members_data->>weight', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching data from Supabase:', error);
+        showMessage('Error fetching data from the database. Check console for details.');
+        return [];
+    }
+
+    if (data && data.length > 0) {
+        console.log('Data fetched successfully:', data);
+        const members = data.map(item => ({
+            id: item.id,
+            name: item.members_data.name,
+            weight: item.members_data.weight,
+            originalWeightDisplay: item.members_data.originalWeightDisplay,
+            color: item.members_data.color 
+        }));
+        console.log('After mapping, members array:', members, 'Length:', members.length);
+        return members;
+    } else {
+        console.warn('No member data found in Supabase table.');
+        return [];
+    }
+}
+
+async function saveMembersToSupabase(newMembers) {
+    console.log('Saving configuration to Supabase...', newMembers);
+
+    const formattedData = newMembers.map(member => ({
+        id: member.id,
+        members_data: {
+            name: member.name,
+            weight: member.weight,
+            originalWeightDisplay: member.originalWeightDisplay,
+            color: member.color || null
+        }
+    }));
+    
+    const { data, error } = await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .upsert(formattedData, { onConflict: 'id' })
+        .select();
+
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+        showMessage('Error saving configuration to the database. Check console for details.');
+        return false;
+    }
+    console.log('Configuration saved successfully:', data);
+    return true;
+}
+
+async function loadDraftOrderFromSupabase() {
+    console.log('Checking for saved draft order...');
+    const { data, error } = await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select('order_data')
+        .order('order_data->>pick', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching draft order:', error);
+        return null;
+    }
+
+    if (data && data.length > 0) {
+        console.log('Draft order found in Supabase:', data);
+        return data.map(item => item.order_data);
+    }
+
+    console.log('No draft order found in the database.');
+    return null;
+}
+
+/* --- DRAFT MANAGEMENT FUNCTIONS --- */
+async function resetDraft() {
+    const confirmed = confirm("WARNING: This will delete the saved draft order from the database. Are you sure?");
+    
+    if (!confirmed) return;
+
+    try {
+        const { error } = await supabase
+            .from('draft_order')
+            .delete()
+            .neq('id', 0); 
+
+        if (error) throw error;
+        
+        sessionStorage.removeItem('hasSeenDraftAnimation');
+        draftOrder = [];
+        isDraftSaved = false;
+        showMessage("Draft has been reset!");
+        initializeDraftState();
+
+    } catch (err) {
+        console.error("Error during reset:", err);
+        showMessage("Error resetting draft.");
+    }
+}
+
+// --- UPDATE ODDS DISPLAY ---
+function updateOddsDisplay() {
+    const teamOddsList = document.getElementById('teamOddsList');
+    if (!teamOddsList || !members || members.length === 0) return;
+
+    teamOddsList.innerHTML = '';
+
+    const sortedMembers = [...members].sort((a, b) => b.weight - a.weight);
+
+    sortedMembers.forEach(m => {
+        const li = document.createElement('li');
+        li.setAttribute('data-team-id', m.id); 
+        
+        li.className = "flex justify-between items-center p-4 mb-3 bg-slate-800 rounded-xl border-l-4 border-yellow-500 shadow-lg transition-all duration-700";
+        
+        li.innerHTML = `
+            <span class="team-name font-bold text-white uppercase tracking-tight">${m.name}</span>
+            <span class="odds-percent font-mono text-white text-lg">${m.originalWeightDisplay || m.weight + '%'}</span>
+        `;
+
+        const isPicked = draftOrder.some(p => 
+            (String(p.teamId) === String(m.id) || p.member === m.name) && 
+            p.pick > pickCounter
+        );
+        
+        if (isPicked) {
+            li.classList.add('picked-team');
+        }
+
+        teamOddsList.appendChild(li);
+    });
+}
+</script>
+</body>
+</html>

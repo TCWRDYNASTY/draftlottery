@@ -4,19 +4,13 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>TCWR 100-YARD DRAFT DASH</title>
 
 <style>
 
-/* =========================================================
-   GLOBAL
-   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800;900&family=Montserrat:wght@600;700;800&display=swap');
 
 *{
   box-sizing:border-box;
@@ -26,14 +20,9 @@ html,
 body{
   margin:0;
   padding:0;
-
   background:#071522;
   color:#fff;
-
-  font-family:
-    Montserrat,
-    Arial,
-    sans-serif;
+  font-family:Montserrat,Arial,sans-serif;
 }
 
 body{
@@ -49,11 +38,8 @@ select{
 button{
   border:0;
   border-radius:8px;
-
   padding:12px 20px;
-
   font-weight:800;
-
   cursor:pointer;
 }
 
@@ -64,23 +50,19 @@ button:disabled{
 
 
 /* =========================================================
-   MAIN WRAPPER
+   MAIN PAGE
    ========================================================= */
 
 .wrap{
   width:100%;
   max-width:1400px;
-
   margin:0 auto;
-
   padding:24px;
 }
 
 h1{
   margin:0 0 8px;
-
   text-align:center;
-
   font:
     900
     clamp(32px,5vw,64px)
@@ -88,19 +70,14 @@ h1{
     .95
     "Barlow Condensed",
     sans-serif;
-
   letter-spacing:1px;
 }
 
 .sub{
   text-align:center;
-
   color:#d8b45a;
-
   font-weight:800;
-
   letter-spacing:2px;
-
   margin-bottom:20px;
 }
 
@@ -111,13 +88,9 @@ h1{
 
 .status{
   text-align:center;
-
   min-height:24px;
-
   margin:8px 0 14px;
-
   color:#d8b45a;
-
   font-weight:800;
 }
 
@@ -128,13 +101,9 @@ h1{
 
 .panel{
   background:#0c1d2b;
-
   border:1px solid #294354;
-
   border-radius:12px;
-
   padding:14px;
-
   margin-bottom:16px;
 }
 
@@ -145,13 +114,8 @@ h1{
 
 .race-layout{
   display:grid;
-
-  grid-template-columns:
-    minmax(0,1fr)
-    340px;
-
+  grid-template-columns:minmax(0,1fr) 340px;
   gap:18px;
-
   align-items:start;
 }
 
@@ -165,15 +129,12 @@ h1{
 
 .results .panel{
   position:sticky;
-
   top:18px;
-
   margin-bottom:0;
 }
 
 .results h2{
   margin:0 0 14px;
-
   font:
     900
     30px
@@ -181,37 +142,27 @@ h1{
     1
     "Barlow Condensed",
     sans-serif;
+  letter-spacing:.5px;
 }
 
 .result-list{
   list-style:none;
-
   padding:0;
-
   margin:0;
 }
 
 .result-list li{
   display:flex;
-
   justify-content:space-between;
-
   align-items:center;
-
   gap:12px;
-
   padding:10px;
-
-  border-bottom:
-    1px solid
-    #294354;
-
+  border-bottom:1px solid #294354;
   font-size:14px;
 }
 
 .result-list li:first-child{
   color:#d8b45a;
-
   font-size:16px;
 }
 
@@ -226,34 +177,16 @@ h1{
 
 .field{
   position:relative;
-
   width:100%;
-
   aspect-ratio:2 / 1;
-
-  /*
-     Keep the race contained inside the field.
-
-     The staggered finish positions are still inside
-     this boundary.
-  */
   overflow:hidden;
-
   border-radius:14px;
-
   border:5px solid #fff;
 
-  background-image:
-    url("racefield.png");
-
-  background-position:
-    center center;
-
-  background-repeat:
-    no-repeat;
-
-  background-size:
-    100% 100%;
+  background-image:url("racefield.png");
+  background-position:center center;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
 }
 
 
@@ -263,19 +196,14 @@ h1{
 
 .runner{
   position:absolute;
-
   left:8%;
-
-  transform:
-    translate(-50%,-50%);
-
+  transform:translateY(-50%);
   z-index:10;
 
   width:64px;
   height:64px;
 
-  transition:
-    left .12s linear;
+  transition:left .15s linear;
 }
 
 .player-image{
@@ -287,10 +215,7 @@ h1{
   object-fit:cover;
 
   border-radius:50%;
-
-  border:
-    3px solid
-    #d8b45a;
+  border:3px solid #d8b45a;
 
   background:#071522;
 
@@ -303,7 +228,6 @@ h1{
 
 .runner.finished{
   opacity:1 !important;
-
   visibility:visible !important;
 }
 
@@ -314,30 +238,19 @@ h1{
 
 .permanent-labels{
   display:grid;
-
-  grid-template-columns:
-    repeat(4,1fr);
-
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
-
   margin-top:16px;
 }
 
 .permanent-team{
   display:flex;
-
   align-items:center;
-
   gap:9px;
-
   min-width:0;
 
   background:#0c1d2b;
-
-  border:
-    1px solid
-    #294354;
-
+  border:1px solid #294354;
   border-radius:10px;
 
   padding:8px 10px;
@@ -347,29 +260,21 @@ h1{
 .label-image-placeholder{
   width:40px;
   height:40px;
-
   flex:0 0 40px;
 
   border-radius:50%;
-
   object-fit:cover;
 
-  border:
-    2px solid
-    #d8b45a;
-
+  border:2px solid #d8b45a;
   background:#071522;
 }
 
 .label-image-placeholder{
   display:flex;
-
   align-items:center;
-
   justify-content:center;
 
   color:#fff;
-
   font-weight:900;
 }
 
@@ -385,17 +290,13 @@ h1{
     sans-serif;
 
   white-space:nowrap;
-
   overflow:hidden;
-
   text-overflow:ellipsis;
 }
 
 .permanent-team-odds{
   color:#d8b45a;
-
   font-size:11px;
-
   font-weight:800;
 }
 
@@ -406,44 +307,31 @@ h1{
 
 #commissionerArea{
   margin-top:22px;
-
   margin-bottom:16px;
 }
 
 #commissionerBottomButton{
   display:block;
-
   margin:0 auto;
 
   background:#d8b45a;
-
   color:#071522;
 }
 
 #commissionerLoginBox,
 #commissionerPanel{
   background:#0c1d2b;
-
-  border:
-    1px solid
-    #294354;
-
+  border:1px solid #294354;
   border-radius:12px;
-
   padding:14px;
-
   margin-top:10px;
 }
 
 #commissionerLoginBox{
   display:flex;
-
   gap:8px;
-
   align-items:center;
-
   justify-content:center;
-
   flex-wrap:wrap;
 }
 
@@ -453,13 +341,9 @@ h1{
   padding:10px 12px;
 
   border-radius:7px;
-
-  border:
-    1px solid
-    #405765;
+  border:1px solid #405765;
 
   background:#081722;
-
   color:#fff;
 }
 
@@ -479,39 +363,30 @@ h1{
 
 .commissioner-actions{
   display:flex;
-
   gap:8px;
-
   flex-wrap:wrap;
-
   margin-top:14px;
 }
 
 #saveConfigBtn{
   background:#2d8a57;
-
   color:#fff;
 }
 
 #lockCommissionerBtn{
   background:#243746;
-
   color:#fff;
 }
 
 #resetDraftBtn{
   background:#8e3d3d;
-
   color:#fff;
 }
 
 .lock-note{
   text-align:center;
-
   color:#9fb0ba;
-
   font-size:12px;
-
   margin:7px 0 0;
 }
 
@@ -526,7 +401,6 @@ h1{
 
 .teams{
   width:100%;
-
   overflow-x:auto;
 }
 
@@ -540,7 +414,6 @@ h1{
     minmax(250px,1fr);
 
   gap:12px;
-
   align-items:center;
 }
 
@@ -548,20 +421,12 @@ h1{
   padding:11px 12px;
 
   background:#102838;
-
   color:#d8b45a;
 
-  border:
-    1px solid
-    #294354;
-
+  border:1px solid #294354;
   border-bottom:0;
 
-  border-radius:
-    10px
-    10px
-    0
-    0;
+  border-radius:10px 10px 0 0;
 
   font:
     800
@@ -572,7 +437,6 @@ h1{
     sans-serif;
 
   letter-spacing:.7px;
-
   text-transform:uppercase;
 }
 
@@ -581,63 +445,36 @@ h1{
 
   background:#081722;
 
-  border-left:
-    1px solid
-    #294354;
-
-  border-right:
-    1px solid
-    #294354;
-
-  border-top:
-    1px solid
-    #294354;
+  border-left:1px solid #294354;
+  border-right:1px solid #294354;
+  border-top:1px solid #294354;
 }
 
 .team-edit:last-child{
-  border-bottom:
-    1px solid
-    #294354;
-
-  border-radius:
-    0
-    0
-    10px
-    10px;
+  border-bottom:1px solid #294354;
+  border-radius:0 0 10px 10px;
 }
 
 .team-edit input,
 .team-edit select{
   width:100%;
-
   min-height:40px;
 
   padding:9px 10px;
 
   border-radius:6px;
-
-  border:
-    1px solid
-    #405765;
+  border:1px solid #405765;
 
   background:#071522;
-
   color:#fff;
 
-  font-family:
-    Montserrat,
-    Arial,
-    sans-serif;
-
+  font-family:Montserrat,Arial,sans-serif;
   font-size:14px;
 }
 
 .team-edit input:focus,
 .team-edit select:focus{
-  outline:
-    2px solid
-    rgba(216,180,90,.45);
-
+  outline:2px solid rgba(216,180,90,.45);
   border-color:#d8b45a;
 }
 
@@ -649,7 +486,6 @@ h1{
     minmax(150px,1fr);
 
   gap:8px;
-
   align-items:center;
 }
 
@@ -658,25 +494,18 @@ h1{
   height:48px;
 
   border-radius:50%;
-
   object-fit:cover;
 
-  border:
-    2px solid
-    #d8b45a;
-
+  border:2px solid #d8b45a;
   background:#071522;
 }
 
 .team-image-preview.placeholder{
   display:flex;
-
   align-items:center;
-
   justify-content:center;
 
   color:#fff;
-
   font-weight:900;
 }
 
@@ -700,7 +529,6 @@ h1{
 
 #raceCurtain{
   position:fixed;
-
   inset:0;
 
   z-index:9999;
@@ -709,11 +537,9 @@ h1{
 
   pointer-events:auto;
 
-  background:
-    rgba(3,10,17,.84);
+  background:rgba(3,10,17,.84);
 
   backdrop-filter:blur(4px);
-
   -webkit-backdrop-filter:blur(4px);
 
   transition:
@@ -723,19 +549,15 @@ h1{
 
 #raceCurtain.hidden{
   opacity:0;
-
   visibility:hidden;
-
   pointer-events:none;
 }
 
 .curtain-panel{
   position:absolute;
-
   top:0;
 
   width:50.5%;
-
   height:100%;
 
   z-index:1;
@@ -791,18 +613,12 @@ h1{
 
 .curtain-panel.left-panel{
   left:0;
-
-  border-right:
-    1px solid
-    rgba(216,180,90,.25);
+  border-right:1px solid rgba(216,180,90,.25);
 }
 
 .curtain-panel.right-panel{
   right:0;
-
-  border-left:
-    1px solid
-    rgba(216,180,90,.25);
+  border-left:1px solid rgba(216,180,90,.25);
 }
 
 .curtain-panel.left-panel::after{
@@ -814,52 +630,38 @@ h1{
 }
 
 #raceCurtain.open .left-panel{
-  transform:
-    translateX(-102%);
+  transform:translateX(-102%);
 }
 
 #raceCurtain.open .right-panel{
-  transform:
-    translateX(102%);
+  transform:translateX(102%);
 }
 
 .race-curtain-content{
   position:absolute;
-
   inset:0;
 
   z-index:3;
 
   display:flex;
-
   align-items:center;
-
   justify-content:center;
 
   padding:24px;
 
-  transition:
-    opacity .35s ease;
+  transition:opacity .35s ease;
 }
 
 #raceCurtain.open .race-curtain-content{
   opacity:0;
-
   pointer-events:none;
 }
 
 .curtain-card{
-  width:min(
-    720px,
-    92vw
-  );
+  width:min(720px,92vw);
 
   padding:
-    clamp(
-      24px,
-      5vw,
-      52px
-    );
+    clamp(24px,5vw,52px);
 
   border:
     1px solid
@@ -974,7 +776,6 @@ h1{
   display:flex;
 
   justify-content:center;
-
   align-items:center;
 
   flex-wrap:wrap;
@@ -1013,15 +814,11 @@ h1{
 
 .flow-arrow{
   color:#d8b45a;
-
   font-weight:900;
 }
 
 .race-note{
-  margin:
-    0
-    0
-    22px;
+  margin:0 0 22px;
 
   color:#9fb0ba;
 
@@ -1038,7 +835,6 @@ h1{
     24px;
 
   background:#d8b45a;
-
   color:#071522;
 
   font:
@@ -1057,8 +853,7 @@ h1{
 }
 
 #startDashBtn:hover:not(:disabled){
-  transform:
-    translateY(-2px);
+  transform:translateY(-2px);
 
   box-shadow:
     0
@@ -1074,21 +869,17 @@ h1{
 
 #countdownView{
   position:absolute;
-
   inset:0;
 
   z-index:5;
 
   display:flex;
-
   flex-direction:column;
 
   align-items:center;
-
   justify-content:center;
 
   opacity:0;
-
   pointer-events:none;
 }
 
@@ -1096,10 +887,8 @@ h1{
   opacity:1;
 }
 
-#raceCurtain.countdown
-.race-curtain-content{
+#raceCurtain.countdown .race-curtain-content{
   opacity:0;
-
   pointer-events:none;
 }
 
@@ -1136,9 +925,7 @@ h1{
     40px
     rgba(216,180,90,.4);
 
-  transform:
-    scale(.7);
-
+  transform:scale(.7);
   opacity:0;
 }
 
@@ -1158,23 +945,17 @@ h1{
 
   0%{
     opacity:0;
-
-    transform:
-      scale(.65);
+    transform:scale(.65);
   }
 
   30%{
     opacity:1;
-
-    transform:
-      scale(1.08);
+    transform:scale(1.08);
   }
 
   100%{
     opacity:0;
-
-    transform:
-      scale(1.25);
+    transform:scale(1.25);
   }
 
 }
@@ -1195,8 +976,7 @@ h1{
   }
 
   .permanent-labels{
-    grid-template-columns:
-      repeat(2,1fr);
+    grid-template-columns:repeat(2,1fr);
   }
 
 }
@@ -1218,17 +998,6 @@ h1{
     grid-column:1/-1;
   }
 
-  .team-image-picker{
-    grid-template-columns:
-      46px
-      minmax(120px,1fr);
-  }
-
-  .team-image-preview{
-    width:38px;
-    height:38px;
-  }
-
 }
 
 @media(max-width:560px){
@@ -1237,8 +1006,9 @@ h1{
     padding:12px;
   }
 
-  .field{
-    aspect-ratio:2 / 1;
+  .runner{
+    width:50px;
+    height:50px;
   }
 
   .player-image{
@@ -1246,77 +1016,16 @@ h1{
     height:44px;
   }
 
-  .runner{
-    width:50px;
-    height:50px;
-  }
-
   .permanent-labels{
-    grid-template-columns:
-      1fr 1fr;
-  }
-
-  #commissionerPassword{
-    min-width:170px;
-
-    width:100%;
-  }
-
-  .race-flow{
-    gap:5px;
-  }
-
-  .flow-box{
-    padding:
-      8px
-      9px;
-
-    font-size:10px;
+    grid-template-columns:1fr;
   }
 
 }
 
 
 /* =========================================================
-   FINISH POSITION VISUALIZATION
+   HTML CONTENT
    ========================================================= */
-
-/*
-   IMPORTANT:
-
-   The finish is NOT one shared X position anymore.
-
-   This gives every draft position its own finish point.
-
-   Pick #1:
-       96%
-
-   Pick #2:
-       93.8%
-
-   Pick #3:
-       91.6%
-
-   Pick #4:
-       89.4%
-
-   Pick #5:
-       87.2%
-
-   Pick #6:
-       85%
-
-   Pick #7:
-       82.8%
-
-   Pick #8:
-       80.6%
-
-   This means EVERY player gets beyond the goal line,
-   but they are no longer sitting directly on top of
-   one another when the draft order is revealed.
-*/
-
 
 </style>
 
@@ -1326,275 +1035,67 @@ h1{
 <body>
 
 
-<!-- =========================================================
-     PRE-RACE CURTAIN
-     ========================================================= -->
-
-<div
-  id="raceCurtain"
->
-
-  <div
-    class="curtain-panel left-panel"
-  ></div>
-
-  <div
-    class="curtain-panel right-panel"
-  ></div>
-
-
-  <div
-    class="race-curtain-content"
-  >
-
-    <div
-      class="curtain-card"
-    >
-
-      <div
-        class="curtain-kicker"
-      >
-        TCWR DRAFT NIGHT
-      </div>
-
-
-      <h2
-        class="curtain-title"
-      >
-        100-YARD DRAFT DASH
-      </h2>
-
-
-      <div
-        class="curtain-subtitle"
-      >
-        Eight teams. One finish line.
-        The order you see is the official draft order.
-      </div>
-
-
-      <div
-        class="main-rule"
-      >
-
-        <div
-          class="main-rule-title"
-        >
-          HIGHER ODDS = BETTER PICK
-        </div>
-
-        <div
-          class="main-rule-text"
-        >
-          The higher a team's odds, the better its chance
-          of being selected early.
-        </div>
-
-      </div>
-
-
-      <div
-        class="race-flow"
-      >
-
-        <div
-          class="flow-box"
-        >
-          FIRST ACROSS
-        </div>
-
-        <div
-          class="flow-arrow"
-        >
-          →
-        </div>
-
-        <div
-          class="flow-box"
-        >
-          PICK #1
-        </div>
-
-        <div
-          class="flow-arrow"
-        >
-          •
-        </div>
-
-        <div
-          class="flow-box"
-        >
-          LAST ACROSS
-        </div>
-
-        <div
-          class="flow-arrow"
-        >
-          →
-        </div>
-
-        <div
-          class="flow-box"
-        >
-          PICK #8
-        </div>
-
-      </div>
-
-
-      <p
-        class="race-note"
-      >
-        The official draft order is locked in before
-        the race begins, so everyone watching sees
-        the same result.
-      </p>
-
-
-      <button
-        id="startDashBtn"
-        type="button"
-      >
-        LET'S RACE
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="countdownView"
-  >
-
-    <div
-      class="countdown-label"
-    >
-      TAKE YOUR MARKS
-    </div>
-
-    <div
-      id="countdownNumber"
-    >
-      3
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =========================================================
-     MAIN PAGE
-     ========================================================= -->
-
-<div
-  class="wrap"
->
+<div class="wrap">
 
   <h1>
     TCWR 100-YARD DRAFT DASH
   </h1>
 
-
-  <div
-    class="sub"
-  >
-    WEIGHTED ODDS • 8 RUNNERS • DRAFT ORDER
+  <div class="sub">
+    HIGHER ODDS = BETTER PICK
   </div>
 
 
-  <div
-    id="status"
-    class="status"
-  >
-    Ready at the starting line.
-  </div>
+  <div id="status" class="status"></div>
 
 
-  <!-- =======================================================
-       COMMISSIONER SETTINGS
-       ======================================================= -->
-
-  <div
-    id="teamSettingsPanel"
-    class="panel hidden"
-  >
-
-    <div
-      class="teams"
-      id="teamInputs"
-    ></div>
+  <div class="race-layout">
 
 
-    <div
-      class="lock-note"
-    >
-      Commissioner tools are unlocked.
-      Edit all 8 teams and click SAVE CONFIGURATION.
-    </div>
-
-  </div>
+    <main class="race-main">
 
 
-  <!-- =======================================================
-       RACE
-       ======================================================= -->
+      <div class="panel">
 
-  <div
-    class="race-layout"
-  >
+        <div
+          id="field"
+          class="field"
+        ></div>
 
-    <div
-      class="race-main"
-    >
-
-      <div
-        class="field"
-        id="field"
-      ></div>
+      </div>
 
 
       <div
-        class="permanent-labels"
         id="permanentLabels"
+        class="permanent-labels"
       ></div>
 
-    </div>
+
+    </main>
 
 
-    <div
-      class="results"
-    >
+    <aside class="results">
 
-      <div
-        class="panel"
-      >
+      <div class="panel">
 
         <h2>
-          Draft Order
+          DRAFT ORDER
         </h2>
 
-
         <ol
-          id="draftOrder"
+          id="resultList"
           class="result-list"
         ></ol>
 
       </div>
 
-    </div>
+    </aside>
+
 
   </div>
 
 
-  <!-- =======================================================
-       COMMISSIONER
-       ======================================================= -->
-
-  <div
-    id="commissionerArea"
-  >
+  <div id="commissionerArea">
 
     <button
       id="commissionerBottomButton"
@@ -1613,23 +1114,13 @@ h1{
         id="commissionerPassword"
         type="password"
         placeholder="Commissioner password"
-        autocomplete="off"
       >
 
-
       <button
-        id="unlockCommissionerBtn"
+        id="commissionerLoginBtn"
         type="button"
       >
         UNLOCK
-      </button>
-
-
-      <button
-        id="cancelCommissionerBtn"
-        type="button"
-      >
-        CANCEL
       </button>
 
     </div>
@@ -1641,37 +1132,53 @@ h1{
     >
 
       <h3>
-        Commissioner Controls
+        COMMISSIONER CONTROLS
       </h3>
 
 
-      <div
-        class="lock-note"
-      >
-        Edit the team name, weight, and choose one of the
-        8 static images. Changes are saved to Supabase.
+      <div id="teamSettingsPanel">
+
+        <div class="teams">
+
+          <div class="team-editor-header">
+
+            <div>
+              TEAM
+            </div>
+
+            <div>
+              ODDS
+            </div>
+
+            <div>
+              PLAYER IMAGE
+            </div>
+
+          </div>
+
+
+          <div id="teamEditor"></div>
+
+        </div>
+
       </div>
 
 
-      <div
-        class="commissioner-actions"
-      >
+      <div class="commissioner-actions">
 
         <button
           id="saveConfigBtn"
           type="button"
         >
-          SAVE CONFIGURATION
+          SAVE TEAM SETTINGS
         </button>
-
 
         <button
           id="resetDraftBtn"
           type="button"
         >
-          RESET SAVED DRAFT
+          RESET DRAFT
         </button>
-
 
         <button
           id="lockCommissionerBtn"
@@ -1682,6 +1189,123 @@ h1{
 
       </div>
 
+
+      <div class="lock-note">
+        Changes are saved to the shared draft configuration.
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     PRE-RACE CURTAIN
+     ========================================================= -->
+
+<div id="raceCurtain">
+
+  <div class="curtain-panel left-panel"></div>
+  <div class="curtain-panel right-panel"></div>
+
+
+  <div class="race-curtain-content">
+
+    <div class="curtain-card">
+
+      <div class="curtain-kicker">
+        TCWR DRAFT NIGHT
+      </div>
+
+
+      <h2 class="curtain-title">
+        100-YARD<br>
+        DRAFT DASH
+      </h2>
+
+
+      <p class="curtain-subtitle">
+        Eight teams. One finish line.
+        The order you see is the official draft order.
+      </p>
+
+
+      <div class="main-rule">
+
+        <div class="main-rule-title">
+          HIGHER ODDS = BETTER PICK
+        </div>
+
+        <div class="main-rule-text">
+          The higher a team's odds,
+          the better its chance of being selected early.
+        </div>
+
+      </div>
+
+
+      <div class="race-flow">
+
+        <div class="flow-box">
+          FIRST ACROSS
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          PICK #1
+        </div>
+
+        <div class="flow-arrow">
+          •
+        </div>
+
+        <div class="flow-box">
+          LAST ACROSS
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          PICK #8
+        </div>
+
+      </div>
+
+
+      <p class="race-note">
+        The official draft order is locked in before the race begins,
+        so everyone watching sees the same result.
+      </p>
+
+
+      <button
+        id="startDashBtn"
+        type="button"
+      >
+        LET'S RACE
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div id="countdownView">
+
+    <div class="countdown-label">
+      GET READY
+    </div>
+
+    <div id="countdownNumber">
+      3
     </div>
 
   </div>
@@ -1691,11 +1315,6 @@ h1{
 
 <script type="module">
 
-
-/* =========================================================
-   SUPABASE
-   ========================================================= */
-
 import {
   createClient
 }
@@ -1704,31 +1323,14 @@ from
 
 
 /* =========================================================
-   COMMISSIONER PASSWORD
-   ========================================================= */
-
-const COMMISSIONER_PASSWORD =
-  "Asher";
-
-
-/* =========================================================
-   SUPABASE CONFIG
+   SUPABASE
    ========================================================= */
 
 const SUPABASE_URL =
   "https://jheqfwykhvyngfqawknr.supabase.co";
 
-
 const SUPABASE_PUBLISHABLE_KEY =
   "PASTE_YOUR_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE";
-
-
-const SUPABASE_TABLE_NAME =
-  "draft_configs";
-
-
-const SUPABASE_ORDERS_TABLE_NAME =
-  "draft_orders";
 
 
 const supabase =
@@ -1739,27 +1341,58 @@ const supabase =
 
 
 /* =========================================================
-   IMAGE FILES
+   CONSTANTS
    ========================================================= */
 
-const IMAGE_FILES = [
+const COMMISSIONER_PASSWORD =
+  "Asher";
 
+
+const TEAM_COUNT =
+  8;
+
+
+const IMAGE_OPTIONS = [
   "image1.jpeg",
-
   "image2.jpeg",
-
   "image3.jpeg",
-
   "image4.jpeg",
-
   "image5.jpeg",
-
   "image6.jpeg",
-
   "image7.jpeg",
-
   "image8.jpeg"
+];
 
+
+/*
+   IMPORTANT:
+
+   The finish positions are measured across the actual field
+   element.
+
+   The blue end zone begins around the low-60% area of the
+   supplied field artwork.
+
+   Every finish position below is therefore safely PAST
+   the actual goal line while remaining INSIDE the field.
+
+   Pick #1 gets the farthest position.
+   Pick #8 gets the least-far position.
+
+   This gives the finishers enough separation to distinguish
+   the final draft order without putting anyone outside the
+   field.
+*/
+
+const FINISH_POSITIONS = [
+  84,
+  81.5,
+  79,
+  76.5,
+  74,
+  71.5,
+  69,
+  66.5
 ];
 
 
@@ -1767,140 +1400,109 @@ const IMAGE_FILES = [
    DEFAULT TEAMS
    ========================================================= */
 
-const defaultTeams = [
+const DEFAULT_TEAMS = [
 
   {
-    id:1,
+    id:"matt",
     name:"Matt",
     weight:18,
-    image:IMAGE_FILES[0]
+    image:"image1.jpeg"
   },
 
   {
-    id:2,
+    id:"steven",
     name:"Steven",
     weight:15,
-    image:IMAGE_FILES[1]
+    image:"image2.jpeg"
   },
 
   {
-    id:3,
+    id:"jess",
     name:"Jess",
     weight:13,
-    image:IMAGE_FILES[2]
+    image:"image3.jpeg"
   },
 
   {
-    id:4,
+    id:"kevin",
     name:"Kevin",
     weight:11,
-    image:IMAGE_FILES[3]
+    image:"image4.jpeg"
   },
 
   {
-    id:5,
+    id:"sarah",
     name:"Sarah",
     weight:10,
-    image:IMAGE_FILES[4]
+    image:"image5.jpeg"
   },
 
   {
-    id:6,
+    id:"mike",
     name:"Mike",
     weight:9,
-    image:IMAGE_FILES[5]
+    image:"image6.jpeg"
   },
 
   {
-    id:7,
+    id:"chris",
     name:"Chris",
     weight:8,
-    image:IMAGE_FILES[6]
+    image:"image7.jpeg"
   },
 
   {
-    id:8,
+    id:"amanda",
     name:"Amanda",
     weight:7,
-    image:IMAGE_FILES[7]
+    image:"image8.jpeg"
   }
 
 ];
 
 
-let teams =
-  defaultTeams.map(
-    team => ({
-      ...team
-    })
-  );
-
-
-let runners = [];
-
-let savedDraftOrder = [];
-
-let raceRunning = false;
-
-let commissionerUnlocked = false;
-
-let raf = 0;
-
-
 /* =========================================================
-   RACE SETTINGS
+   STATE
    ========================================================= */
 
-const START_POSITION =
-  8;
+let teams =
+  structuredClone(DEFAULT_TEAMS);
 
 
-/*
-   This is no longer a single finish point.
+let savedDraftOrder =
+  [];
 
-   Instead each draft position gets its own finish
-   position using getFinishPosition() below.
-*/
+
+let raceStarted =
+  false;
+
+
+let commissionerUnlocked =
+  false;
+
+
+let animationFrame =
+  null;
 
 
 /* =========================================================
-   DOM
+   ELEMENTS
    ========================================================= */
 
 const field =
-  document.getElementById(
-    "field"
-  );
+  document.getElementById("field");
 
 
-const draftOrderList =
-  document.getElementById(
-    "draftOrder"
-  );
+const statusEl =
+  document.getElementById("status");
+
+
+const resultList =
+  document.getElementById("resultList");
 
 
 const permanentLabels =
-  document.getElementById(
-    "permanentLabels"
-  );
-
-
-const teamSettingsPanel =
-  document.getElementById(
-    "teamSettingsPanel"
-  );
-
-
-const teamInputs =
-  document.getElementById(
-    "teamInputs"
-  );
-
-
-const statusElement =
-  document.getElementById(
-    "status"
-  );
+  document.getElementById("permanentLabels");
 
 
 const commissionerBottomButton =
@@ -1927,15 +1529,9 @@ const commissionerPassword =
   );
 
 
-const unlockCommissionerBtn =
+const commissionerLoginBtn =
   document.getElementById(
-    "unlockCommissionerBtn"
-  );
-
-
-const cancelCommissionerBtn =
-  document.getElementById(
-    "cancelCommissionerBtn"
+    "commissionerLoginBtn"
   );
 
 
@@ -1954,6 +1550,12 @@ const saveConfigBtn =
 const resetDraftBtn =
   document.getElementById(
     "resetDraftBtn"
+  );
+
+
+const teamEditor =
+  document.getElementById(
+    "teamEditor"
   );
 
 
@@ -1979,443 +1581,35 @@ const countdownNumber =
    STATUS
    ========================================================= */
 
-function showStatus(
-  message
-){
+function showStatus(message){
 
-  statusElement.textContent =
+  statusEl.textContent =
     message;
 
 }
 
 
 /* =========================================================
-   ESCAPE HTML
+   IMAGE FALLBACK
    ========================================================= */
 
-function escapeHTML(
-  value
-){
+function safeImage(image){
 
-  return String(
-    value ?? ""
-  )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+  if(
+    IMAGE_OPTIONS.includes(image)
+  ){
+
+    return image;
+
+  }
+
+  return IMAGE_OPTIONS[0];
 
 }
 
 
 /* =========================================================
-   IMAGE HELPERS
-   ========================================================= */
-
-function imageForTeamId(
-  id
-){
-
-  const index =
-    Number(id) - 1;
-
-
-  return (
-    IMAGE_FILES[index] ||
-    IMAGE_FILES[0]
-  );
-
-}
-
-
-function normalizeImage(
-  value,
-  id
-){
-
-  const supplied =
-    String(
-      value || ""
-    ).trim();
-
-
-  if(
-    IMAGE_FILES.includes(
-      supplied
-    )
-  ){
-
-    return supplied;
-
-  }
-
-
-  if(
-    /^https?:\/\//i.test(
-      supplied
-    )
-  ){
-
-    return supplied;
-
-  }
-
-
-  return imageForTeamId(
-    id
-  );
-
-}
-
-
-/* =========================================================
-   RENDER COMMISSIONER EDITOR
-   ========================================================= */
-
-function renderInputs(){
-
-  teamInputs.innerHTML =
-    "";
-
-
-  const header =
-    document.createElement(
-      "div"
-    );
-
-
-  header.className =
-    "team-editor-header";
-
-
-  header.innerHTML = `
-
-    <div>
-      Team Name
-    </div>
-
-    <div>
-      Weight (%)
-    </div>
-
-    <div>
-      Image
-    </div>
-
-  `;
-
-
-  teamInputs.appendChild(
-    header
-  );
-
-
-  teams.forEach(
-    team => {
-
-      const row =
-        document.createElement(
-          "div"
-        );
-
-
-      row.className =
-        "team-edit";
-
-
-      const imageOptions =
-        IMAGE_FILES
-          .map(
-            (
-              file,
-              index
-            ) => {
-
-              const selected =
-                file === team.image
-                  ? "selected"
-                  : "";
-
-
-              return `
-
-                <option
-                  value="${escapeHTML(file)}"
-                  ${selected}
-                >
-                  Image ${index + 1}
-                </option>
-
-              `;
-
-            }
-          )
-          .join("");
-
-
-      row.innerHTML = `
-
-        <div>
-
-          <input
-            type="text"
-            data-type="name"
-            data-id="${team.id}"
-            value="${escapeHTML(team.name)}"
-          >
-
-        </div>
-
-
-        <div>
-
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            data-type="weight"
-            data-id="${team.id}"
-            value="${Number(team.weight)}"
-          >
-
-        </div>
-
-
-        <div
-          class="team-image-picker"
-        >
-
-          <img
-            class="team-image-preview"
-            id="image-preview-${team.id}"
-            src="${escapeHTML(normalizeImage(team.image,team.id))}"
-            alt=""
-            onerror="
-              this.style.display='none';
-              this.nextElementSibling.style.display='flex';
-            "
-          >
-
-
-          <div
-            class="team-image-preview placeholder"
-            style="display:none;"
-          >
-            ${team.id}
-          </div>
-
-
-          <select
-            data-type="image"
-            data-id="${team.id}"
-          >
-
-            ${imageOptions}
-
-          </select>
-
-        </div>
-
-      `;
-
-
-      teamInputs.appendChild(
-        row
-      );
-
-    }
-  );
-
-
-  attachEditorListeners();
-
-}
-
-
-/* =========================================================
-   EDITOR LISTENERS
-   ========================================================= */
-
-function attachEditorListeners(){
-
-  teamInputs
-    .querySelectorAll(
-      "input, select"
-    )
-    .forEach(
-      element => {
-
-        element.addEventListener(
-          "input",
-          updateTeamFromEditor
-        );
-
-
-        element.addEventListener(
-          "change",
-          updateTeamFromEditor
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE TEAM
-   ========================================================= */
-
-function updateTeamFromEditor(
-  event
-){
-
-  const element =
-    event.target;
-
-
-  const id =
-    String(
-      element.dataset.id
-    );
-
-
-  const type =
-    element.dataset.type;
-
-
-  const team =
-    teams.find(
-      item =>
-        String(item.id) === id
-    );
-
-
-  if(
-    !team
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    type === "name"
-  ){
-
-    team.name =
-      element.value.trim() ||
-      `Team ${team.id}`;
-
-  }
-
-
-  if(
-    type === "weight"
-  ){
-
-    team.weight =
-      Math.max(
-        0,
-        Number(
-          element.value
-        ) || 0
-      );
-
-  }
-
-
-  if(
-    type === "image"
-  ){
-
-    const duplicate =
-      teams.find(
-        item =>
-          String(item.id) !== id &&
-          item.image === element.value
-      );
-
-
-    if(
-      duplicate
-    ){
-
-      alert(
-        "Each image can only be assigned to one team."
-      );
-
-
-      element.value =
-        team.image;
-
-
-      return;
-
-    }
-
-
-    team.image =
-      normalizeImage(
-        element.value,
-        team.id
-      );
-
-
-    const preview =
-      document.getElementById(
-        `image-preview-${team.id}`
-      );
-
-
-    if(
-      preview
-    ){
-
-      preview.src =
-        team.image;
-
-      preview.style.display =
-        "block";
-
-      if(
-        preview.nextElementSibling
-      ){
-
-        preview.nextElementSibling.style.display =
-          "none";
-
-      }
-
-    }
-
-  }
-
-
-  renderPermanentLabels();
-
-}
-
-
-/* =========================================================
-   PERMANENT LABELS
+   TEAM LABELS
    ========================================================= */
 
 function renderPermanentLabels(){
@@ -2425,78 +1619,219 @@ function renderPermanentLabels(){
 
 
   const sorted =
-    [...teams].sort(
-      (
-        a,
-        b
-      ) =>
-        Number(b.weight) -
-        Number(a.weight)
-    );
+    [...teams]
+      .sort(
+        (a,b) =>
+          Number(b.weight) -
+          Number(a.weight)
+      );
 
 
-  sorted.forEach(
-    team => {
+  sorted.forEach(team => {
 
-      const box =
-        document.createElement(
-          "div"
-        );
+    const item =
+      document.createElement("div");
 
-
-      box.className =
-        "permanent-team";
+    item.className =
+      "permanent-team";
 
 
-      const image =
-        normalizeImage(
-          team.image,
-          team.id
-        );
+    const img =
+      document.createElement("img");
+
+    img.src =
+      safeImage(team.image);
+
+    img.alt =
+      team.name;
 
 
-      box.innerHTML = `
+    const text =
+      document.createElement("div");
 
-        <img
-          src="${escapeHTML(image)}"
-          alt=""
-          onerror="
-            this.style.display='none';
-            this.nextElementSibling.style.display='flex';
-          "
-        >
-
-        <div
-          class="label-image-placeholder"
-          style="display:none;"
-        >
-          ${escapeHTML(team.id)}
-        </div>
+    text.className =
+      "permanent-team-text";
 
 
-        <div
-          class="permanent-team-text"
-        >
+    const name =
+      document.createElement("div");
 
-          <div
-            class="permanent-team-name"
-          >
-            ${escapeHTML(team.name)}
-          </div>
+    name.className =
+      "permanent-team-name";
 
-          <div
-            class="permanent-team-odds"
-          >
-            ${Number(team.weight)}%
-          </div>
-
-        </div>
-
-      `;
+    name.textContent =
+      team.name;
 
 
-      permanentLabels.appendChild(
-        box
+    const odds =
+      document.createElement("div");
+
+    odds.className =
+      "permanent-team-odds";
+
+    odds.textContent =
+      `${team.weight}%`;
+
+
+    text.appendChild(name);
+    text.appendChild(odds);
+
+
+    item.appendChild(img);
+    item.appendChild(text);
+
+
+    permanentLabels.appendChild(item);
+
+  });
+
+}
+
+
+/* =========================================================
+   COMMISSIONER EDITOR
+   ========================================================= */
+
+function renderTeamEditor(){
+
+  teamEditor.innerHTML =
+    "";
+
+
+  teams.forEach(
+    (team,index) => {
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "team-edit";
+
+
+      const nameInput =
+        document.createElement("input");
+
+      nameInput.type =
+        "text";
+
+      nameInput.value =
+        team.name;
+
+      nameInput.dataset.index =
+        index;
+
+      nameInput.className =
+        "team-name-input";
+
+
+      const weightInput =
+        document.createElement("input");
+
+      weightInput.type =
+        "number";
+
+      weightInput.min =
+        "0";
+
+      weightInput.step =
+        "1";
+
+      weightInput.value =
+        team.weight;
+
+      weightInput.dataset.index =
+        index;
+
+      weightInput.className =
+        "team-weight-input";
+
+
+      const imagePicker =
+        document.createElement("div");
+
+      imagePicker.className =
+        "team-image-picker";
+
+
+      const preview =
+        document.createElement("img");
+
+      preview.className =
+        "team-image-preview";
+
+      preview.src =
+        safeImage(team.image);
+
+      preview.alt =
+        team.name;
+
+
+      const select =
+        document.createElement("select");
+
+      select.dataset.index =
+        index;
+
+      select.className =
+        "team-image-select";
+
+
+      IMAGE_OPTIONS.forEach(
+        image => {
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            image;
+
+          option.textContent =
+            image;
+
+          option.selected =
+            image === team.image;
+
+          select.appendChild(option);
+
+        }
+      );
+
+
+      select.addEventListener(
+        "change",
+        () => {
+
+          preview.src =
+            safeImage(select.value);
+
+        }
+      );
+
+
+      imagePicker.appendChild(
+        preview
+      );
+
+      imagePicker.appendChild(
+        select
+      );
+
+
+      row.appendChild(
+        nameInput
+      );
+
+      row.appendChild(
+        weightInput
+      );
+
+      row.appendChild(
+        imagePicker
+      );
+
+
+      teamEditor.appendChild(
+        row
       );
 
     }
@@ -2506,15 +1841,171 @@ function renderPermanentLabels(){
 
 
 /* =========================================================
+   READ TEAM EDITOR
+   ========================================================= */
+
+function readTeamEditor(){
+
+  const nameInputs =
+    [
+      ...document.querySelectorAll(
+        ".team-name-input"
+      )
+    ];
+
+
+  const weightInputs =
+    [
+      ...document.querySelectorAll(
+        ".team-weight-input"
+      )
+    ];
+
+
+  const imageSelects =
+    [
+      ...document.querySelectorAll(
+        ".team-image-select"
+      )
+    ];
+
+
+  teams =
+    teams.map(
+      (team,index) => {
+
+        const name =
+          nameInputs[index]
+            ?.value
+            ?.trim() ||
+          team.name;
+
+
+        const weight =
+          Math.max(
+            0,
+            Number(
+              weightInputs[index]
+                ?.value
+            ) || 0
+          );
+
+
+        const image =
+          safeImage(
+            imageSelects[index]
+              ?.value ||
+            team.image
+          );
+
+
+        return {
+          ...team,
+          name,
+          weight,
+          image
+        };
+
+      }
+    );
+
+
+  renderPermanentLabels();
+
+}
+
+
+/* =========================================================
+   COMMISSIONER UI
+   ========================================================= */
+
+commissionerBottomButton.addEventListener(
+  "click",
+  () => {
+
+    commissionerLoginBox
+      .classList
+      .toggle("hidden");
+
+  }
+);
+
+
+commissionerLoginBtn.addEventListener(
+  "click",
+  () => {
+
+    if(
+      commissionerPassword.value ===
+      COMMISSIONER_PASSWORD
+    ){
+
+      commissionerUnlocked =
+        true;
+
+
+      commissionerLoginBox
+        .classList
+        .add("hidden");
+
+
+      commissionerPanel
+        .classList
+        .remove("hidden");
+
+
+      commissionerPassword.value =
+        "";
+
+
+      renderTeamEditor();
+
+
+      showStatus(
+        "Commissioner controls unlocked."
+      );
+
+    }
+    else{
+
+      showStatus(
+        "Incorrect commissioner password."
+      );
+
+    }
+
+  }
+);
+
+
+lockCommissionerBtn.addEventListener(
+  "click",
+  () => {
+
+    commissionerUnlocked =
+      false;
+
+
+    commissionerPanel
+      .classList
+      .add("hidden");
+
+
+    showStatus(
+      "Commissioner controls locked."
+    );
+
+  }
+);
+
+
+/* =========================================================
    WEIGHTED PICK
    ========================================================= */
 
-function weightedPick(
-  pool
-){
+function weightedPick(pool){
 
   if(
-    !pool ||
     !pool.length
   ){
 
@@ -2525,10 +2016,7 @@ function weightedPick(
 
   const total =
     pool.reduce(
-      (
-        sum,
-        team
-      ) =>
+      (sum,team) =>
         sum +
         Math.max(
           0,
@@ -2542,15 +2030,13 @@ function weightedPick(
     total <= 0
   ){
 
-    return (
-      pool[
-        Math.floor(
-          Math.random() *
-          pool.length
-        )
-      ] ||
-      null
-    );
+    const index =
+      Math.floor(
+        Math.random() *
+        pool.length
+      );
+
+    return pool[index];
 
   }
 
@@ -2595,7 +2081,7 @@ function weightedPick(
 
 function createDraftOrder(){
 
-  let pool =
+  const pool =
     teams.map(
       team => ({
         ...team
@@ -2603,23 +2089,20 @@ function createDraftOrder(){
     );
 
 
-  const order = [];
+  const order =
+    [];
 
 
-  for(
-    let pick = 1;
-    pick <= teams.length - 1;
-    pick++
+  while(
+    pool.length > 1
   ){
 
-    const winner =
-      weightedPick(
-        pool
-      );
+    const selected =
+      weightedPick(pool);
 
 
     if(
-      !winner
+      !selected
     ){
 
       break;
@@ -2627,23 +2110,32 @@ function createDraftOrder(){
     }
 
 
-    order.push({
-
-      pick,
-
-      team:{
-        ...winner
-      }
-
-    });
-
-
-    pool =
-      pool.filter(
+    const index =
+      pool.findIndex(
         team =>
-          String(team.id) !==
-          String(winner.id)
+          team.id ===
+          selected.id
       );
+
+
+    if(
+      index === -1
+    ){
+
+      break;
+
+    }
+
+
+    pool.splice(
+      index,
+      1
+    );
+
+
+    order.push(
+      selected
+    );
 
   }
 
@@ -2652,239 +2144,197 @@ function createDraftOrder(){
     pool.length === 1
   ){
 
-    order.push({
-
-      pick:teams.length,
-
-      team:{
-        ...pool[0]
-      }
-
-    });
+    order.push(
+      pool[0]
+    );
 
   }
 
 
-  return order;
+  return order.map(
+    (team,index) => ({
+      pick:index + 1,
+      member:team.name,
+      memberId:team.id,
+      originalWeightDisplay:
+        `${team.weight}%`
+    })
+  );
 
 }
 
 
 /* =========================================================
-   SAVE TEAMS
+   SAVE TEAM CONFIG
    ========================================================= */
 
-async function saveTeamsToSupabase(){
+async function saveTeamConfig(){
 
   if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    !commissionerUnlocked
   ){
 
-    showStatus(
-      "Supabase publishable key is missing."
-    );
-
-
-    return false;
+    return;
 
   }
 
 
-  const rows =
-    teams.map(
-      team => ({
+  readTeamEditor();
 
-        id:
-          team.id,
 
-        members_data:{
+  showStatus(
+    "Saving team settings..."
+  );
 
-          name:
-            team.name,
 
-          weight:
-            Number(team.weight),
+  const payload = {
 
-          image:
-            normalizeImage(
-              team.image,
-              team.id
-            )
+    id:"main",
 
-        }
+    members_data:
+      teams.map(
+        team => ({
+          name:team.name,
+          weight:team.weight,
+          image:team.image
+        })
+      )
 
-      })
-    );
+  };
 
 
   const {
     error
   } =
     await supabase
-      .from(
-        SUPABASE_TABLE_NAME
-      )
+      .from("draft_configs")
       .upsert(
-        rows,
+        payload,
         {
           onConflict:"id"
         }
       );
 
 
-  if(
-    error
-  ){
+  if(error){
 
     console.error(
-      "Supabase team save error:",
       error
     );
 
 
     showStatus(
-      "Supabase could not save the team configuration."
+      "Could not save team settings."
     );
 
-
-    return false;
+    return;
 
   }
 
 
-  return true;
+  showStatus(
+    "Team settings saved."
+  );
+
+
+  renderPermanentLabels();
 
 }
 
 
+saveConfigBtn.addEventListener(
+  "click",
+  saveTeamConfig
+);
+
+
 /* =========================================================
-   LOAD TEAMS
+   LOAD TEAM CONFIG
    ========================================================= */
 
-async function loadTeamsFromSupabase(){
+async function loadTeamConfig(){
 
-  if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
-  ){
+  try{
 
-    return defaultTeams.map(
-      team => ({
-        ...team
-      })
-    );
-
-  }
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from("draft_configs")
+        .select("*")
+        .eq("id","main")
+        .maybeSingle();
 
 
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_TABLE_NAME
-      )
-      .select(
-        "id,members_data"
+    if(error){
+
+      console.warn(
+        "Could not load team config:",
+        error
       );
 
+      return;
 
-  if(
-    error
-  ){
+    }
 
-    console.error(
-      "Supabase team load error:",
+
+    if(
+      data &&
+      Array.isArray(
+        data.members_data
+      ) &&
+      data.members_data.length ===
+        TEAM_COUNT
+    ){
+
+      teams =
+        DEFAULT_TEAMS.map(
+          (defaultTeam,index) => {
+
+            const stored =
+              data.members_data[index];
+
+
+            return {
+
+              ...defaultTeam,
+
+              name:
+                stored?.name ||
+                defaultTeam.name,
+
+              weight:
+                Number(
+                  stored?.weight
+                ) >= 0
+                  ? Number(
+                      stored.weight
+                    )
+                  : defaultTeam.weight,
+
+              image:
+                safeImage(
+                  stored?.image ||
+                  defaultTeam.image
+                )
+
+            };
+
+          }
+        );
+
+    }
+
+  }
+  catch(error){
+
+    console.warn(
+      "Team config load failed:",
       error
     );
 
-
-    showStatus(
-      "Using local team settings — Supabase could not be loaded."
-    );
-
-
-    return defaultTeams.map(
-      team => ({
-        ...team
-      })
-    );
-
   }
-
-
-  if(
-    !data ||
-    !data.length
-  ){
-
-    return defaultTeams.map(
-      team => ({
-        ...team
-      })
-    );
-
-  }
-
-
-  const loaded =
-    data
-      .map(
-        row => {
-
-          const d =
-            row.members_data ||
-            {};
-
-
-          const id =
-            Number(row.id);
-
-
-          return {
-
-            id,
-
-            name:
-              d.name ||
-              `Team ${id}`,
-
-            weight:
-              Number(d.weight) || 1,
-
-            image:
-              normalizeImage(
-                d.image,
-                id
-              )
-
-          };
-
-        }
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(a.id) -
-          Number(b.id)
-      );
-
-
-  return loaded.length
-    ? loaded
-    : defaultTeams.map(
-        team => ({
-          ...team
-        })
-      );
 
 }
 
@@ -2893,73 +2343,38 @@ async function loadTeamsFromSupabase(){
    SAVE DRAFT ORDER
    ========================================================= */
 
-async function saveDraftOrderToSupabase(
+async function saveDraftOrder(
   order
 ){
 
-  if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
-  ){
+  const payload = {
 
-    return false;
+    id:"main",
 
-  }
+    order_data:order
 
-
-  const rows =
-    order.map(
-      item => ({
-
-        id:
-          `pick_${item.pick}`,
-
-        order_data:{
-
-          pick:
-            item.pick,
-
-          member:
-            item.team.name,
-
-          memberId:
-            item.team.id,
-
-          originalWeightDisplay:
-            `${Number(item.team.weight)}%`
-
-        }
-
-      })
-    );
+  };
 
 
   const {
     error
   } =
     await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
+      .from("draft_orders")
       .upsert(
-        rows,
+        payload,
         {
           onConflict:"id"
         }
       );
 
 
-  if(
-    error
-  ){
+  if(error){
 
     console.error(
-      "Supabase draft save error:",
+      "Draft order save failed:",
       error
     );
-
 
     return false;
 
@@ -2977,71 +2392,62 @@ async function saveDraftOrderToSupabase(
 
 async function loadDraftOrderFromSupabase(){
 
-  if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
-  ){
+  try{
 
-    return [];
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from("draft_orders")
+        .select("*")
+        .eq("id","main")
+        .maybeSingle();
 
-  }
 
+    if(error){
 
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
-      .select(
-        "id,order_data"
+      console.warn(
+        "Draft order load failed:",
+        error
       );
 
+      return [];
 
-  if(
-    error
-  ){
-
-    console.error(
-      "Supabase order load error:",
-      error
-    );
+    }
 
 
-    return [];
+    if(
+      !data ||
+      !Array.isArray(
+        data.order_data
+      )
+    ){
 
-  }
+      return [];
 
-
-  if(
-    !data ||
-    !data.length
-  ){
-
-    return [];
-
-  }
+    }
 
 
-  const order =
-    data
-      .map(
-        row => {
+    if(
+      data.order_data.length !==
+      TEAM_COUNT
+    ){
 
-          const d =
-            row.order_data ||
-            {};
+      return [];
 
+    }
+
+
+    const mapped =
+      data.order_data.map(
+        record => {
 
           const team =
             teams.find(
               item =>
-                String(item.id) ===
-                String(d.memberId)
+                item.id ===
+                record.memberId
             );
 
 
@@ -3057,1819 +2463,58 @@ async function loadDraftOrderFromSupabase(){
           return {
 
             pick:
-              Number(d.pick),
+              Number(
+                record.pick
+              ),
 
-            team:{
-              ...team
-            }
+            member:
+              team.name,
+
+            memberId:
+              team.id,
+
+            originalWeightDisplay:
+              `${team.weight}%`
 
           };
 
         }
-      )
-      .filter(
-        Boolean
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(a.pick) -
-          Number(b.pick)
       );
 
 
-  if(
-    order.length !==
-    teams.length
-  ){
+    if(
+      mapped.some(
+        item => !item
+      )
+    ){
+
+      return [];
+
+    }
+
+
+    return mapped;
+
+  }
+  catch(error){
+
+    console.warn(
+      "Draft order load failed:",
+      error
+    );
 
     return [];
 
   }
 
-
-  return order;
-
 }
 
 
 /* =========================================================
-   CLEAR DRAFT
+   RESET DRAFT
    ========================================================= */
 
-async function clearDraftOrderFromSupabase(){
-
-  if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
-  ){
-
-    showStatus(
-      "Supabase publishable key is missing."
-    );
-
-
-    return false;
-
-  }
-
-
-  const {
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
-      .delete()
-      .not(
-        "id",
-        "is",
-        null
-      );
-
-
-  if(
-    error
-  ){
-
-    console.error(
-      "Supabase draft clear error:",
-      error
-    );
-
-
-    showStatus(
-      "Supabase could not clear the saved draft."
-    );
-
-
-    return false;
-
-  }
-
-
-  savedDraftOrder =
-    [];
-
-
-  return true;
-
-}
-
-
-/* =========================================================
-   RESET VISUALS
-   ========================================================= */
-
-function resetVisuals(){
-
-  cancelAnimationFrame(
-    raf
-  );
-
-
-  field.innerHTML =
-    "";
-
-
-  draftOrderList.innerHTML =
-    "";
-
-
-  runners =
-    [];
-
-
-  raceRunning =
-    false;
-
-}
-
-
-/* =========================================================
-   RUNNER
-   ========================================================= */
-
-function addRunner(
-  team,
-  index
-){
-
-  const runner =
-    document.createElement(
-      "div"
-    );
-
-
-  runner.className =
-    "runner";
-
-
-  /*
-     Eight runners receive their own lane.
-
-     More vertical spacing makes the individual
-     racers easier to distinguish.
-  */
-
-  runner.style.top =
-    `${7 + index * 12.25}%`;
-
-
-  runner.style.left =
-    `${START_POSITION}%`;
-
-
-  const image =
-    normalizeImage(
-      team.image,
-      team.id
-    );
-
-
-  runner.innerHTML = `
-
-    <img
-      class="player-image"
-      src="${escapeHTML(image)}"
-      alt=""
-      onerror="
-        this.style.display='none';
-      "
-    >
-
-  `;
-
-
-  field.appendChild(
-    runner
-  );
-
-
-  return runner;
-
-}
-
-
-/* =========================================================
-   FINISH POSITION
-   ========================================================= */
-
-/*
-   THIS IS THE BIG CHANGE.
-
-   We no longer send everyone to one identical finish
-   position.
-
-   The finish positions intentionally create space
-   between the draft picks.
-
-   Pick #1 = 96%
-   Pick #2 = 93.8%
-   Pick #3 = 91.6%
-   Pick #4 = 89.4%
-   Pick #5 = 87.2%
-   Pick #6 = 85%
-   Pick #7 = 82.8%
-   Pick #8 = 80.6%
-
-   All of these are beyond the goal line and inside
-   the end-zone portion of the field.
-
-   Because the positions are separated, the first and
-   second-place runners won't be sitting directly
-   on top of each other.
-*/
-
-function getFinishPosition(
-  rank
-){
-
-  const positions = [
-
-    96.0,
-
-    93.8,
-
-    91.6,
-
-    89.4,
-
-    87.2,
-
-    85.0,
-
-    82.8,
-
-    80.6
-
-  ];
-
-
-  return (
-    positions[rank] ??
-    80.6
-  );
-
-}
-
-
-/* =========================================================
-   DRAFT ORDER DISPLAY
-   ========================================================= */
-
-function initializeDraftOrderDisplay(){
-
-  draftOrderList.innerHTML =
-    "";
-
-
-  for(
-    let pick = 1;
-    pick <= teams.length;
-    pick++
-  ){
-
-    const li =
-      document.createElement(
-        "li"
-      );
-
-
-    li.dataset.pick =
-      String(pick);
-
-
-    li.innerHTML = `
-
-      <span>
-
-        <strong>
-          PICK #${pick}
-        </strong>
-
-      </span>
-
-      <span
-        class="pending"
-      >
-        Pending...
-      </span>
-
-    `;
-
-
-    draftOrderList.appendChild(
-      li
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   REVEAL RESULT
-   ========================================================= */
-
-function revealDraftResult(
-  item
-){
-
-  const li =
-    draftOrderList.querySelector(
-      `[data-pick="${item.pick}"]`
-    );
-
-
-  if(
-    !li
-  ){
-
-    return;
-
-  }
-
-
-  li.innerHTML = `
-
-    <span>
-
-      <strong>
-        PICK #${item.pick}
-      </strong>
-
-      ${escapeHTML(item.team.name)}
-
-    </span>
-
-
-    <span>
-      ${Number(item.team.weight)}%
-    </span>
-
-  `;
-
-}
-
-
-/* =========================================================
-   RENDER FINAL RESULTS
-   ========================================================= */
-
-function renderResults(
-  order
-){
-
-  draftOrderList.innerHTML =
-    "";
-
-
-  order
-    .sort(
-      (
-        a,
-        b
-      ) =>
-        Number(a.pick) -
-        Number(b.pick)
-    )
-    .forEach(
-      item => {
-
-        const li =
-          document.createElement(
-            "li"
-          );
-
-
-        li.innerHTML = `
-
-          <span>
-
-            <strong>
-              PICK #${item.pick}
-            </strong>
-
-            ${escapeHTML(item.team.name)}
-
-          </span>
-
-
-          <span>
-            ${Number(item.team.weight)}%
-          </span>
-
-        `;
-
-
-        draftOrderList.appendChild(
-          li
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   SHOW SAVED DRAFT
-   ========================================================= */
-
-function showSavedDraft(){
-
-  if(
-    !savedDraftOrder ||
-    savedDraftOrder.length !==
-    teams.length
-  ){
-
-    return;
-
-  }
-
-
-  resetVisuals();
-
-
-  runners =
-    teams.map(
-      (
-        team,
-        index
-      ) => {
-
-        const el =
-          addRunner(
-            team,
-            index
-          );
-
-
-        const saved =
-          savedDraftOrder.find(
-            item =>
-              String(item.team.id) ===
-              String(team.id)
-          );
-
-
-        const rank =
-          saved
-            ? Number(saved.pick) - 1
-            : index;
-
-
-        const finishPosition =
-          getFinishPosition(
-            rank
-          );
-
-
-        el.style.left =
-          `${finishPosition}%`;
-
-
-        el.classList.add(
-          "finished"
-        );
-
-
-        return {
-
-          team:{
-            ...team
-          },
-
-          el,
-
-          revealed:true,
-
-          rank,
-
-          finishPosition
-
-        };
-
-      }
-    );
-
-
-  renderResults(
-    [...savedDraftOrder]
-  );
-
-
-  showStatus(
-    "Saved draft loaded from Supabase."
-  );
-
-}
-
-
-/* =========================================================
-   START RACE
-   ========================================================= */
-
-async function start(){
-
-  if(
-    raceRunning
-  ){
-
-    return false;
-
-  }
-
-
-  resetVisuals();
-
-
-  initializeDraftOrderDisplay();
-
-
-  /* =======================================================
-     OFFICIAL ORDER
-     ======================================================= */
-
-  let officialOrder =
-    savedDraftOrder &&
-    savedDraftOrder.length ===
-    teams.length
-      ? savedDraftOrder.map(
-          item => ({
-
-            pick:
-              item.pick,
-
-            team:{
-              ...item.team
-            }
-
-          })
-        )
-      : [];
-
-
-  if(
-    officialOrder.length !==
-    teams.length
-  ){
-
-    showStatus(
-      "Creating the official draft order..."
-    );
-
-
-    officialOrder =
-      createDraftOrder();
-
-
-    if(
-      officialOrder.length !==
-      teams.length
-    ){
-
-      showStatus(
-        "Could not create a complete draft order."
-      );
-
-
-      return false;
-
-    }
-
-
-    savedDraftOrder =
-      officialOrder.map(
-        item => ({
-
-          pick:
-            item.pick,
-
-          team:{
-            ...item.team
-          }
-
-        })
-      );
-
-
-    const saved =
-      await saveDraftOrderToSupabase(
-        officialOrder
-      );
-
-
-    if(
-      !saved
-    ){
-
-      console.warn(
-        "Supabase could not save the draft. Continuing with the local draft order."
-      );
-
-
-      showStatus(
-        "Draft order created — race starting."
-      );
-
-    }
-
-  }
-
-
-  const order =
-    officialOrder.map(
-      item => ({
-
-        pick:
-          item.pick,
-
-        team:{
-          ...item.team
-        }
-
-      })
-    );
-
-
-  raceRunning =
-    true;
-
-
-  showStatus(
-    "The draft is locked in — the race is on!"
-  );
-
-
-  /* =======================================================
-     CREATE RUNNERS
-     ======================================================= */
-
-  runners =
-    teams.map(
-      (
-        team,
-        index
-      ) => ({
-
-        team:{
-          ...team
-        },
-
-        el:
-          addRunner(
-            team,
-            index
-          ),
-
-        finish:0,
-
-        revealed:false,
-
-        rank:-1,
-
-        distance:0,
-
-        lastFrameTime:0,
-
-        raceStartTime:0,
-
-        finishPosition:
-          80.6,
-
-        behavior:null
-
-      })
-    );
-
-
-  /* =======================================================
-     60 SECOND RACE
-     ======================================================= */
-
-  const baseFinish =
-    53000;
-
-
-  const finishGap =
-    order.length > 1
-
-      ? (
-          60000 -
-          baseFinish
-        ) /
-        (
-          order.length - 1
-        )
-
-      : 0;
-
-
-  order.forEach(
-    (
-      item,
-      rank
-    ) => {
-
-      const runner =
-        runners.find(
-          r =>
-            String(r.team.id) ===
-            String(item.team.id)
-        );
-
-
-      if(
-        !runner
-      ){
-
-        return;
-
-      }
-
-
-      runner.pick =
-        item.pick;
-
-
-      runner.rank =
-        rank;
-
-
-      /*
-         The actual reveal time remains what determines
-         the official draft order.
-
-         Rank 0:
-             53 seconds
-
-         Rank 7:
-             60 seconds
-      */
-
-      runner.finish =
-        baseFinish +
-        rank *
-        finishGap;
-
-
-      /*
-         Each runner gets a different finish location.
-
-         This is what creates visual separation at the
-         end of the race.
-      */
-
-      runner.finishPosition =
-        getFinishPosition(
-          rank
-        );
-
-
-      runner.behavior = {
-
-        earlySurge:
-          1.45 +
-          Math.random() *
-          .95,
-
-        earlyFade:
-          .55 +
-          Math.random() *
-          .55,
-
-        midSurge:
-          1.65 +
-          Math.random() *
-          1.10,
-
-        midFade:
-          .55 +
-          Math.random() *
-          .65,
-
-        lateSurge:
-          1.80 +
-          Math.random() *
-          1.20,
-
-        lateFade:
-          .45 +
-          Math.random() *
-          .65,
-
-        phase:
-          Math.random() *
-          Math.PI *
-          2,
-
-        waveSpeed:
-          2.5 +
-          Math.random() *
-          2.4,
-
-        waveAmount:
-          .22 +
-          Math.random() *
-          .18,
-
-        timingShift:
-          (
-            Math.random() -
-            .5
-          ) *
-          .12,
-
-        totalSpeedIntegral:
-          1
-
-      };
-
-    }
-  );
-
-
-  /* =======================================================
-     RACE START
-     ======================================================= */
-
-  const startTime =
-    performance.now();
-
-
-  /* =======================================================
-     PULSE
-     ======================================================= */
-
-  function pulse(
-    progress,
-    center,
-    width
-  ){
-
-    return Math.exp(
-      -Math.pow(
-        (
-          progress -
-          center
-        ) /
-        width,
-        2
-      )
-    );
-
-  }
-
-
-  /* =======================================================
-     SPEED
-     ======================================================= */
-
-  function speedMultiplier(
-    runner,
-    progress
-  ){
-
-    const b =
-      runner.behavior;
-
-
-    const shift =
-      b.timingShift;
-
-
-    /*
-       HOT START
-    */
-
-    const earlySurge =
-      b.earlySurge *
-      pulse(
-        progress,
-        .10 + shift,
-        .075
-      );
-
-
-    /*
-       FALL BEHIND
-    */
-
-    const earlyFade =
-      b.earlyFade *
-      pulse(
-        progress,
-        .23 + shift,
-        .075
-      );
-
-
-    /*
-       BIG MID-RACE SURGE
-    */
-
-    const midSurge =
-      b.midSurge *
-      pulse(
-        progress,
-        .40 - shift,
-        .085
-      );
-
-
-    /*
-       MID-RACE FALL
-    */
-
-    const midFade =
-      b.midFade *
-      pulse(
-        progress,
-        .54 + shift,
-        .075
-      );
-
-
-    /*
-       SECOND BIG SURGE
-    */
-
-    const lateSurge =
-      b.lateSurge *
-      pulse(
-        progress,
-        .68 - shift,
-        .085
-      );
-
-
-    /*
-       LATE FADE
-    */
-
-    const lateFade =
-      b.lateFade *
-      pulse(
-        progress,
-        .82 + shift,
-        .070
-      );
-
-
-    /*
-       FINAL PUSH
-    */
-
-    const finalPush =
-      (
-        .55 +
-        Math.random() * .20
-      ) *
-      pulse(
-        progress,
-        .93,
-        .055
-      );
-
-
-    /*
-       Small natural movement variation.
-    */
-
-    const wave =
-      Math.sin(
-        progress *
-        Math.PI *
-        b.waveSpeed +
-        b.phase
-      ) *
-      b.waveAmount;
-
-
-    /*
-       This produces much more visible:
-       
-       SURGE
-          ↓
-       FALL
-          ↓
-       SURGE
-          ↓
-       FALL
-          ↓
-       FINAL PUSH
-    */
-
-    const rawSpeed =
-      .42 +
-      earlySurge -
-      earlyFade +
-      midSurge -
-      midFade +
-      lateSurge -
-      lateFade +
-      finalPush +
-      wave;
-
-
-    /*
-       Never let speed reach zero.
-
-       The runner may become slow,
-       but they continue moving forward.
-    */
-
-    return Math.max(
-      .12,
-      rawSpeed
-    );
-
-  }
-
-
-  /* =======================================================
-     NORMALIZE EACH RUNNER'S SPEED CURVE
-     ======================================================= */
-
-  runners.forEach(
-    runner => {
-
-      let integral =
-        0;
-
-
-      const samples =
-        800;
-
-
-      const step =
-        1 /
-        samples;
-
-
-      for(
-        let i = 0;
-        i <= samples;
-        i++
-      ){
-
-        const p =
-          i *
-          step;
-
-
-        integral +=
-          speedMultiplier(
-            runner,
-            p
-          ) *
-          step;
-
-      }
-
-
-      runner.behavior.totalSpeedIntegral =
-        Math.max(
-          .001,
-          integral
-        );
-
-    }
-  );
-
-
-  /* =======================================================
-     REVEAL RUNNER
-     ======================================================= */
-
-  function revealRunner(
-    runner
-  ){
-
-    if(
-      runner.revealed
-    ){
-
-      return;
-
-    }
-
-
-    runner.revealed =
-      true;
-
-
-    runner.el.classList.add(
-      "finished"
-    );
-
-
-    /*
-       Send the player to THEIR OWN finish position.
-
-       This is the important visual change.
-
-       Pick #1 gets the deepest position.
-
-       Pick #8 gets the shallowest position,
-
-       but every runner is still beyond the goal line.
-    */
-
-    runner.el.style.left =
-      `${runner.finishPosition}%`;
-
-
-    const result =
-      order.find(
-        item =>
-          String(item.team.id) ===
-          String(runner.team.id)
-      );
-
-
-    if(
-      result
-    ){
-
-      revealDraftResult(
-        result
-      );
-
-    }
-
-  }
-
-
-  /* =======================================================
-     RACE FRAME
-     ======================================================= */
-
-  function frame(
-    now
-  ){
-
-    const elapsed =
-      now -
-      startTime;
-
-
-    runners.forEach(
-      runner => {
-
-        if(
-          runner.revealed
-        ){
-
-          return;
-
-        }
-
-
-        const finishTime =
-          runner.finish;
-
-
-        const timeProgress =
-          Math.min(
-            1,
-            elapsed /
-            finishTime
-          );
-
-
-        if(
-          runner.lastFrameTime ===
-          0
-        ){
-
-          runner.lastFrameTime =
-            now;
-
-          runner.raceStartTime =
-            startTime;
-
-        }
-
-
-        const deltaSeconds =
-          Math.min(
-            .05,
-            Math.max(
-              0,
-              (
-                now -
-                runner.lastFrameTime
-              ) /
-              1000
-            )
-          );
-
-
-        runner.lastFrameTime =
-          now;
-
-
-        /*
-           Get current speed.
-
-           IMPORTANT:
-
-           This modifies how FAST the player moves.
-
-           It does not modify their position backward.
-        */
-
-        const speed =
-          speedMultiplier(
-            runner,
-            timeProgress
-          );
-
-
-        const deltaProgress =
-          deltaSeconds /
-          (
-            finishTime /
-            1000
-          );
-
-
-        /*
-           FORWARD ONLY.
-
-           Distance is always increased.
-
-           It is NEVER decreased.
-
-           Therefore a player can:
-             - surge
-             - slow down
-             - fall behind
-             - surge again
-
-           but can NEVER physically move backward.
-        */
-
-        runner.distance +=
-          (
-            deltaProgress *
-            speed
-          ) /
-          runner.behavior.totalSpeedIntegral;
-
-
-        const visualProgress =
-          Math.min(
-            .995,
-            Math.max(
-              0,
-              runner.distance
-            )
-          );
-
-
-        const currentPosition =
-          START_POSITION +
-          visualProgress *
-          (
-            runner.finishPosition -
-            START_POSITION
-          );
-
-
-        /*
-           Absolute anti-backwards protection.
-
-           Even if a calculation somehow produces a
-           smaller position, the player keeps their
-           previous position.
-        */
-
-        const previousPosition =
-          parseFloat(
-            runner.el.style.left
-          ) ||
-          START_POSITION;
-
-
-        const safePosition =
-          Math.max(
-            previousPosition,
-            currentPosition
-          );
-
-
-        runner.el.style.left =
-          `${safePosition}%`;
-
-
-        /*
-           Official finish/reveal time.
-        */
-
-        if(
-          elapsed >=
-          finishTime
-        ){
-
-          revealRunner(
-            runner
-          );
-
-        }
-
-      }
-    );
-
-
-    /* =====================================================
-       RACE COMPLETE
-       ===================================================== */
-
-    if(
-      runners.every(
-        runner =>
-          runner.revealed
-      )
-    ){
-
-      raceRunning =
-        false;
-
-
-      renderResults(
-        [...savedDraftOrder]
-      );
-
-
-      showStatus(
-        "DRAFT ORDER COMPLETE — Pick #1 is the winner."
-      );
-
-
-      return;
-
-    }
-
-
-    raf =
-      requestAnimationFrame(
-        frame
-      );
-
-  }
-
-
-  raf =
-    requestAnimationFrame(
-      frame
-    );
-
-
-  return true;
-
-}
-
-
-/* =========================================================
-   COMMISSIONER LOGIN
-   ========================================================= */
-
-function openCommissioner(){
-
-  commissionerBottomButton.classList.add(
-    "hidden"
-  );
-
-
-  commissionerLoginBox.classList.remove(
-    "hidden"
-  );
-
-
-  commissionerPassword.value =
-    "";
-
-
-  commissionerPassword.focus();
-
-}
-
-
-function closeCommissioner(){
-
-  commissionerBottomButton.classList.remove(
-    "hidden"
-  );
-
-
-  commissionerLoginBox.classList.add(
-    "hidden"
-  );
-
-
-  commissionerPanel.classList.add(
-    "hidden"
-  );
-
-
-  teamSettingsPanel.classList.add(
-    "hidden"
-  );
-
-
-  commissionerUnlocked =
-    false;
-
-}
-
-
-function unlockCommissioner(){
-
-  if(
-    commissionerPassword.value !==
-    COMMISSIONER_PASSWORD
-  ){
-
-    alert(
-      "Incorrect commissioner password."
-    );
-
-
-    commissionerPassword.select();
-
-
-    return;
-
-  }
-
-
-  commissionerUnlocked =
-    true;
-
-
-  commissionerLoginBox.classList.add(
-    "hidden"
-  );
-
-
-  commissionerPanel.classList.remove(
-    "hidden"
-  );
-
-
-  teamSettingsPanel.classList.remove(
-    "hidden"
-  );
-
-
-  renderInputs();
-
-
-  showStatus(
-    "Commissioner tools unlocked."
-  );
-
-}
-
-
-function lockCommissioner(){
-
-  commissionerUnlocked =
-    false;
-
-
-  commissionerPanel.classList.add(
-    "hidden"
-  );
-
-
-  teamSettingsPanel.classList.add(
-    "hidden"
-  );
-
-
-  commissionerBottomButton.classList.remove(
-    "hidden"
-  );
-
-
-  showStatus(
-    "Commissioner tools locked."
-  );
-
-}
-
-
-/* =========================================================
-   SAVE CONFIGURATION
-   ========================================================= */
-
-async function saveConfiguration(){
-
-  if(
-    !commissionerUnlocked
-  ){
-
-    return;
-
-  }
-
-
-  const images =
-    teams.map(
-      team =>
-        normalizeImage(
-          team.image,
-          team.id
-        )
-    );
-
-
-  const duplicateImages =
-    images.filter(
-      (
-        image,
-        index
-      ) =>
-        images.indexOf(image) !==
-        index
-    );
-
-
-  if(
-    duplicateImages.length
-  ){
-
-    alert(
-      "Each image must be assigned to only one team."
-    );
-
-
-    return;
-
-  }
-
-
-  const invalidWeight =
-    teams.some(
-      team =>
-        !Number.isFinite(
-          Number(team.weight)
-        ) ||
-        Number(team.weight) < 0
-    );
-
-
-  if(
-    invalidWeight
-  ){
-
-    alert(
-      "All weights must be zero or greater."
-    );
-
-
-    return;
-
-  }
-
-
-  saveConfigBtn.disabled =
-    true;
-
-
-  showStatus(
-    "Saving team configuration..."
-  );
-
-
-  const saved =
-    await saveTeamsToSupabase();
-
-
-  saveConfigBtn.disabled =
-    false;
-
-
-  if(
-    !saved
-  ){
-
-    return;
-
-  }
-
-
-  renderPermanentLabels();
-
-
-  showStatus(
-    "Team configuration saved to Supabase."
-  );
-
-}
-
-
-/* =========================================================
-   WAIT
-   ========================================================= */
-
-function wait(
-  milliseconds
-){
-
-  return new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        milliseconds
-      )
-  );
-
-}
-
-
-/* =========================================================
-   COUNTDOWN
-   ========================================================= */
-
-async function runCountdown(){
-
-  raceCurtain.classList.remove(
-    "open",
-    "hidden"
-  );
-
-
-  raceCurtain.classList.add(
-    "countdown"
-  );
-
-
-  const sequence = [
-
-    "3",
-
-    "2",
-
-    "1",
-
-    "GO!"
-
-  ];
-
-
-  for(
-    const value of sequence
-  ){
-
-    countdownNumber.textContent =
-      value;
-
-
-    countdownNumber.classList.remove(
-      "pop",
-      "go"
-    );
-
-
-    void
-      countdownNumber.offsetWidth;
-
-
-    countdownNumber.classList.add(
-      "pop"
-    );
-
-
-    if(
-      value ===
-      "GO!"
-    ){
-
-      countdownNumber.classList.add(
-        "go"
-      );
-
-    }
-
-
-    await wait(
-      value === "GO!"
-        ? 500
-        : 750
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   START FROM CURTAIN
-   ========================================================= */
-
-async function startDashFromOverlay(){
-
-  if(
-    raceRunning
-  ){
-
-    return;
-
-  }
-
-
-  startDashBtn.disabled =
-    true;
-
-
-  await runCountdown();
-
-
-  /*
-     Open curtains immediately.
-  */
-
-  raceCurtain.classList.add(
-    "open"
-  );
-
-
-  raceCurtain.classList.remove(
-    "countdown"
-  );
-
-
-  /*
-     Start race before waiting for the curtain
-     to completely finish opening.
-  */
-
-  await wait(
-    180
-  );
-
-
-  const success =
-    await start();
-
-
-  if(
-    !success
-  ){
-
-    raceCurtain.classList.remove(
-      "open",
-      "countdown",
-      "hidden"
-    );
-
-
-    startDashBtn.disabled =
-      false;
-
-
-    countdownNumber.textContent =
-      "3";
-
-
-    return;
-
-  }
-
-
-  await wait(
-    900
-  );
-
-
-  raceCurtain.classList.add(
-    "hidden"
-  );
-
-
-  startDashBtn.disabled =
-    false;
-
-}
-
-
-/* =========================================================
-   RESET SAVED DRAFT
-   ========================================================= */
-
-async function resetSavedDraft(){
+async function resetDraft(){
 
   if(
     !commissionerUnlocked
@@ -4881,8 +2526,8 @@ async function resetSavedDraft(){
 
 
   const confirmed =
-    window.confirm(
-      "Reset the saved draft order in Supabase?"
+    confirm(
+      "Reset the saved draft order?"
     );
 
 
@@ -4895,25 +2540,643 @@ async function resetSavedDraft(){
   }
 
 
-  resetDraftBtn.disabled =
-    true;
+  const {
+    error
+  } =
+    await supabase
+      .from("draft_orders")
+      .delete()
+      .eq("id","main");
+
+
+  if(error){
+
+    console.error(
+      error
+    );
+
+
+    showStatus(
+      "Could not reset the draft."
+    );
+
+    return;
+
+  }
+
+
+  savedDraftOrder =
+    [];
+
+
+  clearRace();
+
+
+  initializeDraftOrderDisplay();
 
 
   showStatus(
-    "Clearing the saved draft..."
+    "Draft reset. Ready for a new race."
   );
 
-
-  const success =
-    await clearDraftOrderFromSupabase();
+}
 
 
-  resetDraftBtn.disabled =
-    false;
+resetDraftBtn.addEventListener(
+  "click",
+  resetDraft
+);
+
+
+/* =========================================================
+   RESULT LIST
+   ========================================================= */
+
+function renderPendingResults(){
+
+  resultList.innerHTML =
+    "";
+
+
+  for(
+    let i = 1;
+    i <= TEAM_COUNT;
+    i++
+  ){
+
+    const li =
+      document.createElement("li");
+
+
+    li.className =
+      "pending";
+
+
+    li.innerHTML = `
+      <span>
+        PICK #${i}
+      </span>
+      <span>
+        —
+      </span>
+    `;
+
+
+    resultList.appendChild(
+      li
+    );
+
+  }
+
+}
+
+
+function renderResults(order){
+
+  resultList.innerHTML =
+    "";
+
+
+  order.forEach(
+    record => {
+
+      const li =
+        document.createElement("li");
+
+
+      li.innerHTML = `
+        <span>
+          PICK #${record.pick}
+        </span>
+
+        <strong>
+          ${escapeHtml(record.member)}
+        </strong>
+      `;
+
+
+      resultList.appendChild(
+        li
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHtml(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================================
+   FINISH POSITION
+   ========================================================= */
+
+function getFinishPosition(rank){
+
+  /*
+     rank is zero-based.
+
+     Pick #1:
+       84%
+
+     Pick #8:
+       66.5%
+
+     The entire range is inside the blue end zone,
+     beyond the actual goal line.
+  */
+
+  return (
+    FINISH_POSITIONS[rank] ??
+    FINISH_POSITIONS[
+      FINISH_POSITIONS.length - 1
+    ]
+  );
+
+}
+
+
+/* =========================================================
+   VERTICAL LANE POSITION
+   ========================================================= */
+
+function getLanePosition(index){
+
+  /*
+     Keep every runner safely inside the field.
+
+     The previous version used:
+
+       7 + index * 12.25
+
+     which pushed the final runner too close to the
+     bottom edge.
+
+     These positions keep all eight 64px runners
+     comfortably inside the field.
+  */
+
+  return (
+    14 +
+    index * 10.3
+  );
+
+}
+
+
+/* =========================================================
+   ADD RUNNER
+   ========================================================= */
+
+function addRunner(
+  record,
+  index
+){
+
+  const team =
+    teams.find(
+      item =>
+        item.id ===
+        record.memberId
+    );
 
 
   if(
-    !success
+    !team
+  ){
+
+    return null;
+
+  }
+
+
+  const runner =
+    document.createElement("div");
+
+
+  runner.className =
+    "runner";
+
+
+  runner.dataset.memberId =
+    team.id;
+
+
+  runner.dataset.pick =
+    record.pick;
+
+
+  runner.style.left =
+    "8%";
+
+
+  runner.style.top =
+    `${getLanePosition(index)}%`;
+
+
+  const image =
+    document.createElement("img");
+
+
+  image.className =
+    "player-image";
+
+
+  image.src =
+    safeImage(team.image);
+
+
+  image.alt =
+    team.name;
+
+
+  image.onerror =
+    () => {
+
+      image.src =
+        safeImage(
+          DEFAULT_TEAMS[index]
+            ?.image
+        );
+
+    };
+
+
+  runner.appendChild(
+    image
+  );
+
+
+  field.appendChild(
+    runner
+  );
+
+
+  runner.finishPosition =
+    getFinishPosition(index);
+
+
+  runner.currentPosition =
+    8;
+
+
+  runner.lastPosition =
+    8;
+
+
+  return runner;
+
+}
+
+
+/* =========================================================
+   CLEAR RACE
+   ========================================================= */
+
+function clearRace(){
+
+  if(
+    animationFrame
+  ){
+
+    cancelAnimationFrame(
+      animationFrame
+    );
+
+    animationFrame =
+      null;
+
+  }
+
+
+  field
+    .querySelectorAll(
+      ".runner"
+    )
+    .forEach(
+      runner =>
+        runner.remove()
+    );
+
+
+  raceStarted =
+    false;
+
+}
+
+
+/* =========================================================
+   SHOW SAVED DRAFT
+   ========================================================= */
+
+function showSavedDraft(){
+
+  clearRace();
+
+
+  savedDraftOrder.forEach(
+    (record,index) => {
+
+      const runner =
+        addRunner(
+          record,
+          index
+        );
+
+
+      if(
+        runner
+      ){
+
+        runner.style.left =
+          `${runner.finishPosition}%`;
+
+        runner.classList.add(
+          "finished"
+        );
+
+      }
+
+    }
+  );
+
+
+  renderResults(
+    savedDraftOrder
+  );
+
+
+  showStatus(
+    "Official draft order loaded."
+  );
+
+}
+
+
+/* =========================================================
+   INITIALIZE DRAFT DISPLAY
+   ========================================================= */
+
+function initializeDraftOrderDisplay(){
+
+  renderPendingResults();
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+function sleep(ms){
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
+
+}
+
+
+async function runCountdown(){
+
+  raceCurtain
+    .classList
+    .remove(
+      "open"
+    );
+
+
+  raceCurtain
+    .classList
+    .remove(
+      "countdown"
+    );
+
+
+  countdownNumber
+    .classList
+    .remove(
+      "pop"
+    );
+
+
+  await sleep(300);
+
+
+  raceCurtain
+    .classList
+    .add(
+      "countdown"
+    );
+
+
+  const sequence = [
+    "3",
+    "2",
+    "1",
+    "GO!"
+  ];
+
+
+  for(
+    const value of sequence
+  ){
+
+    countdownNumber
+      .textContent =
+      value;
+
+
+    countdownNumber
+      .classList
+      .remove(
+        "pop"
+      );
+
+
+    countdownNumber
+      .classList
+      .remove(
+        "go"
+      );
+
+
+    if(
+      value ===
+      "GO!"
+    ){
+
+      countdownNumber
+        .classList
+        .add(
+          "go"
+        );
+
+    }
+
+
+    void
+      countdownNumber
+        .offsetWidth;
+
+
+    countdownNumber
+      .classList
+      .add(
+        "pop"
+      );
+
+
+    await sleep(
+      900
+    );
+
+  }
+
+
+  raceCurtain
+    .classList
+    .remove(
+      "countdown"
+    );
+
+
+  raceCurtain
+    .classList
+    .add(
+      "open"
+    );
+
+
+  await sleep(
+    850
+  );
+
+}
+
+
+/* =========================================================
+   RACE SPEED CURVE
+   ========================================================= */
+
+function getSpeedMultiplier(
+  progress,
+  lane
+){
+
+  /*
+     Each runner has a slightly different
+     surge/fade pattern.
+
+     Importantly, this function NEVER controls
+     whether the runner moves backward.
+
+     It only changes how quickly the runner advances.
+  */
+
+  const wave =
+    Math.sin(
+      progress *
+      Math.PI *
+      (2.1 + lane * .12)
+      +
+      lane * 1.7
+    );
+
+
+  const wave2 =
+    Math.sin(
+      progress *
+      Math.PI *
+      5.3
+      +
+      lane * 2.4
+    );
+
+
+  let multiplier =
+    1;
+
+
+  if(
+    progress < .18
+  ){
+
+    multiplier =
+      .82 +
+      lane * .025;
+
+  }
+  else if(
+    progress < .42
+  ){
+
+    multiplier =
+      1.05 +
+      wave * .25;
+
+  }
+  else if(
+    progress < .68
+  ){
+
+    multiplier =
+      .86 +
+      wave2 * .30;
+
+  }
+  else if(
+    progress < .88
+  ){
+
+    multiplier =
+      1.08 +
+      wave * .28;
+
+  }
+  else{
+
+    multiplier =
+      1.18 +
+      wave2 * .18;
+
+  }
+
+
+  return Math.max(
+    .35,
+    multiplier
+  );
+
+}
+
+
+/* =========================================================
+   START RACE
+   ========================================================= */
+
+async function startRace(){
+
+  if(
+    raceStarted
   ){
 
     return;
@@ -4921,102 +3184,408 @@ async function resetSavedDraft(){
   }
 
 
-  resetVisuals();
+  raceStarted =
+    true;
 
 
-  initializeDraftOrderDisplay();
+  startDashBtn.disabled =
+    true;
+
+
+  /*
+     Always use the already-saved official order
+     when one exists.
+  */
+
+  if(
+    !savedDraftOrder ||
+    savedDraftOrder.length !==
+      TEAM_COUNT
+  ){
+
+    savedDraftOrder =
+      createDraftOrder();
+
+
+    renderResults(
+      savedDraftOrder
+    );
+
+
+    /*
+       Save the order before the race.
+
+       Even if Supabase happens to fail,
+       the local race continues using the same
+       locked order.
+    */
+
+    await saveDraftOrder(
+      savedDraftOrder
+    );
+
+  }
+  else{
+
+    renderResults(
+      savedDraftOrder
+    );
+
+  }
+
+
+  clearRace();
+
+
+  /*
+     Re-create runners in official draft order.
+  */
+
+  const runners =
+    savedDraftOrder
+      .map(
+        (record,index) =>
+          addRunner(
+            record,
+            index
+          )
+      )
+      .filter(Boolean);
+
+
+  /*
+     Give the runners a clean starting position.
+  */
+
+  runners.forEach(
+    runner => {
+
+      runner.style.left =
+        "8%";
+
+      runner.currentPosition =
+        8;
+
+      runner.lastPosition =
+        8;
+
+    }
+  );
+
+
+  await runCountdown();
 
 
   showStatus(
-    "Saved draft cleared. The next race will create a new weighted draw."
+    "THE DRAFT DASH IS ON!"
   );
+
+
+  const startTime =
+    performance.now();
+
+
+  /*
+     First-place runner finishes at about 53 seconds.
+
+     Eighth-place runner finishes at about 60 seconds.
+
+     This keeps the complete race close to one minute.
+  */
+
+  const baseFinish =
+    53000;
+
+
+  const finishGap =
+    (
+      60000 -
+      baseFinish
+    ) /
+    (
+      runners.length -
+      1
+    );
+
+
+  const finishTimes =
+    runners.map(
+      (
+        runner,
+        index
+      ) =>
+        baseFinish +
+        finishGap *
+        index
+    );
+
+
+  function animate(now){
+
+    const elapsed =
+      now -
+      startTime;
+
+
+    let allFinished =
+      true;
+
+
+    runners.forEach(
+      (
+        runner,
+        index
+      ) => {
+
+        const finishTime =
+          finishTimes[index];
+
+
+        const rawProgress =
+          Math.min(
+            1,
+            elapsed /
+            finishTime
+          );
+
+
+        /*
+           Ease the overall race progression,
+           but don't allow this calculation
+           to ever move a runner backward.
+        */
+
+        const easedProgress =
+          1 -
+          Math.pow(
+            1 -
+            rawProgress,
+            1.12
+          );
+
+
+        const multiplier =
+          getSpeedMultiplier(
+            rawProgress,
+            index
+          );
+
+
+        /*
+           Small visual surge effect.
+
+           It affects the amount of progress,
+           not the final order.
+        */
+
+        const surge =
+          (
+            Math.sin(
+              rawProgress *
+              Math.PI *
+              (
+                2.5 +
+                index * .15
+              )
+              +
+              index
+            ) *
+            .012
+          );
+
+
+        let visualProgress =
+          easedProgress *
+          multiplier *
+          .72 +
+          rawProgress *
+          .28 +
+          surge;
+
+
+        visualProgress =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              visualProgress
+            )
+          );
+
+
+        /*
+           Once the runner reaches its scheduled
+           finish time, force it all the way to
+           its assigned finish position.
+        */
+
+        if(
+          elapsed >=
+          finishTime
+        ){
+
+          visualProgress =
+            1;
+
+        }
+
+
+        const startPosition =
+          8;
+
+
+        const finishPosition =
+          runner.finishPosition;
+
+
+        let currentPosition =
+          startPosition +
+          (
+            finishPosition -
+            startPosition
+          ) *
+          visualProgress;
+
+
+        /*
+           CRITICAL:
+
+           Never allow a runner to move backward.
+
+           This protects against the sine-wave
+           surge/fade effect making a runner appear
+           to step backward.
+        */
+
+        currentPosition =
+          Math.max(
+            runner.lastPosition,
+            currentPosition
+          );
+
+
+        if(
+          elapsed >=
+          finishTime
+        ){
+
+          currentPosition =
+            finishPosition;
+
+          runner.classList.add(
+            "finished"
+          );
+
+        }
+        else{
+
+          allFinished =
+            false;
+
+        }
+
+
+        runner.lastPosition =
+          currentPosition;
+
+
+        runner.currentPosition =
+          currentPosition;
+
+
+        runner.style.left =
+          `${currentPosition}%`;
+
+      }
+    );
+
+
+    if(
+      !allFinished
+    ){
+
+      animationFrame =
+        requestAnimationFrame(
+          animate
+        );
+
+    }
+    else{
+
+      animationFrame =
+        null;
+
+
+      showStatus(
+        "DRAFT ORDER LOCKED."
+      );
+
+
+      startDashBtn.disabled =
+        false;
+
+    }
+
+  }
+
+
+  animationFrame =
+    requestAnimationFrame(
+      animate
+    );
 
 }
 
 
 /* =========================================================
-   EVENTS
+   START BUTTON
    ========================================================= */
-
-commissionerBottomButton.addEventListener(
-  "click",
-  openCommissioner
-);
-
-
-unlockCommissionerBtn.addEventListener(
-  "click",
-  unlockCommissioner
-);
-
-
-cancelCommissionerBtn.addEventListener(
-  "click",
-  closeCommissioner
-);
-
-
-lockCommissionerBtn.addEventListener(
-  "click",
-  lockCommissioner
-);
-
-
-saveConfigBtn.addEventListener(
-  "click",
-  saveConfiguration
-);
-
-
-resetDraftBtn.addEventListener(
-  "click",
-  resetSavedDraft
-);
-
 
 startDashBtn.addEventListener(
   "click",
-  startDashFromOverlay
-);
-
-
-commissionerPassword.addEventListener(
-  "keydown",
-  event => {
-
-    if(
-      event.key ===
-      "Enter"
-    ){
-
-      unlockCommissioner();
-
-    }
-
-  }
+  startRace
 );
 
 
 /* =========================================================
-   INITIALIZE
+   INITIALIZATION
    ========================================================= */
 
 async function initialize(){
 
-  initializeDraftOrderDisplay();
-
-
-  showStatus(
-    "Loading draft configuration..."
-  );
-
-
-  teams =
-    await loadTeamsFromSupabase();
+  renderPendingResults();
 
 
   renderPermanentLabels();
 
+
+  /*
+     Open the curtain immediately.
+
+     This prevents the old issue where Supabase
+     loading could delay the curtain/countdown.
+  */
+
+  raceCurtain
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+     Load shared team configuration.
+  */
+
+  await loadTeamConfig();
+
+
+  renderPermanentLabels();
+
+
+  /*
+     Load official saved draft order.
+  */
 
   savedDraftOrder =
     await loadDraftOrderFromSupabase();
@@ -5046,9 +3615,7 @@ async function initialize(){
 
 initialize();
 
-
 </script>
 
 </body>
-
 </html>

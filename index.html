@@ -1424,22 +1424,7 @@ const COMMISSIONER_PASSWORD =
 
 
 /* =========================================================
-   =========================================================
    SUPABASE
-   =========================================================
-   =========================================================
-
-   IMPORTANT:
-
-   Paste your CURRENT Supabase publishable key below.
-
-   It should start with:
-
-   sb_publishable_
-
-   DO NOT put an sb_secret key here.
-   DO NOT put a service_role key here.
-
    ========================================================= */
 
 const SUPABASE_URL =
@@ -1466,9 +1451,7 @@ const supabase =
 
 
 /* =========================================================
-   =========================================================
-   IMAGE FILES — CHANGE FILENAMES HERE
-   =========================================================
+   IMAGE FILES
    ========================================================= */
 
 const IMAGE_FILES = [
@@ -2946,61 +2929,54 @@ function resetVisuals(){
 
 
 /* =========================================================
-   FINISH LINE / RUNNER POSITIONING
+   FINISH POSITION
    ========================================================= */
 
 /*
-   These values represent the CENTER of each runner.
+   IMPORTANT:
 
-   The goal line in racefield.png is near the right side of
-   the field. Every center position below is beyond that line,
-   while still leaving enough room for the entire runner to
-   remain inside the field.
+   These are the LEFT positions of the runner.
 
-   The small stagger makes Pick #1 and Pick #2 visually
-   distinguishable without changing the draft order.
+   The runner itself is 64px wide, so we leave
+   enough room on the right side for the entire
+   runner to remain inside the field.
+
+   The positions are staggered slightly so the
+   first few finishers don't all sit directly
+   on top of each other.
 */
 
-const FINISH_CENTER_POSITIONS = [
+const FINISH_POSITIONS = [
 
-  94,
+  84,
 
-  93.25,
+  82.8,
 
-  92.5,
+  81.6,
 
-  91.75,
+  80.4,
 
-  91,
+  79.2,
 
-  90.25,
+  78,
 
-  89.5,
+  76.8,
 
-  88.75
+  75.6
 
 ];
 
 
-function getFinishCenterPosition(
+function getFinishPosition(
   rank
 ){
 
-  return
-    FINISH_CENTER_POSITIONS[rank] ??
-    FINISH_CENTER_POSITIONS[
-      FINISH_CENTER_POSITIONS.length - 1
-    ];
-
-}
-
-
-function getRunnerHalfSize(){
-
-  return
-    window.innerWidth <= 560
-      ? 25
-      : 32;
+  return (
+    FINISH_POSITIONS[rank] ??
+    FINISH_POSITIONS[
+      FINISH_POSITIONS.length - 1
+    ]
+  );
 
 }
 
@@ -3025,17 +3001,15 @@ function addRunner(
 
 
   /*
-     CORRECTION:
+     Keep all eight runners comfortably inside
+     the field vertically.
 
-     The previous bottom lane was too close to the
-     edge of the field.
-
-     These eight positions keep the entire runner
-     inside the field, including Amanda.
+     This fixes Amanda being pushed outside
+     the bottom boundary.
   */
 
   runner.style.top =
-    `${10 + index * 10.4}%`;
+    `${12 + index * 10.8}%`;
 
 
   runner.style.left =
@@ -3261,12 +3235,26 @@ function showSavedDraft(){
 
 
         /*
-           Saved results use the same finish
-           positions as the live race.
+           Put saved runners at their final
+           staggered positions.
         */
 
+        const savedItem =
+          savedDraftOrder.find(
+            item =>
+              String(item.team.id) ===
+              String(team.id)
+          );
+
+
+        const rank =
+          savedItem
+            ? Number(savedItem.pick) - 1
+            : index;
+
+
         el.style.left =
-          `calc(${getFinishCenterPosition(index)}% - ${getRunnerHalfSize()}px)`;
+          `${getFinishPosition(rank)}%`;
 
 
         el.classList.add(
@@ -3282,7 +3270,9 @@ function showSavedDraft(){
 
           el,
 
-          revealed:true
+          revealed:true,
+
+          rank
 
         };
 
@@ -3323,10 +3313,10 @@ async function start(){
   initializeDraftOrderDisplay();
 
 
-  /*
+  /* =======================================================
      STEP 1:
-     Use an existing official saved order.
-  */
+     USE EXISTING SAVED ORDER IF ONE EXISTS
+     ======================================================= */
 
   let officialOrder =
     savedDraftOrder &&
@@ -3334,20 +3324,23 @@ async function start(){
     teams.length
       ? savedDraftOrder.map(
           item => ({
-            pick:item.pick,
+
+            pick:
+              item.pick,
+
             team:{
               ...item.team
             }
+
           })
         )
       : [];
 
 
-  /*
+  /* =======================================================
      STEP 2:
-     If there isn't an official saved order,
-     create one locally.
-  */
+     CREATE A NEW ORDER IF NECESSARY
+     ======================================================= */
 
   if(
     officialOrder.length !==
@@ -3379,7 +3372,12 @@ async function start(){
 
 
     /*
-       Set this BEFORE attempting Supabase.
+       LOCK THE ORDER LOCALLY FIRST.
+
+       This is critical.
+
+       The race does NOT depend on Supabase
+       successfully saving the order.
     */
 
     savedDraftOrder =
@@ -3397,34 +3395,58 @@ async function start(){
       );
 
 
-    const saved =
-      await saveDraftOrderToSupabase(
-        officialOrder
+    /* =====================================================
+       IMPORTANT FIX:
+
+       DO NOT AWAIT SUPABASE HERE.
+
+       The old version did:
+
+         await saveDraftOrderToSupabase(...)
+
+       That meant a slow/hanging Supabase request
+       could prevent the race from ever reaching
+       the animation code.
+
+       Now the save happens in the background.
+       ===================================================== */
+
+    saveDraftOrderToSupabase(
+      officialOrder
+    )
+      .then(
+        saved => {
+
+          if(
+            !saved
+          ){
+
+            console.warn(
+              "Supabase could not save the draft. The race is continuing with the locally locked order."
+            );
+
+          }
+
+        }
+      )
+      .catch(
+        error => {
+
+          console.warn(
+            "Supabase draft save failed. The race is continuing locally.",
+            error
+          );
+
+        }
       );
-
-
-    if(
-      !saved
-    ){
-
-      console.warn(
-        "Supabase could not save the draft. Continuing with the locally generated order for this race."
-      );
-
-
-      showStatus(
-        "Draft order created — race starting."
-      );
-
-    }
 
   }
 
 
-  /*
+  /* =======================================================
      STEP 3:
-     Make a completely separate copy.
-  */
+     COPY THE LOCKED ORDER FOR THE RACE
+     ======================================================= */
 
   const order =
     officialOrder.map(
@@ -3441,10 +3463,10 @@ async function start(){
     );
 
 
-  /*
+  /* =======================================================
      STEP 4:
-     START THE RACE.
-  */
+     START THE RACE IMMEDIATELY
+     ======================================================= */
 
   raceRunning =
     true;
@@ -3482,20 +3504,15 @@ async function start(){
     );
 
 
-  /*
+  /* =======================================================
      RACE TIMING
 
-     Original timing is preserved.
+     Pick #1 finishes around 76 seconds.
+     Pick #8 finishes around 90 seconds.
 
-     Pick #1:
-       76 seconds
-
-     Pick #8:
-       90 seconds
-
-     The order is still determined by the
-     weighted draft draw, not race speed.
-  */
+     The draft order itself was already determined
+     by the weighted random draw.
+     ======================================================= */
 
   const baseFinish =
     76000;
@@ -3557,6 +3574,10 @@ async function start(){
     finishGap;
 
 
+  /* =======================================================
+     REVEAL RUNNER
+     ======================================================= */
+
   function revealRunner(
     runner
   ){
@@ -3580,18 +3601,12 @@ async function start(){
 
 
     /*
-       CORRECTION:
-
-       Finish positions are based on the CENTER
-       of the runner.
-
-       This puts every runner past the actual
-       goal line while keeping the entire circle
-       inside the field.
+       Use the same finish position used
+       during animation.
     */
 
     runner.el.style.left =
-      `calc(${getFinishCenterPosition(runner.rank)}% - ${getRunnerHalfSize()}px)`;
+      `${getFinishPosition(runner.rank)}%`;
 
 
     const result =
@@ -3614,6 +3629,10 @@ async function start(){
 
   }
 
+
+  /* =======================================================
+     ANIMATION FRAME
+     ======================================================= */
 
   function frame(
     now
@@ -3639,6 +3658,21 @@ async function start(){
           runner.finish;
 
 
+        /*
+           Protect against any runner that somehow
+           doesn't receive a valid finish time.
+        */
+
+        if(
+          !finishTime ||
+          finishTime <= 0
+        ){
+
+          return;
+
+        }
+
+
         const individualProgress =
           Math.min(
             1,
@@ -3652,11 +3686,11 @@ async function start(){
 
 
         /*
-           88% shared movement keeps the pack
-           tight.
+           Shared movement keeps the runners
+           relatively close.
 
-           12% individual movement creates
-           small surges/fades.
+           Individual movement gives each runner
+           small surges and fades.
         */
 
         const progress =
@@ -3707,15 +3741,8 @@ async function start(){
           8;
 
 
-        /*
-           IMPORTANT:
-
-           This is now the finish CENTER rather
-           than the left edge of the runner.
-        */
-
         const finishPosition =
-          getFinishCenterPosition(
+          getFinishPosition(
             runner.rank
           );
 
@@ -3730,6 +3757,25 @@ async function start(){
           );
 
 
+        /*
+           IMPORTANT:
+
+           Never allow the runner to move backward.
+
+           The current position is based on the
+           forward-moving base position, and the
+           surge/fade effect is clamped so the runner
+           can never go below the current progress.
+        */
+
+        const movementEffect =
+          (
+            surge +
+            fade
+          ) *
+          100;
+
+
         const currentPosition =
           Math.min(
 
@@ -3740,12 +3786,7 @@ async function start(){
               startPosition,
 
               basePosition +
-
-              (
-                surge +
-                fade
-              ) *
-              100
+              movementEffect
 
             )
 
@@ -3753,13 +3794,38 @@ async function start(){
 
 
         /*
-           Subtract half the runner width so
-           currentPosition represents the center.
+           Prevent any backward movement caused by
+           the surge/fade effect.
         */
 
-        runner.el.style.left =
-          `calc(${currentPosition}% - ${getRunnerHalfSize()}px)`;
+        const previousPosition =
+          Number(
+            runner.el.dataset.position ||
+            startPosition
+          );
 
+
+        const safePosition =
+          Math.max(
+            previousPosition,
+            currentPosition
+          );
+
+
+        runner.el.dataset.position =
+          String(
+            safePosition
+          );
+
+
+        runner.el.style.left =
+          `${safePosition}%`;
+
+
+        /*
+           Once the runner reaches its scheduled
+           finish time, lock it to the finish line.
+        */
 
         if(
           elapsed >=
@@ -3775,6 +3841,11 @@ async function start(){
       }
     );
 
+
+    /*
+       When all eight have finished, stop
+       requesting animation frames.
+    */
 
     if(
       runners.every(
@@ -3809,6 +3880,11 @@ async function start(){
 
   }
 
+
+  /*
+     THIS IS THE LINE THAT ACTUALLY STARTS
+     THE RUNNERS MOVING.
+  */
 
   raf =
     requestAnimationFrame(
@@ -4099,10 +4175,8 @@ function wait(
 async function runCountdown(){
 
   /*
-     IMPORTANT:
-
-     Make sure the full-screen overlay is visible
-     while the countdown runs.
+     Make sure the overlay is visible
+     at the beginning of every race.
   */
 
   raceCurtain.classList.remove(
@@ -4190,7 +4264,7 @@ async function startDashFromOverlay(){
 
 
   /*
-     Run countdown.
+     Run the countdown first.
   */
 
   await runCountdown();
@@ -4213,10 +4287,7 @@ async function startDashFromOverlay(){
 
 
   /*
-     Give the curtain a moment to start moving,
-     then start the race.
-
-     Supabase does not control the curtain.
+     Let the curtain begin opening.
   */
 
   await wait(
@@ -4224,12 +4295,23 @@ async function startDashFromOverlay(){
   );
 
 
+  /*
+     START THE RACE.
+
+     IMPORTANT:
+
+     start() no longer waits for Supabase.
+
+     The animation begins immediately.
+  */
+
   const success =
     await start();
 
 
   /*
-     If start somehow fails, restore overlay.
+     If something local prevents the race
+     from starting, restore the overlay.
   */
 
   if(
@@ -4257,15 +4339,12 @@ async function startDashFromOverlay(){
 
 
   /*
-     IMPORTANT FIX:
+     The curtain animation itself is 1.05 seconds.
 
-     The curtain animation is 1.05 seconds.
+     Wait slightly longer than that, then completely
+     remove the overlay.
 
-     Wait slightly longer than that before adding
-     hidden, so the blur layer itself disappears.
-
-     Previously the panels moved away but the
-     full-screen blur could remain visible.
+     This removes the blur/dark layer too.
   */
 
   await wait(
@@ -4447,7 +4526,7 @@ async function initialize(){
   /*
      Load the official saved draft.
 
-     If it exists, everyone gets the same order.
+     If one exists, everyone sees the same order.
   */
 
   savedDraftOrder =

@@ -2933,37 +2933,42 @@ function resetVisuals(){
    ========================================================= */
 
 /*
-   IMPORTANT:
+   THE FIELD IMAGE:
 
-   These are the LEFT positions of the runner.
+   The blue end zone begins at approximately 83%
+   of the field width.
 
-   The green playing field ends just before the
-   blue FANTASY FOOTBALL LEAGUE panel in the
-   background image. The runner is 64px wide,
-   so these positions place the runners with
-   their right edge at the finish boundary.
+   The runners are 64px wide.
 
-   The positions are only slightly staggered so
-   the eight runners finish as a tight group.
+   These values place the runners DEEP INSIDE
+   THE BLUE END ZONE instead of stopping around
+   midfield.
+
+   Rank 0 = Pick #1
+   Rank 7 = Pick #8
+
+   The slight stagger keeps the runners from
+   sitting directly on top of each other when
+   they finish.
 */
 
 const FINISH_POSITIONS = [
 
-  54,
+  90.5,
 
-  53.3,
+  90.0,
 
-  52.6,
+  89.5,
 
-  51.9,
+  89.0,
 
-  51.2,
+  88.5,
 
-  50.5,
+  88.0,
 
-  49.8,
+  87.5,
 
-  49.1
+  87.0
 
 ];
 
@@ -3002,10 +3007,10 @@ function addRunner(
 
 
   /*
-     Keep all eight runners comfortably inside
-     the field vertically.
+     Keep all eight runners comfortably
+     inside the field vertically.
 
-     This fixes Amanda being pushed outside
+     The final runner is still safely above
      the bottom boundary.
   */
 
@@ -3015,6 +3020,10 @@ function addRunner(
 
   runner.style.left =
     "8%";
+
+
+  runner.dataset.position =
+    "8";
 
 
   const image =
@@ -3237,7 +3246,7 @@ function showSavedDraft(){
 
         /*
            Put saved runners at their final
-           finish-line positions.
+           positions inside the blue end zone.
         */
 
         const savedItem =
@@ -3254,8 +3263,20 @@ function showSavedDraft(){
             : index;
 
 
+        const finishPosition =
+          getFinishPosition(
+            rank
+          );
+
+
         el.style.left =
-          `${getFinishPosition(rank)}%`;
+          `${finishPosition}%`;
+
+
+        el.dataset.position =
+          String(
+            finishPosition
+          );
 
 
         el.classList.add(
@@ -3375,10 +3396,8 @@ async function start(){
     /*
        LOCK THE ORDER LOCALLY FIRST.
 
-       This is critical.
-
-       The order is now official before
-       the animation begins.
+       The race does not depend on Supabase
+       successfully saving the order.
     */
 
     savedDraftOrder =
@@ -3397,17 +3416,10 @@ async function start(){
 
 
     /*
-       DO NOT AWAIT SUPABASE HERE.
+       Save in the background.
 
-       The old version did:
-
-         await saveDraftOrderToSupabase(...)
-
-       That meant a slow/hanging Supabase request
-       could prevent the race from ever reaching
-       the animation code.
-
-       Now the save happens in the background.
+       This prevents Supabase latency from
+       delaying the actual race animation.
     */
 
     saveDraftOrderToSupabase(
@@ -3464,7 +3476,7 @@ async function start(){
 
   /* =======================================================
      STEP 4:
-     START THE RACE IMMEDIATELY
+     START THE RACE
      ======================================================= */
 
   raceRunning =
@@ -3504,14 +3516,18 @@ async function start(){
 
 
   /* =======================================================
-     RACE TIMING
+     45-SECOND RACE
 
-     The complete simulation lasts 45 seconds.
-     Pick #1 finishes around 38 seconds.
-     Pick #8 finishes at 45 seconds.
+     Pick #1 finishes at 38 seconds.
 
-     The draft order itself was already determined
-     by the weighted random draw.
+     Each subsequent pick finishes 1 second later.
+
+     Pick #8 therefore finishes at:
+
+       38 + (7 × 1)
+       = 45 seconds
+
+     The total race is exactly 45 seconds.
      ======================================================= */
 
   const baseFinish =
@@ -3566,6 +3582,16 @@ async function start(){
     performance.now();
 
 
+  /*
+     Last runner:
+
+       38,000 + 7,000
+       = 45,000 ms
+
+     Therefore the animation is exactly
+     45 seconds from start to final finish.
+  */
+
   const raceDuration =
     baseFinish +
     (
@@ -3601,12 +3627,23 @@ async function start(){
 
 
     /*
-       Use the same finish position used
-       during animation.
+       Lock the runner into the blue end zone.
     */
 
+    const finalPosition =
+      getFinishPosition(
+        runner.rank
+      );
+
+
     runner.el.style.left =
-      `${getFinishPosition(runner.rank)}%`;
+      `${finalPosition}%`;
+
+
+    runner.el.dataset.position =
+      String(
+        finalPosition
+      );
 
 
     const result =
@@ -3643,6 +3680,12 @@ async function start(){
       startTime;
 
 
+    /*
+       Overall race progress.
+
+       This reaches exactly 1 at 45 seconds.
+    */
+
     const overallProgress =
       Math.min(
         1,
@@ -3658,11 +3701,6 @@ async function start(){
           runner.finish;
 
 
-        /*
-           Protect against any runner that somehow
-           doesn't receive a valid finish time.
-        */
-
         if(
           !finishTime ||
           finishTime <= 0
@@ -3673,68 +3711,21 @@ async function start(){
         }
 
 
+        /*
+           Each runner has its own finish time.
+
+           This is important.
+
+           Pick #1 reaches the end zone at 38 sec.
+           Pick #8 reaches the end zone at 45 sec.
+        */
+
         const individualProgress =
           Math.min(
             1,
             elapsed /
             finishTime
           );
-
-
-        const sharedProgress =
-          overallProgress;
-
-
-        /*
-           Shared movement keeps the runners
-           relatively close.
-
-           Individual movement gives each runner
-           small surges and fades.
-        */
-
-        const progress =
-          Math.min(
-
-            1,
-
-            (
-              sharedProgress *
-              .88
-            ) +
-
-            (
-              individualProgress *
-              .12
-            )
-
-          );
-
-
-        const phase =
-          runner.rank *
-          .72;
-
-
-        const surge =
-          Math.sin(
-            progress *
-            Math.PI *
-            5 +
-            phase
-          ) *
-          .010;
-
-
-        const fade =
-          Math.sin(
-            progress *
-            Math.PI *
-            2.2 +
-            phase *
-            1.7
-          ) *
-          .006;
 
 
         const startPosition =
@@ -3747,10 +3738,26 @@ async function start(){
           );
 
 
+        /*
+           Smooth forward movement.
+
+           easeOutCubic makes the runners accelerate
+           naturally and then settle toward the finish.
+        */
+
+        const easedProgress =
+          1 -
+          Math.pow(
+            1 -
+            individualProgress,
+            1.35
+          );
+
+
         const basePosition =
           startPosition +
 
-          progress *
+          easedProgress *
           (
             finishPosition -
             startPosition
@@ -3758,15 +3765,37 @@ async function start(){
 
 
         /*
-           IMPORTANT:
+           Small visual surges.
 
-           Never allow the runner to move backward.
-
-           The current position is based on the
-           forward-moving base position, and the
-           surge/fade effect is clamped so the runner
-           can never go below the current progress.
+           These do NOT determine who wins.
+           The official order was already locked.
         */
+
+        const phase =
+          runner.rank *
+          .72;
+
+
+        const surge =
+          Math.sin(
+            individualProgress *
+            Math.PI *
+            5 +
+            phase
+          ) *
+          .010;
+
+
+        const fade =
+          Math.sin(
+            individualProgress *
+            Math.PI *
+            2.2 +
+            phase *
+            1.7
+          ) *
+          .006;
+
 
         const movementEffect =
           (
@@ -3794,8 +3823,10 @@ async function start(){
 
 
         /*
-           Prevent any backward movement caused by
-           the surge/fade effect.
+           Never move backward.
+
+           Once the runner reaches a position,
+           it can only continue forward.
         */
 
         const previousPosition =
@@ -3823,8 +3854,8 @@ async function start(){
 
 
         /*
-           Once the runner reaches its scheduled
-           finish time, lock it to the finish line.
+           Once its individual finish time is reached,
+           lock the runner into the end zone.
         */
 
         if(
@@ -3843,8 +3874,8 @@ async function start(){
 
 
     /*
-       When all eight have finished, stop
-       requesting animation frames.
+       When all eight have finished, stop the
+       animation loop.
     */
 
     if(
@@ -3882,8 +3913,7 @@ async function start(){
 
 
   /*
-     THIS IS THE LINE THAT ACTUALLY STARTS
-     THE RUNNERS MOVING.
+     START THE RUNNERS.
   */
 
   raf =
@@ -4296,13 +4326,7 @@ async function startDashFromOverlay(){
 
 
   /*
-     START THE RACE.
-
-     IMPORTANT:
-
-     start() no longer waits for Supabase.
-
-     The animation begins immediately.
+     Start the actual 45-second race.
   */
 
   const success =
@@ -4341,10 +4365,8 @@ async function startDashFromOverlay(){
   /*
      The curtain animation itself is 1.05 seconds.
 
-     Wait slightly longer than that, then completely
-     remove the overlay.
-
-     This removes the blur/dark layer too.
+     Remove the overlay after it has completely
+     opened so the field is fully visible.
   */
 
   await wait(

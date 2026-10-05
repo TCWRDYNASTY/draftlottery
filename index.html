@@ -1391,7 +1391,7 @@ h1{
           id="lockCommissionerBtn"
           type="button"
         >
-          LOCK
+          LOCK ODDS
         </button>
 
       </div>
@@ -1559,6 +1559,16 @@ let raceRunning =
 
 
 let commissionerUnlocked =
+  false;
+
+
+/*
+   TRUE means the commissioner has locked the odds and
+   the official draft order has been generated and saved
+   to Supabase. The race is never allowed to create a
+   new random order on its own.
+*/
+let oddsLocked =
   false;
 
 
@@ -1812,6 +1822,12 @@ function renderInputs(){
     "";
 
 
+  const disabledAttr =
+    oddsLocked
+      ? "disabled"
+      : "";
+
+
   const header =
     document.createElement(
       "div"
@@ -1896,6 +1912,7 @@ function renderInputs(){
             data-type="name"
             data-id="${team.id}"
             value="${escapeHTML(team.name)}"
+            ${disabledAttr}
           >
 
         </div>
@@ -1910,6 +1927,7 @@ function renderInputs(){
             data-type="weight"
             data-id="${team.id}"
             value="${Number(team.weight)}"
+            ${disabledAttr}
           >
 
         </div>
@@ -1939,6 +1957,7 @@ function renderInputs(){
           <select
             data-type="image"
             data-id="${team.id}"
+            ${disabledAttr}
           >
 
             ${imageOptions}
@@ -2933,42 +2952,36 @@ function resetVisuals(){
    ========================================================= */
 
 /*
-   THE FIELD IMAGE:
+   IMPORTANT:
 
-   The blue end zone begins at approximately 83%
-   of the field width.
+   These are the LEFT positions of the runner.
 
-   The runners are 64px wide.
+   The runner itself is 64px wide, so we leave
+   enough room on the right side for the entire
+   runner to remain inside the field.
 
-   These values place the runners DEEP INSIDE
-   THE BLUE END ZONE instead of stopping around
-   midfield.
-
-   Rank 0 = Pick #1
-   Rank 7 = Pick #8
-
-   The slight stagger keeps the runners from
-   sitting directly on top of each other when
-   they finish.
+   The positions are staggered slightly so the
+   first few finishers don't all sit directly
+   on top of each other.
 */
 
 const FINISH_POSITIONS = [
 
-  90.5,
+  84,
 
-  90.0,
+  82.8,
 
-  89.5,
+  81.6,
 
-  89.0,
+  80.4,
 
-  88.5,
+  79.2,
 
-  88.0,
+  78,
 
-  87.5,
+  76.8,
 
-  87.0
+  75.6
 
 ];
 
@@ -3007,10 +3020,10 @@ function addRunner(
 
 
   /*
-     Keep all eight runners comfortably
-     inside the field vertically.
+     Keep all eight runners comfortably inside
+     the field vertically.
 
-     The final runner is still safely above
+     This fixes Amanda being pushed outside
      the bottom boundary.
   */
 
@@ -3020,10 +3033,6 @@ function addRunner(
 
   runner.style.left =
     "8%";
-
-
-  runner.dataset.position =
-    "8";
 
 
   const image =
@@ -3246,7 +3255,7 @@ function showSavedDraft(){
 
         /*
            Put saved runners at their final
-           positions inside the blue end zone.
+           staggered positions.
         */
 
         const savedItem =
@@ -3263,20 +3272,8 @@ function showSavedDraft(){
             : index;
 
 
-        const finishPosition =
-          getFinishPosition(
-            rank
-          );
-
-
         el.style.left =
-          `${finishPosition}%`;
-
-
-        el.dataset.position =
-          String(
-            finishPosition
-          );
+          `${getFinishPosition(rank)}%`;
 
 
         el.classList.add(
@@ -3361,47 +3358,38 @@ async function start(){
 
   /* =======================================================
      STEP 2:
-     CREATE A NEW ORDER IF NECESSARY
+     REFRESH THE LOCKED ORDER FROM SUPABASE.
+
+     This makes sure every browser uses the same official
+     order and also prevents a stale browser from racing
+     after the commissioner has reset the draft.
+
+     IMPORTANT:
+
+     The race NEVER calls createDraftOrder().
+     That random draw happens only when the commissioner
+     clicks LOCK ODDS.
      ======================================================= */
 
+  const latestSavedOrder =
+    await loadDraftOrderFromSupabase();
+
+
   if(
-    officialOrder.length !==
+    latestSavedOrder.length ===
     teams.length
   ){
 
-    showStatus(
-      "Creating the official draft order..."
-    );
+    savedDraftOrder =
+      latestSavedOrder;
+
+
+    oddsLocked =
+      true;
 
 
     officialOrder =
-      createDraftOrder();
-
-
-    if(
-      officialOrder.length !==
-      teams.length
-    ){
-
-      showStatus(
-        "Could not create a complete draft order."
-      );
-
-
-      return false;
-
-    }
-
-
-    /*
-       LOCK THE ORDER LOCALLY FIRST.
-
-       The race does not depend on Supabase
-       successfully saving the order.
-    */
-
-    savedDraftOrder =
-      officialOrder.map(
+      latestSavedOrder.map(
         item => ({
 
           pick:
@@ -3414,42 +3402,27 @@ async function start(){
         })
       );
 
+  }
+  else{
 
-    /*
-       Save in the background.
+    oddsLocked =
+      false;
 
-       This prevents Supabase latency from
-       delaying the actual race animation.
-    */
+  }
 
-    saveDraftOrderToSupabase(
-      officialOrder
-    )
-      .then(
-        saved => {
 
-          if(
-            !saved
-          ){
+  if(
+    !oddsLocked ||
+    officialOrder.length !==
+    teams.length
+  ){
 
-            console.warn(
-              "Supabase could not save the draft. The race is continuing with the locally locked order."
-            );
+    showStatus(
+      "Odds are not locked yet. The commissioner must lock the odds before the race can start."
+    );
 
-          }
 
-        }
-      )
-      .catch(
-        error => {
-
-          console.warn(
-            "Supabase draft save failed. The race is continuing locally.",
-            error
-          );
-
-        }
-      );
+    return false;
 
   }
 
@@ -3476,7 +3449,7 @@ async function start(){
 
   /* =======================================================
      STEP 4:
-     START THE RACE
+     START THE RACE IMMEDIATELY
      ======================================================= */
 
   raceRunning =
@@ -3516,26 +3489,23 @@ async function start(){
 
 
   /* =======================================================
-     45-SECOND RACE
+     RACE TIMING
 
-     Pick #1 finishes at 38 seconds.
+     The complete simulation is 45 seconds.
+     Pick #1 finishes around 31 seconds.
+     Pick #8 finishes at 45 seconds.
 
-     Each subsequent pick finishes 1 second later.
-
-     Pick #8 therefore finishes at:
-
-       38 + (7 × 1)
-       = 45 seconds
-
-     The total race is exactly 45 seconds.
+     The draft order itself was already determined
+     by the weighted random draw when the commissioner
+     locked the odds.
      ======================================================= */
 
   const baseFinish =
-    38000;
+    31000;
 
 
   const finishGap =
-    1000;
+    2000;
 
 
   order.forEach(
@@ -3582,16 +3552,6 @@ async function start(){
     performance.now();
 
 
-  /*
-     Last runner:
-
-       38,000 + 7,000
-       = 45,000 ms
-
-     Therefore the animation is exactly
-     45 seconds from start to final finish.
-  */
-
   const raceDuration =
     baseFinish +
     (
@@ -3627,23 +3587,12 @@ async function start(){
 
 
     /*
-       Lock the runner into the blue end zone.
+       Use the same finish position used
+       during animation.
     */
 
-    const finalPosition =
-      getFinishPosition(
-        runner.rank
-      );
-
-
     runner.el.style.left =
-      `${finalPosition}%`;
-
-
-    runner.el.dataset.position =
-      String(
-        finalPosition
-      );
+      `${getFinishPosition(runner.rank)}%`;
 
 
     const result =
@@ -3680,12 +3629,6 @@ async function start(){
       startTime;
 
 
-    /*
-       Overall race progress.
-
-       This reaches exactly 1 at 45 seconds.
-    */
-
     const overallProgress =
       Math.min(
         1,
@@ -3701,6 +3644,11 @@ async function start(){
           runner.finish;
 
 
+        /*
+           Protect against any runner that somehow
+           doesn't receive a valid finish time.
+        */
+
         if(
           !finishTime ||
           finishTime <= 0
@@ -3711,21 +3659,68 @@ async function start(){
         }
 
 
-        /*
-           Each runner has its own finish time.
-
-           This is important.
-
-           Pick #1 reaches the end zone at 38 sec.
-           Pick #8 reaches the end zone at 45 sec.
-        */
-
         const individualProgress =
           Math.min(
             1,
             elapsed /
             finishTime
           );
+
+
+        const sharedProgress =
+          overallProgress;
+
+
+        /*
+           Shared movement keeps the runners
+           relatively close.
+
+           Individual movement gives each runner
+           small surges and fades.
+        */
+
+        const progress =
+          Math.min(
+
+            1,
+
+            (
+              sharedProgress *
+              .88
+            ) +
+
+            (
+              individualProgress *
+              .12
+            )
+
+          );
+
+
+        const phase =
+          runner.rank *
+          .72;
+
+
+        const surge =
+          Math.sin(
+            progress *
+            Math.PI *
+            5 +
+            phase
+          ) *
+          .010;
+
+
+        const fade =
+          Math.sin(
+            progress *
+            Math.PI *
+            2.2 +
+            phase *
+            1.7
+          ) *
+          .006;
 
 
         const startPosition =
@@ -3738,26 +3733,10 @@ async function start(){
           );
 
 
-        /*
-           Smooth forward movement.
-
-           easeOutCubic makes the runners accelerate
-           naturally and then settle toward the finish.
-        */
-
-        const easedProgress =
-          1 -
-          Math.pow(
-            1 -
-            individualProgress,
-            1.35
-          );
-
-
         const basePosition =
           startPosition +
 
-          easedProgress *
+          progress *
           (
             finishPosition -
             startPosition
@@ -3765,37 +3744,15 @@ async function start(){
 
 
         /*
-           Small visual surges.
+           IMPORTANT:
 
-           These do NOT determine who wins.
-           The official order was already locked.
+           Never allow the runner to move backward.
+
+           The current position is based on the
+           forward-moving base position, and the
+           surge/fade effect is clamped so the runner
+           can never go below the current progress.
         */
-
-        const phase =
-          runner.rank *
-          .72;
-
-
-        const surge =
-          Math.sin(
-            individualProgress *
-            Math.PI *
-            5 +
-            phase
-          ) *
-          .010;
-
-
-        const fade =
-          Math.sin(
-            individualProgress *
-            Math.PI *
-            2.2 +
-            phase *
-            1.7
-          ) *
-          .006;
-
 
         const movementEffect =
           (
@@ -3823,10 +3780,8 @@ async function start(){
 
 
         /*
-           Never move backward.
-
-           Once the runner reaches a position,
-           it can only continue forward.
+           Prevent any backward movement caused by
+           the surge/fade effect.
         */
 
         const previousPosition =
@@ -3854,8 +3809,8 @@ async function start(){
 
 
         /*
-           Once its individual finish time is reached,
-           lock the runner into the end zone.
+           Once the runner reaches its scheduled
+           finish time, lock it to the finish line.
         */
 
         if(
@@ -3874,8 +3829,8 @@ async function start(){
 
 
     /*
-       When all eight have finished, stop the
-       animation loop.
+       When all eight have finished, stop
+       requesting animation frames.
     */
 
     if(
@@ -3913,7 +3868,8 @@ async function start(){
 
 
   /*
-     START THE RUNNERS.
+     THIS IS THE LINE THAT ACTUALLY STARTS
+     THE RUNNERS MOVING.
   */
 
   raf =
@@ -4031,39 +3987,193 @@ function unlockCommissioner(){
 
 
   showStatus(
-    "Commissioner tools unlocked."
+    oddsLocked
+      ? "Commissioner tools unlocked. Odds are already locked; reset the saved draft to make changes."
+      : "Commissioner tools unlocked."
   );
 
 }
 
 
 /* =========================================================
-   LOCK COMMISSIONER
+   LOCK ODDS
+
+   This is the ONLY place where a new weighted draft
+   order is created. Once saved successfully to Supabase,
+   oddsLocked becomes true and every future race uses the
+   exact same order.
    ========================================================= */
 
-function lockCommissioner(){
+async function lockOdds(){
 
-  commissionerUnlocked =
-    false;
+  if(
+    !commissionerUnlocked ||
+    oddsLocked
+  ){
 
+    return;
 
-  commissionerPanel.classList.add(
-    "hidden"
-  );
-
-
-  teamSettingsPanel.classList.add(
-    "hidden"
-  );
+  }
 
 
-  commissionerBottomButton.classList.remove(
-    "hidden"
-  );
+  /*
+     Check Supabase first in case another commissioner
+     browser has already locked the draft.
+  */
+  const existingOrder =
+    await loadDraftOrderFromSupabase();
+
+
+  if(
+    existingOrder.length ===
+    teams.length
+  ){
+
+    savedDraftOrder =
+      existingOrder;
+
+
+    oddsLocked =
+      true;
+
+
+    renderInputs();
+
+
+    lockCommissionerBtn.textContent =
+      "ODDS LOCKED";
+
+
+    lockCommissionerBtn.disabled =
+      true;
+
+
+    showStatus(
+      "Odds were already locked. The existing official draft order was loaded from Supabase."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+     Save the latest commissioner edits first so the
+     weighted draw uses exactly what was just entered.
+  */
+  const configSaved =
+    await saveConfiguration();
+
+
+  if(
+    !configSaved
+  ){
+
+    return;
+
+  }
+
+
+  lockCommissionerBtn.disabled =
+    true;
 
 
   showStatus(
-    "Commissioner tools locked."
+    "Generating and saving the official draft order..."
+  );
+
+
+  const officialOrder =
+    createDraftOrder();
+
+
+  if(
+    officialOrder.length !==
+    teams.length
+  ){
+
+    lockCommissionerBtn.disabled =
+      false;
+
+
+    showStatus(
+      "Could not create a complete draft order. Odds were not locked."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+     IMPORTANT:
+
+     Do not mark the odds locked until Supabase confirms
+     that the official order was saved. This prevents one
+     browser from showing a locally locked result that other
+     browsers cannot retrieve.
+  */
+  const saved =
+    await saveDraftOrderToSupabase(
+      officialOrder
+    );
+
+
+  if(
+    !saved
+  ){
+
+    lockCommissionerBtn.disabled =
+      false;
+
+
+    showStatus(
+      "The official draft order could not be saved. Odds were NOT locked."
+    );
+
+
+    return;
+
+  }
+
+
+  savedDraftOrder =
+    officialOrder.map(
+      item => ({
+
+        pick:
+          item.pick,
+
+        team:{
+          ...item.team
+        }
+
+      })
+    );
+
+
+  oddsLocked =
+    true;
+
+
+  renderInputs();
+
+
+  renderPermanentLabels();
+
+
+  lockCommissionerBtn.textContent =
+    "ODDS LOCKED";
+
+
+  lockCommissionerBtn.disabled =
+    true;
+
+
+  showStatus(
+    "ODDS LOCKED — the official draft order is now fixed. Every race will show the same result."
   );
 
 }
@@ -4076,10 +4186,11 @@ function lockCommissioner(){
 async function saveConfiguration(){
 
   if(
-    !commissionerUnlocked
+    !commissionerUnlocked ||
+    oddsLocked
   ){
 
-    return;
+    return false;
 
   }
 
@@ -4175,6 +4286,9 @@ async function saveConfiguration(){
   showStatus(
     "Team configuration saved to Supabase."
   );
+
+
+  return true;
 
 }
 
@@ -4326,7 +4440,13 @@ async function startDashFromOverlay(){
 
 
   /*
-     Start the actual 45-second race.
+     START THE RACE.
+
+     IMPORTANT:
+
+     start() no longer waits for Supabase.
+
+     The animation begins immediately.
   */
 
   const success =
@@ -4365,8 +4485,10 @@ async function startDashFromOverlay(){
   /*
      The curtain animation itself is 1.05 seconds.
 
-     Remove the overlay after it has completely
-     opened so the field is fully visible.
+     Wait slightly longer than that, then completely
+     remove the overlay.
+
+     This removes the blur/dark layer too.
   */
 
   await wait(
@@ -4441,14 +4563,29 @@ async function resetSavedDraft(){
   }
 
 
+  oddsLocked =
+    false;
+
+
+  lockCommissionerBtn.textContent =
+    "LOCK ODDS";
+
+
+  lockCommissionerBtn.disabled =
+    false;
+
+
   resetVisuals();
 
 
   initializeDraftOrderDisplay();
 
 
+  renderInputs();
+
+
   showStatus(
-    "Saved draft cleared. The next race will create a new weighted draw."
+    "Saved draft cleared. Review the odds, then LOCK ODDS to create the new official draft order."
   );
 
 }
@@ -4478,7 +4615,7 @@ cancelCommissionerBtn.addEventListener(
 
 lockCommissionerBtn.addEventListener(
   "click",
-  lockCommissioner
+  lockOdds
 );
 
 
@@ -4559,6 +4696,18 @@ async function initialize(){
     savedDraftOrder.length ===
     teams.length
   ){
+
+    oddsLocked =
+      true;
+
+
+    lockCommissionerBtn.textContent =
+      "ODDS LOCKED";
+
+
+    lockCommissionerBtn.disabled =
+      true;
+
 
     showSavedDraft();
 

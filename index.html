@@ -2937,32 +2937,33 @@ function resetVisuals(){
 
    These are the LEFT positions of the runner.
 
-   The runner itself is 64px wide, so we leave
-   enough room on the right side for the entire
-   runner to remain inside the field.
+   The green playing field ends just before the
+   blue FANTASY FOOTBALL LEAGUE panel in the
+   background image. The runner is 64px wide,
+   so these positions place the runners with
+   their right edge at the finish boundary.
 
-   The positions are staggered slightly so the
-   first few finishers don't all sit directly
-   on top of each other.
+   The positions are only slightly staggered so
+   the eight runners finish as a tight group.
 */
 
 const FINISH_POSITIONS = [
 
-  84,
+  54,
 
-  82.8,
+  53.3,
 
-  81.6,
+  52.6,
 
-  80.4,
+  51.9,
 
-  79.2,
+  51.2,
 
-  78,
+  50.5,
 
-  76.8,
+  49.8,
 
-  75.6
+  49.1
 
 ];
 
@@ -3236,7 +3237,7 @@ function showSavedDraft(){
 
         /*
            Put saved runners at their final
-           staggered positions.
+           finish-line positions.
         */
 
         const savedItem =
@@ -3376,8 +3377,8 @@ async function start(){
 
        This is critical.
 
-       The race does NOT depend on Supabase
-       successfully saving the order.
+       The order is now official before
+       the animation begins.
     */
 
     savedDraftOrder =
@@ -3395,9 +3396,7 @@ async function start(){
       );
 
 
-    /* =====================================================
-       IMPORTANT FIX:
-
+    /*
        DO NOT AWAIT SUPABASE HERE.
 
        The old version did:
@@ -3409,7 +3408,7 @@ async function start(){
        the animation code.
 
        Now the save happens in the background.
-       ===================================================== */
+    */
 
     saveDraftOrderToSupabase(
       officialOrder
@@ -3507,19 +3506,20 @@ async function start(){
   /* =======================================================
      RACE TIMING
 
-     Pick #1 finishes around 76 seconds.
-     Pick #8 finishes around 90 seconds.
+     The complete simulation lasts 45 seconds.
+     Pick #1 finishes around 38 seconds.
+     Pick #8 finishes at 45 seconds.
 
      The draft order itself was already determined
      by the weighted random draw.
      ======================================================= */
 
   const baseFinish =
-    76000;
+    38000;
 
 
   const finishGap =
-    2000;
+    1000;
 
 
   order.forEach(

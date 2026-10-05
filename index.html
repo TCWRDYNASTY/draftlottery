@@ -1412,7 +1412,6 @@ import {
   createClient
 } from "https://esm.sh/@supabase/supabase-js@2";
 
-
 /* =========================================================
    COMMISSIONER PASSWORD
    ========================================================= */
@@ -1420,25 +1419,14 @@ import {
 const COMMISSIONER_PASSWORD =
   "Asher";
 
-
 /* =========================================================
    SUPABASE
    ========================================================= */
 
-const SUPABASE_URL =
-  "https://jheqfwykhvyngfqawknr.supabase.co";
-
-
-const SUPABASE_PUBLISHABLE_KEY =
-  "PASTE_YOUR_CURRENT_SUPABASE_PUBLISHABLE_KEY_HERE";
-
-
-const SUPABASE_TABLE_NAME =
-  "draft_configs";
-
-
-const SUPABASE_ORDERS_TABLE_NAME =
-  "draft_orders";
+const SUPABASE_URL ="https://jheqfwykhvyngfqawknr.supabase.co";
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+const SUPABASE_TABLE_NAME ="draft_configs";
+const SUPABASE_ORDERS_TABLE_NAME ="draft_orders";
 
 
 const supabase =
@@ -1446,7 +1434,6 @@ const supabase =
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
-
 
 /* =========================================================
    IMAGE FILES

@@ -3110,15 +3110,13 @@ function showSavedDraft(){
 
    IMPORTANT:
 
-   The draft order MUST already exist before the race starts.
+   If an official order already exists, use it.
 
-   The race NEVER creates a new random order.
+   If one does not exist, create it LOCALLY immediately,
+   lock it locally, and save it to Supabase in the
+   background.
 
-   This guarantees that a refresh cannot produce a
-   different draft.
-
-   The official order is created/saved during initialization
-   or by the commissioner LOCK ODDS button.
+   THE RACE NEVER WAITS FOR SUPABASE.
    ========================================================= */
 
 function start(){
@@ -3130,58 +3128,117 @@ function start(){
   }
 
 
-  /*
-     There must already be an official saved order.
-
-     NEVER generate a new random order here.
-  */
-
-  if(
-    !savedDraftOrder ||
-    savedDraftOrder.length !== teams.length
-  ){
-
-    showStatus(
-      "No official draft order is saved yet."
-    );
-
-
-    return false;
-
-  }
-
-
   resetVisuals();
-
 
   initializeDraftOrderDisplay();
 
 
   /*
-     Use ONLY the already-saved official order.
+     USE THE EXISTING OFFICIAL ORDER IF ONE EXISTS.
+  */
 
-     No randomization happens here.
+  let officialOrder =
+    savedDraftOrder &&
+    savedDraftOrder.length === teams.length
+
+      ? cloneDraftOrder(
+          savedDraftOrder
+        )
+
+      : [];
+
+
+  /*
+     IF THERE IS NO SAVED ORDER YET:
+
+     Create it immediately.
+
+     This is what prevents the countdown from getting
+     stuck after GO.
+  */
+
+  if(
+    officialOrder.length !==
+    teams.length
+  ){
+
+    officialOrder =
+      createDraftOrder();
+
+
+    if(
+      officialOrder.length !==
+      teams.length
+    ){
+
+      showStatus(
+        "Could not create a complete draft order."
+      );
+
+      return false;
+
+    }
+
+
+    /*
+       LOCK THE ORDER LOCALLY IMMEDIATELY.
+
+       From this point forward this race uses this exact
+       order.
+    */
+
+    savedDraftOrder =
+      cloneDraftOrder(
+        officialOrder
+      );
+
+
+    oddsLocked =
+      true;
+
+
+    /*
+       SAVE TO SUPABASE IN THE BACKGROUND.
+
+       DO NOT AWAIT THIS.
+
+       The race must start regardless of network speed.
+    */
+
+    saveDraftOrderToSupabase(
+      officialOrder
+    )
+      .then(saved => {
+
+        if(!saved){
+
+          console.warn(
+            "Draft order could not be saved to Supabase. The race is continuing with the locally locked order."
+          );
+
+        }
+
+      })
+      .catch(error => {
+
+        console.warn(
+          "Background draft save failed:",
+          error
+        );
+
+      });
+
+  }
+
+
+  /*
+     THIS IS NOW THE OFFICIAL ORDER FOR THE RACE.
   */
 
   const order =
     cloneDraftOrder(
-      savedDraftOrder
+      officialOrder
     );
-
-
-  if(
-    order.length !==
-    teams.length
-  ){
-
-    showStatus(
-      "The saved draft order is incomplete."
-    );
-
-
-    return false;
-
-  }
 
 
   raceRunning =
@@ -3192,6 +3249,10 @@ function start(){
     "The draft is locked in — the race is on!"
   );
 
+
+  /*
+     CREATE ALL EIGHT RUNNERS.
+  */
 
   runners =
     teams.map(
@@ -3216,6 +3277,374 @@ function start(){
       })
     );
 
+
+  /* =======================================================
+     45-SECOND RACE
+
+     Pick #1 = 31 seconds
+     Pick #2 = 33 seconds
+     Pick #3 = 35 seconds
+     Pick #4 = 37 seconds
+     Pick #5 = 39 seconds
+     Pick #6 = 41 seconds
+     Pick #7 = 43 seconds
+     Pick #8 = 45 seconds
+     ======================================================= */
+
+  const baseFinish =
+    31000;
+
+
+  const finishGap =
+    2000;
+
+
+  order.forEach(
+    (item,rank) => {
+
+      const runner =
+        runners.find(
+          r =>
+            String(r.team.id) ===
+            String(item.team.id)
+        );
+
+
+      if(!runner){
+
+        return;
+
+      }
+
+
+      runner.pick =
+        item.pick;
+
+
+      runner.rank =
+        rank;
+
+
+      runner.finish =
+        baseFinish +
+        rank *
+        finishGap;
+
+    }
+  );
+
+
+  const startTime =
+    performance.now();
+
+
+  /* =======================================================
+     REVEAL RUNNER
+     ======================================================= */
+
+  function revealRunner(runner){
+
+    if(runner.revealed){
+
+      return;
+
+    }
+
+
+    /*
+       Force the runner to the actual finish position
+       BEFORE revealing the pick.
+    */
+
+    runner.el.style.left =
+      `${getFinishPosition(runner.rank)}%`;
+
+
+    runner.el.dataset.position =
+      String(
+        getFinishPosition(runner.rank)
+      );
+
+
+    runner.revealed =
+      true;
+
+
+    runner.el.classList.add(
+      "finished"
+    );
+
+
+    const result =
+      order.find(
+        item =>
+          String(item.team.id) ===
+          String(runner.team.id)
+      );
+
+
+    if(result){
+
+      revealDraftResult(
+        result
+      );
+
+    }
+
+  }
+
+
+  /* =======================================================
+     ANIMATION
+     ======================================================= */
+
+  function frame(now){
+
+    const elapsed =
+      now -
+      startTime;
+
+
+    runners.forEach(runner => {
+
+      const finishTime =
+        runner.finish;
+
+
+      if(
+        !finishTime ||
+        finishTime <= 0
+      ){
+
+        return;
+
+      }
+
+
+      /*
+         Each runner progresses according to its own
+         predetermined finish time.
+      */
+
+      const individualProgress =
+        Math.min(
+          1,
+          elapsed /
+          finishTime
+        );
+
+
+      /*
+         Smooth race movement.
+      */
+
+      const progress =
+        1 -
+        Math.pow(
+          1 -
+          individualProgress,
+          1.18
+        );
+
+
+      const startPosition =
+        8;
+
+
+      const finishPosition =
+        getFinishPosition(
+          runner.rank
+        );
+
+
+      const phase =
+        runner.rank *
+        .72;
+
+
+      /*
+         Small movement variation.
+
+         The variation disappears as the runner approaches
+         the finish line.
+      */
+
+      const surge =
+        Math.sin(
+          progress *
+          Math.PI *
+          5 +
+          phase
+        ) *
+        .010 *
+        (
+          1 -
+          individualProgress
+        );
+
+
+      const fade =
+        Math.sin(
+          progress *
+          Math.PI *
+          2.2 +
+          phase *
+          1.7
+        ) *
+        .006 *
+        (
+          1 -
+          individualProgress
+        );
+
+
+      const basePosition =
+        startPosition +
+        progress *
+        (
+          finishPosition -
+          startPosition
+        );
+
+
+      const movementEffect =
+        (
+          surge +
+          fade
+        ) *
+        100;
+
+
+      let currentPosition =
+        basePosition +
+        movementEffect;
+
+
+      /*
+         Do NOT let the runner reach the finish line
+         before its scheduled finish time.
+      */
+
+      if(
+        individualProgress < 1
+      ){
+
+        currentPosition =
+          Math.min(
+            finishPosition - 0.15,
+            Math.max(
+              startPosition,
+              currentPosition
+            )
+          );
+
+      }
+      else{
+
+        currentPosition =
+          finishPosition;
+
+      }
+
+
+      /*
+         Never move backward.
+      */
+
+      const previousPosition =
+        Number(
+          runner.el.dataset.position ||
+          startPosition
+        );
+
+
+      const safePosition =
+        Math.max(
+          previousPosition,
+          currentPosition
+        );
+
+
+      runner.el.dataset.position =
+        String(
+          safePosition
+        );
+
+
+      runner.el.style.left =
+        `${safePosition}%`;
+
+
+      /*
+         ONLY reveal once the runner has actually reached
+         its finish position.
+      */
+
+      if(
+        individualProgress >= 1 &&
+        safePosition >=
+          finishPosition - 0.01
+      ){
+
+        revealRunner(
+          runner
+        );
+
+      }
+
+    });
+
+
+    /*
+       Race ends only when all runners have actually
+       reached the finish.
+    */
+
+    if(
+      runners.every(
+        runner =>
+          runner.revealed
+      )
+    ){
+
+      raceRunning =
+        false;
+
+
+      renderResults(
+        cloneDraftOrder(
+          savedDraftOrder
+        )
+      );
+
+
+      showStatus(
+        "DRAFT ORDER COMPLETE — Pick #1 is the winner."
+      );
+
+
+      return;
+
+    }
+
+
+    raf =
+      requestAnimationFrame(
+        frame
+      );
+
+  }
+
+
+  raf =
+    requestAnimationFrame(
+      frame
+    );
+
+
+  return true;
+
+}
 
   /* =======================================================
      45-SECOND RACE

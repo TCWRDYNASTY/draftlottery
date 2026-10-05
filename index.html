@@ -1575,53 +1575,70 @@ let raf =
 const field =
   document.getElementById("field");
 
+
 const draftOrderList =
   document.getElementById("draftOrder");
+
 
 const permanentLabels =
   document.getElementById("permanentLabels");
 
+
 const teamSettingsPanel =
   document.getElementById("teamSettingsPanel");
+
 
 const teamInputs =
   document.getElementById("teamInputs");
 
+
 const statusElement =
   document.getElementById("status");
+
 
 const commissionerBottomButton =
   document.getElementById("commissionerBottomButton");
 
+
 const commissionerLoginBox =
   document.getElementById("commissionerLoginBox");
+
 
 const commissionerPanel =
   document.getElementById("commissionerPanel");
 
+
 const commissionerPassword =
   document.getElementById("commissionerPassword");
+
 
 const unlockCommissionerBtn =
   document.getElementById("unlockCommissionerBtn");
 
+
 const cancelCommissionerBtn =
   document.getElementById("cancelCommissionerBtn");
+
 
 const lockCommissionerBtn =
   document.getElementById("lockCommissionerBtn");
 
+
 const saveConfigBtn =
   document.getElementById("saveConfigBtn");
+
 
 const resetDraftBtn =
   document.getElementById("resetDraftBtn");
 
+
 const raceCurtain =
   document.getElementById("raceCurtain");
 
+
 const startDashBtn =
   document.getElementById("startDashBtn");
+
 
 const countdownNumber =
   document.getElementById("countdownNumber");
@@ -1677,6 +1694,7 @@ function normalizeImage(value,id){
   const supplied =
     String(value || "").trim();
 
+
   if(
     IMAGE_FILES.includes(supplied)
   ){
@@ -1685,6 +1703,7 @@ function normalizeImage(value,id){
 
   }
 
+
   if(
     /^https?:\/\//i.test(supplied)
   ){
@@ -1692,6 +1711,7 @@ function normalizeImage(value,id){
     return supplied;
 
   }
+
 
   return imageForTeamId(id);
 
@@ -1706,16 +1726,20 @@ function renderInputs(){
 
   teamInputs.innerHTML = "";
 
+
   const disabled =
     oddsLocked
       ? "disabled"
       : "";
 
+
   const header =
     document.createElement("div");
 
+
   header.className =
     "team-editor-header";
+
 
   header.innerHTML = `
 
@@ -1727,6 +1751,7 @@ function renderInputs(){
 
   `;
 
+
   teamInputs.appendChild(header);
 
 
@@ -1734,6 +1759,7 @@ function renderInputs(){
 
     const row =
       document.createElement("div");
+
 
     row.className =
       "team-edit";
@@ -1748,13 +1774,16 @@ function renderInputs(){
               ? "selected"
               : "";
 
+
           return `
 
             <option
               value="${escapeHTML(file)}"
               ${selected}
             >
+
               Image ${index + 1} — ${escapeHTML(file)}
+
             </option>
 
           `;
@@ -1857,6 +1886,7 @@ function attachEditorListeners(){
       updateTeamFromEditor
     );
 
+
     element.addEventListener(
       "change",
       updateTeamFromEditor
@@ -1883,11 +1913,14 @@ function updateTeamFromEditor(event){
   const element =
     event.target;
 
+
   const id =
     String(element.dataset.id);
 
+
   const type =
     element.dataset.type;
+
 
   const team =
     teams.find(
@@ -1939,8 +1972,10 @@ function updateTeamFromEditor(event){
         "Each image can only be assigned to one team."
       );
 
+
       element.value =
         team.image;
+
 
       return;
 
@@ -1965,8 +2000,10 @@ function updateTeamFromEditor(event){
       preview.src =
         team.image;
 
+
       preview.style.display =
         "block";
+
 
       if(preview.nextElementSibling){
 
@@ -2008,6 +2045,7 @@ function renderPermanentLabels(){
     const box =
       document.createElement("div");
 
+
     box.className =
       "permanent-team";
 
@@ -2044,6 +2082,7 @@ function renderPermanentLabels(){
         >
           ${escapeHTML(team.name)}
         </div>
+
 
         <div
           class="permanent-team-odds"
@@ -2106,7 +2145,8 @@ function weightedPick(pool){
 
 
   let random =
-    Math.random() * total;
+    Math.random() *
+    total;
 
 
   for(const team of pool){
@@ -2210,6 +2250,28 @@ function createDraftOrder(){
 
 
 /* =========================================================
+   CLONE DRAFT ORDER
+   ========================================================= */
+
+function cloneDraftOrder(order){
+
+  return (order || []).map(
+    item => ({
+
+      pick:
+        Number(item.pick),
+
+      team:{
+        ...item.team
+      }
+
+    })
+  );
+
+}
+
+
+/* =========================================================
    SAVE TEAMS
    ========================================================= */
 
@@ -2268,6 +2330,7 @@ async function saveTeamsToSupabase(){
       error
     );
 
+
     return false;
 
   }
@@ -2315,6 +2378,7 @@ async function loadTeamsFromSupabase(){
         error
       );
 
+
       return defaultTeams.map(
         team => ({
           ...team
@@ -2345,6 +2409,7 @@ async function loadTeamsFromSupabase(){
           const d =
             row.members_data ||
             {};
+
 
           const id =
             Number(row.id);
@@ -2393,6 +2458,7 @@ async function loadTeamsFromSupabase(){
       error
     );
 
+
     return defaultTeams.map(
       team => ({
         ...team
@@ -2406,6 +2472,17 @@ async function loadTeamsFromSupabase(){
 
 /* =========================================================
    SAVE DRAFT ORDER
+
+   IMPORTANT:
+
+   The official draft order is immutable.
+
+   INSERT is intentionally used instead of UPSERT.
+
+   If two browsers happen to initialize at the same time,
+   the first successful insert becomes the official order.
+   A second browser cannot overwrite it with a new random
+   order.
    ========================================================= */
 
 async function saveDraftOrderToSupabase(order){
@@ -2450,11 +2527,8 @@ async function saveDraftOrderToSupabase(order){
     const {error} =
       await supabase
         .from(SUPABASE_ORDERS_TABLE_NAME)
-        .upsert(
-          rows,
-          {
-            onConflict:"id"
-          }
+        .insert(
+          rows
         );
 
 
@@ -2464,6 +2538,7 @@ async function saveDraftOrderToSupabase(order){
         "Supabase draft save error:",
         error
       );
+
 
       return false;
 
@@ -2480,6 +2555,7 @@ async function saveDraftOrderToSupabase(order){
       error
     );
 
+
     return false;
 
   }
@@ -2490,12 +2566,11 @@ async function saveDraftOrderToSupabase(order){
 /* =========================================================
    LOAD DRAFT ORDER
 
-   This is only used during initialization.
+   This is only used during initialization/reset.
 
-   It is NEVER called during the actual race start.
+   It is NEVER called during the actual race.
 
-   This is important because a network request should
-   never be allowed to stop the animation from starting.
+   The race always uses the already-saved order.
    ========================================================= */
 
 async function loadDraftOrderFromSupabase(){
@@ -2526,6 +2601,7 @@ async function loadDraftOrderFromSupabase(){
         "Supabase order load error:",
         error
       );
+
 
       return [];
 
@@ -2606,6 +2682,7 @@ async function loadDraftOrderFromSupabase(){
       error
     );
 
+
     return [];
 
   }
@@ -2627,6 +2704,7 @@ async function clearDraftOrderFromSupabase(){
     showStatus(
       "Supabase publishable key is missing."
     );
+
 
     return false;
 
@@ -2653,9 +2731,11 @@ async function clearDraftOrderFromSupabase(){
         error
       );
 
+
       showStatus(
         "Supabase could not clear the saved draft."
       );
+
 
       return false;
 
@@ -2663,6 +2743,7 @@ async function clearDraftOrderFromSupabase(){
 
 
     savedDraftOrder = [];
+
 
     return true;
 
@@ -2673,6 +2754,7 @@ async function clearDraftOrderFromSupabase(){
       "Supabase draft clear exception:",
       error
     );
+
 
     return false;
 
@@ -2692,6 +2774,7 @@ function resetVisuals(){
 
   field.innerHTML =
     "";
+
 
   draftOrderList.innerHTML =
     "";
@@ -2981,6 +3064,12 @@ function showSavedDraft(){
           `${getFinishPosition(rank)}%`;
 
 
+        el.dataset.position =
+          String(
+            getFinishPosition(rank)
+          );
+
+
         el.classList.add(
           "finished"
         );
@@ -3019,24 +3108,43 @@ function showSavedDraft(){
 /* =========================================================
    START RACE
 
-   CRITICAL FIX:
+   IMPORTANT:
 
-   There is NO Supabase request here.
+   The draft order MUST already exist before the race starts.
 
-   The race must start immediately after GO.
+   The race NEVER creates a new random order.
 
-   If a saved order exists, use it.
+   This guarantees that a refresh cannot produce a
+   different draft.
 
-   If there is no saved order, create one immediately
-   using the weighted odds and then save it in the
-   background.
-
-   This prevents the countdown/curtain from failing.
+   The official order is created/saved during initialization
+   or by the commissioner LOCK ODDS button.
    ========================================================= */
 
 function start(){
 
   if(raceRunning){
+
+    return false;
+
+  }
+
+
+  /*
+     There must already be an official saved order.
+
+     NEVER generate a new random order here.
+  */
+
+  if(
+    !savedDraftOrder ||
+    savedDraftOrder.length !== teams.length
+  ){
+
+    showStatus(
+      "No official draft order is saved yet."
+    );
+
 
     return false;
 
@@ -3049,132 +3157,31 @@ function start(){
   initializeDraftOrderDisplay();
 
 
-  let officialOrder =
-    savedDraftOrder &&
-    savedDraftOrder.length ===
-    teams.length
-
-      ? savedDraftOrder.map(
-          item => ({
-
-            pick:
-              item.pick,
-
-            team:{
-              ...item.team
-            }
-
-          })
-        )
-
-      : [];
-
-
   /*
-     If there isn't already an official order,
-     CREATE IT NOW.
+     Use ONLY the already-saved official order.
 
-     This happens locally and instantly.
-  */
-
-  if(
-    officialOrder.length !==
-    teams.length
-  ){
-
-    officialOrder =
-      createDraftOrder();
-
-
-    if(
-      officialOrder.length !==
-      teams.length
-    ){
-
-      showStatus(
-        "Could not create a complete draft order."
-      );
-
-      return false;
-
-    }
-
-
-    /*
-       Lock the order locally immediately.
-    */
-
-    savedDraftOrder =
-      officialOrder.map(
-        item => ({
-
-          pick:
-            item.pick,
-
-          team:{
-            ...item.team
-          }
-
-        })
-      );
-
-
-    /*
-       Save in the background.
-
-       DO NOT await this.
-
-       The animation is completely independent
-       of Supabase.
-    */
-
-    saveDraftOrderToSupabase(
-      officialOrder
-    )
-      .then(saved => {
-
-        if(!saved){
-
-          console.warn(
-            "Draft order could not be saved to Supabase. Race continues using the locally locked order."
-          );
-
-        }
-
-      })
-      .catch(error => {
-
-        console.warn(
-          "Background draft save failed:",
-          error
-        );
-
-      });
-
-
-    oddsLocked =
-      true;
-
-  }
-
-
-  /*
-     The order is now locked locally.
+     No randomization happens here.
   */
 
   const order =
-    officialOrder.map(
-      item => ({
-
-        pick:
-          item.pick,
-
-        team:{
-          ...item.team
-        }
-
-      })
+    cloneDraftOrder(
+      savedDraftOrder
     );
+
+
+  if(
+    order.length !==
+    teams.length
+  ){
+
+    showStatus(
+      "The saved draft order is incomplete."
+    );
+
+
+    return false;
+
+  }
 
 
   raceRunning =
@@ -3185,10 +3192,6 @@ function start(){
     "The draft is locked in — the race is on!"
   );
 
-
-  /*
-     Create all eight runners.
-  */
 
   runners =
     teams.map(
@@ -3274,19 +3277,18 @@ function start(){
     performance.now();
 
 
-  const raceDuration =
-    45000;
-
-
   /* =======================================================
      REVEAL RUNNER
+
+     A runner is NOT revealed simply because its timer has
+     elapsed.
+
+     The runner must actually reach the finish position.
      ======================================================= */
 
   function revealRunner(runner){
 
-    if(
-      runner.revealed
-    ){
+    if(runner.revealed){
 
       return;
 
@@ -3297,13 +3299,24 @@ function start(){
       true;
 
 
-    runner.el.classList.add(
-      "finished"
-    );
-
+    /*
+       Put the runner exactly at the finish position only
+       after the animation has reached it.
+    */
 
     runner.el.style.left =
       `${getFinishPosition(runner.rank)}%`;
+
+
+    runner.el.dataset.position =
+      String(
+        getFinishPosition(runner.rank)
+      );
+
+
+    runner.el.classList.add(
+      "finished"
+    );
 
 
     const result =
@@ -3336,14 +3349,6 @@ function start(){
       startTime;
 
 
-    const overallProgress =
-      Math.min(
-        1,
-        elapsed /
-        raceDuration
-      );
-
-
     runners.forEach(runner => {
 
       const finishTime =
@@ -3360,6 +3365,26 @@ function start(){
       }
 
 
+      /*
+         CRITICAL FIX:
+
+         Each runner's movement is based on THEIR OWN
+         finish time.
+
+         The old code used:
+
+             overallProgress * .88
+             +
+             individualProgress * .12
+
+         That meant Pick #1's 31-second reveal timer
+         expired while the runner was still around the
+         10-yard line.
+
+         Now the runner reaches the actual finish position
+         exactly when its finish time arrives.
+      */
+
       const individualProgress =
         Math.min(
           1,
@@ -3369,29 +3394,36 @@ function start(){
 
 
       /*
-         Shared movement keeps the field competitive.
+         Smooth acceleration.
 
-         The individual progress adds slight differences
-         so the runners don't look like one solid block.
+         This changes the shape of the run, but not the
+         finish time.
       */
 
       const progress =
-        Math.min(
-
-          1,
-
-          (
-            overallProgress *
-            .88
-          ) +
-
-          (
-            individualProgress *
-            .12
-          )
-
+        1 -
+        Math.pow(
+          1 - individualProgress,
+          1.18
         );
 
+
+      const startPosition =
+        8;
+
+
+      const finishPosition =
+        getFinishPosition(
+          runner.rank
+        );
+
+
+      /*
+         Small lane-specific movement.
+
+         The effect fades completely as the runner reaches
+         the finish line.
+      */
 
       const phase =
         runner.rank *
@@ -3405,7 +3437,11 @@ function start(){
           5 +
           phase
         ) *
-        .010;
+        .010 *
+        (
+          1 -
+          individualProgress
+        );
 
 
       const fade =
@@ -3416,22 +3452,15 @@ function start(){
           phase *
           1.7
         ) *
-        .006;
-
-
-      const startPosition =
-        8;
-
-
-      const finishPosition =
-        getFinishPosition(
-          runner.rank
+        .006 *
+        (
+          1 -
+          individualProgress
         );
 
 
       const basePosition =
         startPosition +
-
         progress *
         (
           finishPosition -
@@ -3447,21 +3476,42 @@ function start(){
         100;
 
 
-      const currentPosition =
-        Math.min(
+      let currentPosition =
+        basePosition +
+        movementEffect;
 
-          finishPosition,
 
-          Math.max(
+      /*
+         BEFORE the finish time:
 
-            startPosition,
+         Never allow the runner to visually reach the
+         finish position.
 
-            basePosition +
-            movementEffect
+         AT the finish time:
 
-          )
+         Force the runner to the finish position.
+      */
 
-        );
+      if(
+        individualProgress < 1
+      ){
+
+        currentPosition =
+          Math.min(
+            finishPosition - 0.15,
+            Math.max(
+              startPosition,
+              currentPosition
+            )
+          );
+
+      }
+      else{
+
+        currentPosition =
+          finishPosition;
+
+      }
 
 
       /*
@@ -3493,12 +3543,22 @@ function start(){
 
 
       /*
-         Finish at the predetermined time.
+         CRITICAL REVEAL FIX:
+
+         The pick is revealed ONLY when:
+
+         1. The runner's individual finish time has arrived
+         AND
+         2. The runner is actually at the finish position.
+
+         Therefore the pick cannot appear at the 10-yard
+         line anymore.
       */
 
       if(
-        elapsed >=
-        finishTime
+        individualProgress >= 1 &&
+        safePosition >=
+          finishPosition - 0.01
       ){
 
         revealRunner(
@@ -3511,41 +3571,29 @@ function start(){
 
 
     /*
-       The race is complete when all runners
-       have crossed the finish line.
+       The race is complete only when ALL runners have
+       physically reached the finish position and have been
+       revealed.
+
+       We do NOT simply end the race because the clock
+       reaches 45 seconds.
     */
 
     if(
-      elapsed >= raceDuration ||
       runners.every(
         runner =>
           runner.revealed
       )
     ){
 
-      runners.forEach(
-        runner => {
-
-          if(
-            !runner.revealed
-          ){
-
-            revealRunner(
-              runner
-            );
-
-          }
-
-        }
-      );
-
-
       raceRunning =
         false;
 
 
       renderResults(
-        [...savedDraftOrder]
+        cloneDraftOrder(
+          savedDraftOrder
+        )
       );
 
 
@@ -3566,10 +3614,6 @@ function start(){
 
   }
 
-
-  /*
-     ACTUALLY START THE ANIMATION.
-  */
 
   raf =
     requestAnimationFrame(
@@ -3592,12 +3636,15 @@ function openCommissioner(){
     "hidden"
   );
 
+
   commissionerLoginBox.classList.remove(
     "hidden"
   );
 
+
   commissionerPassword.value =
     "";
+
 
   commissionerPassword.focus();
 
@@ -3614,17 +3661,21 @@ function closeCommissioner(){
     "hidden"
   );
 
+
   commissionerLoginBox.classList.add(
     "hidden"
   );
+
 
   commissionerPanel.classList.add(
     "hidden"
   );
 
+
   teamSettingsPanel.classList.add(
     "hidden"
   );
+
 
   commissionerUnlocked =
     false;
@@ -3647,7 +3698,9 @@ function unlockCommissioner(){
       "Incorrect commissioner password."
     );
 
+
     commissionerPassword.select();
+
 
     return;
 
@@ -3662,9 +3715,11 @@ function unlockCommissioner(){
     "hidden"
   );
 
+
   commissionerPanel.classList.remove(
     "hidden"
   );
+
 
   teamSettingsPanel.classList.remove(
     "hidden"
@@ -3689,8 +3744,8 @@ function unlockCommissioner(){
    This can be used by the commissioner to explicitly
    generate and save the official order before the race.
 
-   However, the race can also safely create the order
-   itself if one hasn't already been created.
+   Once saved, the order is immutable until RESET DRAFT
+   is used.
    ========================================================= */
 
 async function lockOdds(){
@@ -3724,6 +3779,7 @@ async function lockOdds(){
     alert(
       "All weights must be zero or greater."
     );
+
 
     return;
 
@@ -3766,9 +3822,11 @@ async function lockOdds(){
     lockCommissionerBtn.disabled =
       false;
 
+
     showStatus(
       "Could not create a complete draft order."
     );
+
 
     return;
 
@@ -3783,12 +3841,62 @@ async function lockOdds(){
 
   if(!savedOrder){
 
+    /*
+       If another browser created the order first,
+       load that official order instead of replacing it.
+    */
+
+    const existingOrder =
+      await loadDraftOrderFromSupabase();
+
+
+    if(
+      existingOrder.length ===
+      teams.length
+    ){
+
+      savedDraftOrder =
+        cloneDraftOrder(
+          existingOrder
+        );
+
+
+      oddsLocked =
+        true;
+
+
+      renderInputs();
+
+
+      lockCommissionerBtn.textContent =
+        "ODDS LOCKED";
+
+
+      lockCommissionerBtn.disabled =
+        true;
+
+
+      showSavedDraft();
+
+
+      showStatus(
+        "Official draft order already existed and was loaded."
+      );
+
+
+      return;
+
+    }
+
+
     lockCommissionerBtn.disabled =
       false;
+
 
     showStatus(
       "Could not save the official draft order. Odds were not locked."
     );
+
 
     return;
 
@@ -3796,17 +3904,8 @@ async function lockOdds(){
 
 
   savedDraftOrder =
-    order.map(
-      item => ({
-
-        pick:
-          item.pick,
-
-        team:{
-          ...item.team
-        }
-
-      })
+    cloneDraftOrder(
+      order
     );
 
 
@@ -3823,6 +3922,9 @@ async function lockOdds(){
 
   lockCommissionerBtn.disabled =
     true;
+
+
+  showSavedDraft();
 
 
   showStatus(
@@ -3874,6 +3976,7 @@ async function saveConfiguration(){
       "Each image must be assigned to only one team."
     );
 
+
     return false;
 
   }
@@ -3896,6 +3999,7 @@ async function saveConfiguration(){
     alert(
       "All weights must be zero or greater."
     );
+
 
     return false;
 
@@ -3924,6 +4028,7 @@ async function saveConfiguration(){
     showStatus(
       "Team configuration could not be saved."
     );
+
 
     return false;
 
@@ -4032,12 +4137,9 @@ async function runCountdown(){
 /* =========================================================
    START FROM OVERLAY
 
-   IMPORTANT FIX:
+   The race starts using the already-saved official order.
 
-   The race starts locally and synchronously after
-   the curtain begins opening.
-
-   There is NO Supabase await here.
+   There is NO Supabase request here.
    ========================================================= */
 
 async function startDashFromOverlay(){
@@ -4063,7 +4165,7 @@ async function startDashFromOverlay(){
   /*
      GO.
 
-     Open curtain.
+     Open the curtain.
   */
 
   raceCurtain.classList.add(
@@ -4079,7 +4181,7 @@ async function startDashFromOverlay(){
   /*
      Start the actual race immediately.
 
-     No network request.
+     start() does NOT create a new order.
   */
 
   const success =
@@ -4139,6 +4241,10 @@ async function startDashFromOverlay(){
 
 /* =========================================================
    RESET SAVED DRAFT
+
+   RESET creates a genuinely new official draft order.
+
+   That new order is saved BEFORE another race can start.
    ========================================================= */
 
 async function resetSavedDraft(){
@@ -4178,40 +4284,175 @@ async function resetSavedDraft(){
     await clearDraftOrderFromSupabase();
 
 
-  resetDraftBtn.disabled =
-    false;
-
-
   if(!success){
+
+    resetDraftBtn.disabled =
+      false;
 
     return;
 
   }
 
 
+  /*
+     RESET means a genuinely new draft.
+
+     Create the new random order now and save it before
+     allowing another race to start.
+
+     This guarantees that every league member who refreshes
+     sees this same new order.
+  */
+
+  showStatus(
+    "Creating the new official draft order..."
+  );
+
+
+  const newOrder =
+    createDraftOrder();
+
+
+  if(
+    newOrder.length !==
+    teams.length
+  ){
+
+    resetDraftBtn.disabled =
+      false;
+
+
+    showStatus(
+      "Could not create a complete new draft order."
+    );
+
+
+    return;
+
+  }
+
+
+  const saved =
+    await saveDraftOrderToSupabase(
+      newOrder
+    );
+
+
+  if(!saved){
+
+    /*
+       Another browser could theoretically have created a
+       new order at the same moment.
+
+       Load the official order again before reporting failure.
+    */
+
+    const existingOrder =
+      await loadDraftOrderFromSupabase();
+
+
+    if(
+      existingOrder.length ===
+      teams.length
+    ){
+
+      savedDraftOrder =
+        cloneDraftOrder(
+          existingOrder
+        );
+
+
+      oddsLocked =
+        true;
+
+
+      lockCommissionerBtn.textContent =
+        "ODDS LOCKED";
+
+
+      lockCommissionerBtn.disabled =
+        true;
+
+
+      resetVisuals();
+
+
+      showSavedDraft();
+
+
+      resetDraftBtn.disabled =
+        false;
+
+
+      showStatus(
+        "New official draft order saved. Ready at the starting line."
+      );
+
+
+      return;
+
+    }
+
+
+    savedDraftOrder = [];
+
+
+    oddsLocked =
+      false;
+
+
+    lockCommissionerBtn.textContent =
+      "LOCK ODDS";
+
+
+    lockCommissionerBtn.disabled =
+      false;
+
+
+    resetDraftBtn.disabled =
+      false;
+
+
+    showStatus(
+      "The draft was reset, but the new official order could not be saved. Check the Supabase publishable key/permissions."
+    );
+
+
+    return;
+
+  }
+
+
+  savedDraftOrder =
+    cloneDraftOrder(
+      newOrder
+    );
+
+
   oddsLocked =
-    false;
+    true;
 
 
   lockCommissionerBtn.textContent =
-    "LOCK ODDS";
+    "ODDS LOCKED";
 
 
   lockCommissionerBtn.disabled =
-    false;
+    true;
 
 
   resetVisuals();
 
 
-  initializeDraftOrderDisplay();
+  showSavedDraft();
 
 
-  renderInputs();
+  resetDraftBtn.disabled =
+    false;
 
 
   showStatus(
-    "Saved draft cleared. The next race will create a new weighted draft."
+    "New official draft order saved. Ready at the starting line."
   );
 
 }
@@ -4281,6 +4522,16 @@ commissionerPassword.addEventListener(
 
 /* =========================================================
    INITIALIZE
+
+   IMPORTANT:
+
+   If an official draft already exists, load it.
+
+   If one does NOT exist, create it ONCE and save it BEFORE
+   the race can start.
+
+   Therefore the race never needs to generate a random order
+   and refreshes cannot change the result.
    ========================================================= */
 
 async function initialize(){
@@ -4294,7 +4545,7 @@ async function initialize(){
 
 
   /*
-     Load teams first.
+     Load the team configuration first.
   */
 
   teams =
@@ -4305,10 +4556,12 @@ async function initialize(){
 
 
   /*
-     Load saved order once during initialization.
+     Load the ONE official draft order.
 
-     This can take time without affecting the
-     race button later.
+     If it already exists, use it.
+
+     If it does not exist, create it ONCE here and save it
+     BEFORE the race can start.
   */
 
   savedDraftOrder =
@@ -4334,8 +4587,31 @@ async function initialize(){
 
     showSavedDraft();
 
+
+    return;
+
   }
-  else{
+
+
+  /*
+     No saved draft exists yet.
+
+     Create the official order once.
+  */
+
+  showStatus(
+    "Creating the official draft order..."
+  );
+
+
+  const newOrder =
+    createDraftOrder();
+
+
+  if(
+    newOrder.length !==
+    teams.length
+  ){
 
     oddsLocked =
       false;
@@ -4349,14 +4625,129 @@ async function initialize(){
       false;
 
 
-    initializeDraftOrderDisplay();
+    showStatus(
+      "Could not create a complete draft order."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+     The order MUST be successfully saved before the race
+     is allowed to begin.
+
+     This makes Supabase the single source of truth for
+     every league member.
+  */
+
+  const saved =
+    await saveDraftOrderToSupabase(
+      newOrder
+    );
+
+
+  if(!saved){
+
+    /*
+       Another league member may have created the official
+       order at the same time.
+
+       Check Supabase one more time before treating the save
+       as a real failure.
+    */
+
+    const existingOrder =
+      await loadDraftOrderFromSupabase();
+
+
+    if(
+      existingOrder.length ===
+      teams.length
+    ){
+
+      savedDraftOrder =
+        cloneDraftOrder(
+          existingOrder
+        );
+
+
+      oddsLocked =
+        true;
+
+
+      lockCommissionerBtn.textContent =
+        "ODDS LOCKED";
+
+
+      lockCommissionerBtn.disabled =
+        true;
+
+
+      showSavedDraft();
+
+
+      showStatus(
+        "Official draft order loaded. Ready at the starting line."
+      );
+
+
+      return;
+
+    }
+
+
+    savedDraftOrder = [];
+
+
+    oddsLocked =
+      false;
+
+
+    lockCommissionerBtn.textContent =
+      "LOCK ODDS";
+
+
+    lockCommissionerBtn.disabled =
+      false;
 
 
     showStatus(
-      "Ready at the starting line."
+      "Could not save the official draft order. Check the Supabase publishable key/permissions."
     );
 
+
+    return;
+
   }
+
+
+  savedDraftOrder =
+    cloneDraftOrder(
+      newOrder
+    );
+
+
+  oddsLocked =
+    true;
+
+
+  lockCommissionerBtn.textContent =
+    "ODDS LOCKED";
+
+
+  lockCommissionerBtn.disabled =
+    true;
+
+
+  showSavedDraft();
+
+
+  showStatus(
+    "Official draft order saved. Ready at the starting line."
+  );
 
 }
 

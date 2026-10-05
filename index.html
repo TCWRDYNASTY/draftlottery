@@ -2475,14 +2475,10 @@ async function loadTeamsFromSupabase(){
 
    IMPORTANT:
 
-   The official draft order is immutable.
+   INSERT is used instead of UPSERT so an existing official
+   draft cannot be silently overwritten.
 
-   INSERT is intentionally used instead of UPSERT.
-
-   If two browsers happen to initialize at the same time,
-   the first successful insert becomes the official order.
-   A second browser cannot overwrite it with a new random
-   order.
+   The saved order is the source of truth for the race.
    ========================================================= */
 
 async function saveDraftOrderToSupabase(order){
@@ -2569,8 +2565,6 @@ async function saveDraftOrderToSupabase(order){
    This is only used during initialization/reset.
 
    It is NEVER called during the actual race.
-
-   The race always uses the already-saved order.
    ========================================================= */
 
 async function loadDraftOrderFromSupabase(){
@@ -3112,11 +3106,15 @@ function showSavedDraft(){
 
    If an official order already exists, use it.
 
-   If one does not exist, create it LOCALLY immediately,
-   lock it locally, and save it to Supabase in the
-   background.
+   If one does not exist, create it immediately and save
+   it in the background.
 
-   THE RACE NEVER WAITS FOR SUPABASE.
+   The race itself NEVER waits for Supabase.
+
+   The entire race is 45 seconds.
+
+   Picks are revealed when runners physically reach the
+   finish line.
    ========================================================= */
 
 function start(){
@@ -3130,11 +3128,12 @@ function start(){
 
   resetVisuals();
 
+
   initializeDraftOrderDisplay();
 
 
   /*
-     USE THE EXISTING OFFICIAL ORDER IF ONE EXISTS.
+     Use the existing official order if one exists.
   */
 
   let officialOrder =
@@ -3149,12 +3148,9 @@ function start(){
 
 
   /*
-     IF THERE IS NO SAVED ORDER YET:
+     If no order exists yet, create it immediately.
 
-     Create it immediately.
-
-     This is what prevents the countdown from getting
-     stuck after GO.
+     This prevents the countdown from getting stuck after GO.
   */
 
   if(
@@ -3175,16 +3171,14 @@ function start(){
         "Could not create a complete draft order."
       );
 
+
       return false;
 
     }
 
 
     /*
-       LOCK THE ORDER LOCALLY IMMEDIATELY.
-
-       From this point forward this race uses this exact
-       order.
+       Lock the order locally immediately.
     */
 
     savedDraftOrder =
@@ -3198,11 +3192,9 @@ function start(){
 
 
     /*
-       SAVE TO SUPABASE IN THE BACKGROUND.
+       Save in the background.
 
-       DO NOT AWAIT THIS.
-
-       The race must start regardless of network speed.
+       DO NOT await this.
     */
 
     saveDraftOrderToSupabase(
@@ -3232,7 +3224,7 @@ function start(){
 
 
   /*
-     THIS IS NOW THE OFFICIAL ORDER FOR THE RACE.
+     This is now the official order for this race.
   */
 
   const order =
@@ -3251,7 +3243,7 @@ function start(){
 
 
   /*
-     CREATE ALL EIGHT RUNNERS.
+     Create all eight runners.
   */
 
   runners =
@@ -3281,22 +3273,41 @@ function start(){
   /* =======================================================
      45-SECOND RACE
 
-     Pick #1 = 31 seconds
-     Pick #2 = 33 seconds
-     Pick #3 = 35 seconds
-     Pick #4 = 37 seconds
-     Pick #5 = 39 seconds
-     Pick #6 = 41 seconds
-     Pick #7 = 43 seconds
-     Pick #8 = 45 seconds
+     The ENTIRE race lasts 45 seconds.
+
+     The final runner reaches the finish line at exactly
+     45 seconds.
+
+     Earlier runners cross progressively before that.
+
+     These are movement/finish times — NOT reveal timers.
+
+     Pick #1 = 35.00 seconds
+     Pick #2 = 36.43 seconds
+     Pick #3 = 37.86 seconds
+     Pick #4 = 39.29 seconds
+     Pick #5 = 40.71 seconds
+     Pick #6 = 42.14 seconds
+     Pick #7 = 43.57 seconds
+     Pick #8 = 45.00 seconds
      ======================================================= */
 
-  const baseFinish =
-    31000;
+  const raceDuration =
+    45000;
+
+
+  const firstFinish =
+    35000;
+
+
+  const finishWindow =
+    raceDuration -
+    firstFinish;
 
 
   const finishGap =
-    2000;
+    finishWindow /
+    (teams.length - 1);
 
 
   order.forEach(
@@ -3325,8 +3336,15 @@ function start(){
         rank;
 
 
+      /*
+         This determines when the runner reaches the
+         physical goal line.
+
+         It is NOT an independent reveal timer.
+      */
+
       runner.finish =
-        baseFinish +
+        firstFinish +
         rank *
         finishGap;
 
@@ -3340,6 +3358,9 @@ function start(){
 
   /* =======================================================
      REVEAL RUNNER
+
+     A runner is revealed ONLY after its visual position
+     has reached the actual finish position.
      ======================================================= */
 
   function revealRunner(runner){
@@ -3352,8 +3373,9 @@ function start(){
 
 
     /*
-       Force the runner to the actual finish position
-       BEFORE revealing the pick.
+       The runner has physically reached the goal line.
+
+       Keep it at the exact finish position.
     */
 
     runner.el.style.left =
@@ -3422,8 +3444,8 @@ function start(){
 
 
       /*
-         Each runner progresses according to its own
-         predetermined finish time.
+         Individual progress is based on how far this
+         particular runner should have traveled by now.
       */
 
       const individualProgress =
@@ -3435,7 +3457,10 @@ function start(){
 
 
       /*
-         Smooth race movement.
+         Smooth acceleration.
+
+         This changes the appearance of the run without
+         changing the runner's scheduled crossing time.
       */
 
       const progress =
@@ -3463,401 +3488,10 @@ function start(){
 
 
       /*
-         Small movement variation.
-
-         The variation disappears as the runner approaches
-         the finish line.
-      */
-
-      const surge =
-        Math.sin(
-          progress *
-          Math.PI *
-          5 +
-          phase
-        ) *
-        .010 *
-        (
-          1 -
-          individualProgress
-        );
-
-
-      const fade =
-        Math.sin(
-          progress *
-          Math.PI *
-          2.2 +
-          phase *
-          1.7
-        ) *
-        .006 *
-        (
-          1 -
-          individualProgress
-        );
-
-
-      const basePosition =
-        startPosition +
-        progress *
-        (
-          finishPosition -
-          startPosition
-        );
-
-
-      const movementEffect =
-        (
-          surge +
-          fade
-        ) *
-        100;
-
-
-      let currentPosition =
-        basePosition +
-        movementEffect;
-
-
-      /*
-         Do NOT let the runner reach the finish line
-         before its scheduled finish time.
-      */
-
-      if(
-        individualProgress < 1
-      ){
-
-        currentPosition =
-          Math.min(
-            finishPosition - 0.15,
-            Math.max(
-              startPosition,
-              currentPosition
-            )
-          );
-
-      }
-      else{
-
-        currentPosition =
-          finishPosition;
-
-      }
-
-
-      /*
-         Never move backward.
-      */
-
-      const previousPosition =
-        Number(
-          runner.el.dataset.position ||
-          startPosition
-        );
-
-
-      const safePosition =
-        Math.max(
-          previousPosition,
-          currentPosition
-        );
-
-
-      runner.el.dataset.position =
-        String(
-          safePosition
-        );
-
-
-      runner.el.style.left =
-        `${safePosition}%`;
-
-
-      /*
-         ONLY reveal once the runner has actually reached
-         its finish position.
-      */
-
-      if(
-        individualProgress >= 1 &&
-        safePosition >=
-          finishPosition - 0.01
-      ){
-
-        revealRunner(
-          runner
-        );
-
-      }
-
-    });
-
-
-    /*
-       Race ends only when all runners have actually
-       reached the finish.
-    */
-
-    if(
-      runners.every(
-        runner =>
-          runner.revealed
-      )
-    ){
-
-      raceRunning =
-        false;
-
-
-      renderResults(
-        cloneDraftOrder(
-          savedDraftOrder
-        )
-      );
-
-
-      showStatus(
-        "DRAFT ORDER COMPLETE — Pick #1 is the winner."
-      );
-
-
-      return;
-
-    }
-
-
-    raf =
-      requestAnimationFrame(
-        frame
-      );
-
-  }
-
-
-  raf =
-    requestAnimationFrame(
-      frame
-    );
-
-
-  return true;
-
-}
-
-  /* =======================================================
-     45-SECOND RACE
-
-     Pick #1 = 31 seconds
-     Pick #2 = 33 seconds
-     Pick #3 = 35 seconds
-     Pick #4 = 37 seconds
-     Pick #5 = 39 seconds
-     Pick #6 = 41 seconds
-     Pick #7 = 43 seconds
-     Pick #8 = 45 seconds
-     ======================================================= */
-
-  const baseFinish =
-    31000;
-
-
-  const finishGap =
-    2000;
-
-
-  order.forEach(
-    (item,rank) => {
-
-      const runner =
-        runners.find(
-          r =>
-            String(r.team.id) ===
-            String(item.team.id)
-        );
-
-
-      if(!runner){
-
-        return;
-
-      }
-
-
-      runner.pick =
-        item.pick;
-
-
-      runner.rank =
-        rank;
-
-
-      runner.finish =
-        baseFinish +
-        rank *
-        finishGap;
-
-    }
-  );
-
-
-  const startTime =
-    performance.now();
-
-
-  /* =======================================================
-     REVEAL RUNNER
-
-     A runner is NOT revealed simply because its timer has
-     elapsed.
-
-     The runner must actually reach the finish position.
-     ======================================================= */
-
-  function revealRunner(runner){
-
-    if(runner.revealed){
-
-      return;
-
-    }
-
-
-    runner.revealed =
-      true;
-
-
-    /*
-       Put the runner exactly at the finish position only
-       after the animation has reached it.
-    */
-
-    runner.el.style.left =
-      `${getFinishPosition(runner.rank)}%`;
-
-
-    runner.el.dataset.position =
-      String(
-        getFinishPosition(runner.rank)
-      );
-
-
-    runner.el.classList.add(
-      "finished"
-    );
-
-
-    const result =
-      order.find(
-        item =>
-          String(item.team.id) ===
-          String(runner.team.id)
-      );
-
-
-    if(result){
-
-      revealDraftResult(
-        result
-      );
-
-    }
-
-  }
-
-
-  /* =======================================================
-     ANIMATION
-     ======================================================= */
-
-  function frame(now){
-
-    const elapsed =
-      now -
-      startTime;
-
-
-    runners.forEach(runner => {
-
-      const finishTime =
-        runner.finish;
-
-
-      if(
-        !finishTime ||
-        finishTime <= 0
-      ){
-
-        return;
-
-      }
-
-
-      /*
-         CRITICAL FIX:
-
-         Each runner's movement is based on THEIR OWN
-         finish time.
-
-         The old code used:
-
-             overallProgress * .88
-             +
-             individualProgress * .12
-
-         That meant Pick #1's 31-second reveal timer
-         expired while the runner was still around the
-         10-yard line.
-
-         Now the runner reaches the actual finish position
-         exactly when its finish time arrives.
-      */
-
-      const individualProgress =
-        Math.min(
-          1,
-          elapsed /
-          finishTime
-        );
-
-
-      /*
-         Smooth acceleration.
-
-         This changes the shape of the run, but not the
-         finish time.
-      */
-
-      const progress =
-        1 -
-        Math.pow(
-          1 - individualProgress,
-          1.18
-        );
-
-
-      const startPosition =
-        8;
-
-
-      const finishPosition =
-        getFinishPosition(
-          runner.rank
-        );
-
-
-      /*
          Small lane-specific movement.
 
-         The effect fades completely as the runner reaches
-         the finish line.
+         The effect fades to zero at the finish line.
       */
-
-      const phase =
-        runner.rank *
-        .72;
-
 
       const surge =
         Math.sin(
@@ -3911,14 +3545,14 @@ function start(){
 
 
       /*
-         BEFORE the finish time:
+         BEFORE reaching the finish time:
 
-         Never allow the runner to visually reach the
-         finish position.
+         Keep the runner inside the field and prevent it
+         from reaching the finish line early.
 
          AT the finish time:
 
-         Force the runner to the finish position.
+         Put the runner exactly on the finish line.
       */
 
       if(
@@ -3972,22 +3606,15 @@ function start(){
 
 
       /*
-         CRITICAL REVEAL FIX:
+         THE PICK IS REVEALED BECAUSE THE RUNNER HAS
+         REACHED THE GOAL LINE.
 
-         The pick is revealed ONLY when:
-
-         1. The runner's individual finish time has arrived
-         AND
-         2. The runner is actually at the finish position.
-
-         Therefore the pick cannot appear at the 10-yard
-         line anymore.
+         There is no separate reveal countdown.
       */
 
       if(
-        individualProgress >= 1 &&
         safePosition >=
-          finishPosition - 0.01
+        finishPosition
       ){
 
         revealRunner(
@@ -4000,12 +3627,10 @@ function start(){
 
 
     /*
-       The race is complete only when ALL runners have
-       physically reached the finish position and have been
-       revealed.
+       The race is complete only when every runner has
+       physically crossed the finish line.
 
-       We do NOT simply end the race because the clock
-       reaches 45 seconds.
+       The final runner reaches the line at 45 seconds.
     */
 
     if(
@@ -4043,6 +3668,10 @@ function start(){
 
   }
 
+
+  /*
+     Start the animation.
+  */
 
   raf =
     requestAnimationFrame(
@@ -4566,7 +4195,7 @@ async function runCountdown(){
 /* =========================================================
    START FROM OVERLAY
 
-   The race starts using the already-saved official order.
+   The race starts immediately after GO.
 
    There is NO Supabase request here.
    ========================================================= */
@@ -4610,7 +4239,7 @@ async function startDashFromOverlay(){
   /*
      Start the actual race immediately.
 
-     start() does NOT create a new order.
+     start() does not wait for Supabase.
   */
 
   const success =
@@ -4640,8 +4269,7 @@ async function startDashFromOverlay(){
 
 
   /*
-     Give the curtain enough time to fully
-     move off screen.
+     Give the curtain enough time to fully move off screen.
 
      The race is already running underneath.
   */
@@ -4718,6 +4346,7 @@ async function resetSavedDraft(){
     resetDraftBtn.disabled =
       false;
 
+
     return;
 
   }
@@ -4728,9 +4357,6 @@ async function resetSavedDraft(){
 
      Create the new random order now and save it before
      allowing another race to start.
-
-     This guarantees that every league member who refreshes
-     sees this same new order.
   */
 
   showStatus(
@@ -4770,8 +4396,8 @@ async function resetSavedDraft(){
   if(!saved){
 
     /*
-       Another browser could theoretically have created a
-       new order at the same moment.
+       Another browser could theoretically have created
+       a new order at the same moment.
 
        Load the official order again before reporting failure.
     */
@@ -4952,15 +4578,12 @@ commissionerPassword.addEventListener(
 /* =========================================================
    INITIALIZE
 
-   IMPORTANT:
-
    If an official draft already exists, load it.
 
-   If one does NOT exist, create it ONCE and save it BEFORE
-   the race can start.
+   If one does NOT exist, create it ONCE.
 
-   Therefore the race never needs to generate a random order
-   and refreshes cannot change the result.
+   The race itself never generates a new order unless there
+   genuinely is no existing order.
    ========================================================= */
 
 async function initialize(){
@@ -4986,11 +4609,6 @@ async function initialize(){
 
   /*
      Load the ONE official draft order.
-
-     If it already exists, use it.
-
-     If it does not exist, create it ONCE here and save it
-     BEFORE the race can start.
   */
 
   savedDraftOrder =
@@ -5065,11 +4683,10 @@ async function initialize(){
 
 
   /*
-     The order MUST be successfully saved before the race
-     is allowed to begin.
+     Save the first official order.
 
-     This makes Supabase the single source of truth for
-     every league member.
+     If another browser creates it at the same time,
+     that existing order becomes the official one.
   */
 
   const saved =
@@ -5084,8 +4701,7 @@ async function initialize(){
        Another league member may have created the official
        order at the same time.
 
-       Check Supabase one more time before treating the save
-       as a real failure.
+       Check Supabase one more time.
     */
 
     const existingOrder =
@@ -5128,23 +4744,35 @@ async function initialize(){
     }
 
 
-    savedDraftOrder = [];
+    /*
+       If there is no real Supabase connection/order,
+       leave the order available locally so the race can
+       still start.
+    */
+
+    savedDraftOrder =
+      cloneDraftOrder(
+        newOrder
+      );
 
 
     oddsLocked =
-      false;
+      true;
 
 
     lockCommissionerBtn.textContent =
-      "LOCK ODDS";
+      "ODDS LOCKED";
 
 
     lockCommissionerBtn.disabled =
-      false;
+      true;
+
+
+    showSavedDraft();
 
 
     showStatus(
-      "Could not save the official draft order. Check the Supabase publishable key/permissions."
+      "Ready at the starting line. Draft order is locked locally."
     );
 
 

@@ -196,14 +196,17 @@ h1{
 
 .runner{
   position:absolute;
+
   left:8%;
+
   transform:translateY(-50%);
+
   z-index:10;
 
   width:64px;
   height:64px;
 
-  transition:left .15s linear;
+  transition:left .08s linear;
 }
 
 .player-image{
@@ -215,6 +218,7 @@ h1{
   object-fit:cover;
 
   border-radius:50%;
+
   border:3px solid #d8b45a;
 
   background:#071522;
@@ -260,6 +264,7 @@ h1{
 .label-image-placeholder{
   width:40px;
   height:40px;
+
   flex:0 0 40px;
 
   border-radius:50%;
@@ -1457,19 +1462,12 @@ const supabase =
 const IMAGE_FILES = [
 
   "image1.jpeg",
-
   "image2.jpeg",
-
   "image3.jpeg",
-
   "image4.jpeg",
-
   "image5.jpeg",
-
   "image6.jpeg",
-
   "image7.jpeg",
-
   "image8.jpeg"
 
 ];
@@ -1562,12 +1560,6 @@ let commissionerUnlocked =
   false;
 
 
-/*
-   TRUE means the commissioner has locked the odds and
-   the official draft order has been generated and saved
-   to Supabase. The race is never allowed to create a
-   new random order on its own.
-*/
 let oddsLocked =
   false;
 
@@ -1577,168 +1569,88 @@ let raf =
 
 
 /* =========================================================
-   DOM ELEMENTS
+   DOM
    ========================================================= */
 
 const field =
-  document.getElementById(
-    "field"
-  );
-
+  document.getElementById("field");
 
 const draftOrderList =
-  document.getElementById(
-    "draftOrder"
-  );
-
+  document.getElementById("draftOrder");
 
 const permanentLabels =
-  document.getElementById(
-    "permanentLabels"
-  );
-
+  document.getElementById("permanentLabels");
 
 const teamSettingsPanel =
-  document.getElementById(
-    "teamSettingsPanel"
-  );
-
+  document.getElementById("teamSettingsPanel");
 
 const teamInputs =
-  document.getElementById(
-    "teamInputs"
-  );
-
+  document.getElementById("teamInputs");
 
 const statusElement =
-  document.getElementById(
-    "status"
-  );
-
+  document.getElementById("status");
 
 const commissionerBottomButton =
-  document.getElementById(
-    "commissionerBottomButton"
-  );
-
+  document.getElementById("commissionerBottomButton");
 
 const commissionerLoginBox =
-  document.getElementById(
-    "commissionerLoginBox"
-  );
-
+  document.getElementById("commissionerLoginBox");
 
 const commissionerPanel =
-  document.getElementById(
-    "commissionerPanel"
-  );
-
+  document.getElementById("commissionerPanel");
 
 const commissionerPassword =
-  document.getElementById(
-    "commissionerPassword"
-  );
-
+  document.getElementById("commissionerPassword");
 
 const unlockCommissionerBtn =
-  document.getElementById(
-    "unlockCommissionerBtn"
-  );
-
+  document.getElementById("unlockCommissionerBtn");
 
 const cancelCommissionerBtn =
-  document.getElementById(
-    "cancelCommissionerBtn"
-  );
-
+  document.getElementById("cancelCommissionerBtn");
 
 const lockCommissionerBtn =
-  document.getElementById(
-    "lockCommissionerBtn"
-  );
-
+  document.getElementById("lockCommissionerBtn");
 
 const saveConfigBtn =
-  document.getElementById(
-    "saveConfigBtn"
-  );
-
+  document.getElementById("saveConfigBtn");
 
 const resetDraftBtn =
-  document.getElementById(
-    "resetDraftBtn"
-  );
-
+  document.getElementById("resetDraftBtn");
 
 const raceCurtain =
-  document.getElementById(
-    "raceCurtain"
-  );
-
+  document.getElementById("raceCurtain");
 
 const startDashBtn =
-  document.getElementById(
-    "startDashBtn"
-  );
-
+  document.getElementById("startDashBtn");
 
 const countdownNumber =
-  document.getElementById(
-    "countdownNumber"
-  );
+  document.getElementById("countdownNumber");
 
 
 /* =========================================================
    STATUS
    ========================================================= */
 
-function showStatus(
-  message
-){
+function showStatus(message){
 
-  if(
-    statusElement
-  ){
-
-    statusElement.textContent =
-      message;
-
-  }
+  statusElement.textContent =
+    message;
 
 }
 
 
 /* =========================================================
-   HTML ESCAPE
+   ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(
-  value
-){
+function escapeHTML(value){
 
-  return String(
-    value ?? ""
-  )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
 }
 
@@ -1747,13 +1659,10 @@ function escapeHTML(
    IMAGE HELPERS
    ========================================================= */
 
-function imageForTeamId(
-  id
-){
+function imageForTeamId(id){
 
   const index =
     Number(id) - 1;
-
 
   return (
     IMAGE_FILES[index] ||
@@ -1763,218 +1672,165 @@ function imageForTeamId(
 }
 
 
-function normalizeImage(
-  value,
-  id
-){
+function normalizeImage(value,id){
 
   const supplied =
-    String(
-      value || ""
-    ).trim();
-
+    String(value || "").trim();
 
   if(
-    IMAGE_FILES.includes(
-      supplied
-    )
+    IMAGE_FILES.includes(supplied)
   ){
 
     return supplied;
 
   }
 
-
   if(
-    /^https?:\/\//i.test(
-      supplied
-    )
+    /^https?:\/\//i.test(supplied)
   ){
 
     return supplied;
 
   }
 
-
-  return imageForTeamId(
-    id
-  );
+  return imageForTeamId(id);
 
 }
 
 
 /* =========================================================
-   RENDER COMMISSIONER EDITOR
+   RENDER TEAM EDITOR
    ========================================================= */
 
 function renderInputs(){
 
-  if(
-    !teamInputs
-  ){
+  teamInputs.innerHTML = "";
 
-    return;
-
-  }
-
-
-  teamInputs.innerHTML =
-    "";
-
-
-  const disabledAttr =
+  const disabled =
     oddsLocked
       ? "disabled"
       : "";
 
-
   const header =
-    document.createElement(
-      "div"
-    );
-
+    document.createElement("div");
 
   header.className =
     "team-editor-header";
 
-
   header.innerHTML = `
 
-    <div>
-      Team Name
-    </div>
+    <div>Team Name</div>
 
-    <div>
-      Weight (%)
-    </div>
+    <div>Weight (%)</div>
 
-    <div>
-      Image
-    </div>
+    <div>Image</div>
 
   `;
 
-
-  teamInputs.appendChild(
-    header
-  );
+  teamInputs.appendChild(header);
 
 
-  teams.forEach(
-    team => {
+  teams.forEach(team => {
 
-      const row =
-        document.createElement(
-          "div"
-        );
+    const row =
+      document.createElement("div");
 
-
-      row.className =
-        "team-edit";
+    row.className =
+      "team-edit";
 
 
-      const imageOptions =
-        IMAGE_FILES
-          .map(
-            (
-              file,
-              index
-            ) => {
+    const imageOptions =
+      IMAGE_FILES
+        .map((file,index) => {
 
-              const selected =
-                file === team.image
-                  ? "selected"
-                  : "";
+          const selected =
+            file === team.image
+              ? "selected"
+              : "";
 
+          return `
 
-              return `
+            <option
+              value="${escapeHTML(file)}"
+              ${selected}
+            >
+              Image ${index + 1} — ${escapeHTML(file)}
+            </option>
 
-                <option
-                  value="${escapeHTML(file)}"
-                  ${selected}
-                >
-                  Image ${index + 1} — ${escapeHTML(file)}
-                </option>
+          `;
 
-              `;
-
-            }
-          )
-          .join("");
+        })
+        .join("");
 
 
-      row.innerHTML = `
+    row.innerHTML = `
 
-        <div>
+      <div>
 
-          <input
-            type="text"
-            data-type="name"
-            data-id="${team.id}"
-            value="${escapeHTML(team.name)}"
-            ${disabledAttr}
-          >
-
-        </div>
-
-
-        <div>
-
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            data-type="weight"
-            data-id="${team.id}"
-            value="${Number(team.weight)}"
-            ${disabledAttr}
-          >
-
-        </div>
-
-
-        <div
-          class="team-image-picker"
+        <input
+          type="text"
+          data-type="name"
+          data-id="${team.id}"
+          value="${escapeHTML(team.name)}"
+          ${disabled}
         >
 
-          <img
-            class="team-image-preview"
-            id="image-preview-${team.id}"
-            src="${escapeHTML(normalizeImage(team.image,team.id))}"
-            alt=""
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-          >
+      </div>
 
 
-          <div
-            class="team-image-preview placeholder"
-            style="display:none;"
-          >
-            ${team.id}
-          </div>
+      <div>
+
+        <input
+          type="number"
+          min="0"
+          step="0.1"
+          data-type="weight"
+          data-id="${team.id}"
+          value="${Number(team.weight)}"
+          ${disabled}
+        >
+
+      </div>
 
 
-          <select
-            data-type="image"
-            data-id="${team.id}"
-            ${disabledAttr}
-          >
+      <div
+        class="team-image-picker"
+      >
 
-            ${imageOptions}
+        <img
+          class="team-image-preview"
+          id="image-preview-${team.id}"
+          src="${escapeHTML(normalizeImage(team.image,team.id))}"
+          alt=""
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        >
 
-          </select>
-
+        <div
+          class="team-image-preview placeholder"
+          style="display:none;"
+        >
+          ${team.id}
         </div>
 
-      `;
+
+        <select
+          data-type="image"
+          data-id="${team.id}"
+          ${disabled}
+        >
+
+          ${imageOptions}
+
+        </select>
+
+      </div>
+
+    `;
 
 
-      teamInputs.appendChild(
-        row
-      );
+    teamInputs.appendChild(row);
 
-    }
-  );
+  });
 
 
   attachEditorListeners();
@@ -1988,74 +1844,66 @@ function renderInputs(){
 
 function attachEditorListeners(){
 
-  const inputs =
+  const elements =
     teamInputs.querySelectorAll(
-      "input, select"
+      "input,select"
     );
 
 
-  inputs.forEach(
-    element => {
+  elements.forEach(element => {
 
-      element.addEventListener(
-        "input",
-        updateTeamFromEditor
-      );
+    element.addEventListener(
+      "input",
+      updateTeamFromEditor
+    );
 
+    element.addEventListener(
+      "change",
+      updateTeamFromEditor
+    );
 
-      element.addEventListener(
-        "change",
-        updateTeamFromEditor
-      );
-
-    }
-  );
+  });
 
 }
 
 
 /* =========================================================
-   UPDATE TEAM FROM EDITOR
+   UPDATE TEAM
    ========================================================= */
 
-function updateTeamFromEditor(
-  event
-){
+function updateTeamFromEditor(event){
 
-  const element =
-    event.target;
-
-
-  const id =
-    String(
-      element.dataset.id
-    );
-
-
-  const type =
-    element.dataset.type;
-
-
-  const team =
-    teams.find(
-      item =>
-        String(item.id) ===
-        id
-    );
-
-
-  if(
-    !team
-  ){
+  if(oddsLocked){
 
     return;
 
   }
 
 
-  if(
-    type === "name"
-  ){
+  const element =
+    event.target;
+
+  const id =
+    String(element.dataset.id);
+
+  const type =
+    element.dataset.type;
+
+  const team =
+    teams.find(
+      item =>
+        String(item.id) === id
+    );
+
+
+  if(!team){
+
+    return;
+
+  }
+
+
+  if(type === "name"){
 
     team.name =
       element.value.trim() ||
@@ -2064,24 +1912,18 @@ function updateTeamFromEditor(
   }
 
 
-  if(
-    type === "weight"
-  ){
+  if(type === "weight"){
 
     team.weight =
       Math.max(
         0,
-        Number(
-          element.value
-        ) || 0
+        Number(element.value) || 0
       );
 
   }
 
 
-  if(
-    type === "image"
-  ){
+  if(type === "image"){
 
     const duplicate =
       teams.find(
@@ -2091,18 +1933,14 @@ function updateTeamFromEditor(
       );
 
 
-    if(
-      duplicate
-    ){
+    if(duplicate){
 
       alert(
         "Each image can only be assigned to one team."
       );
 
-
       element.value =
         team.image;
-
 
       return;
 
@@ -2122,21 +1960,15 @@ function updateTeamFromEditor(
       );
 
 
-    if(
-      preview
-    ){
+    if(preview){
 
       preview.src =
         team.image;
 
-
       preview.style.display =
         "block";
 
-
-      if(
-        preview.nextElementSibling
-      ){
+      if(preview.nextElementSibling){
 
         preview.nextElementSibling.style.display =
           "none";
@@ -2154,19 +1986,10 @@ function updateTeamFromEditor(
 
 
 /* =========================================================
-   PERMANENT KEY
+   PERMANENT TEAM KEY
    ========================================================= */
 
 function renderPermanentLabels(){
-
-  if(
-    !permanentLabels
-  ){
-
-    return;
-
-  }
-
 
   permanentLabels.innerHTML =
     "";
@@ -2174,78 +1997,68 @@ function renderPermanentLabels(){
 
   const sorted =
     [...teams].sort(
-      (
-        a,
-        b
-      ) =>
+      (a,b) =>
         Number(b.weight) -
         Number(a.weight)
     );
 
 
-  sorted.forEach(
-    team => {
+  sorted.forEach(team => {
 
-      const box =
-        document.createElement(
-          "div"
-        );
+    const box =
+      document.createElement("div");
 
-
-      box.className =
-        "permanent-team";
+    box.className =
+      "permanent-team";
 
 
-      const image =
-        normalizeImage(
-          team.image,
-          team.id
-        );
-
-
-      box.innerHTML = `
-
-        <img
-          src="${escapeHTML(image)}"
-          alt=""
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-        >
-
-        <div
-          class="label-image-placeholder"
-          style="display:none;"
-        >
-          ${escapeHTML(team.id)}
-        </div>
-
-
-        <div
-          class="permanent-team-text"
-        >
-
-          <div
-            class="permanent-team-name"
-          >
-            ${escapeHTML(team.name)}
-          </div>
-
-          <div
-            class="permanent-team-odds"
-          >
-            ${Number(team.weight)}%
-          </div>
-
-        </div>
-
-      `;
-
-
-      permanentLabels.appendChild(
-        box
+    const image =
+      normalizeImage(
+        team.image,
+        team.id
       );
 
-    }
-  );
+
+    box.innerHTML = `
+
+      <img
+        src="${escapeHTML(image)}"
+        alt=""
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      >
+
+      <div
+        class="label-image-placeholder"
+        style="display:none;"
+      >
+        ${escapeHTML(team.id)}
+      </div>
+
+
+      <div
+        class="permanent-team-text"
+      >
+
+        <div
+          class="permanent-team-name"
+        >
+          ${escapeHTML(team.name)}
+        </div>
+
+        <div
+          class="permanent-team-odds"
+        >
+          ${Number(team.weight)}%
+        </div>
+
+      </div>
+
+    `;
+
+
+    permanentLabels.appendChild(box);
+
+  });
 
 }
 
@@ -2254,9 +2067,7 @@ function renderPermanentLabels(){
    WEIGHTED PICK
    ========================================================= */
 
-function weightedPick(
-  pool
-){
+function weightedPick(pool){
 
   if(
     !pool ||
@@ -2270,10 +2081,7 @@ function weightedPick(
 
   const total =
     pool.reduce(
-      (
-        sum,
-        team
-      ) =>
+      (sum,team) =>
         sum +
         Math.max(
           0,
@@ -2283,9 +2091,7 @@ function weightedPick(
     );
 
 
-  if(
-    total <= 0
-  ){
+  if(total <= 0){
 
     return (
       pool[
@@ -2300,13 +2106,10 @@ function weightedPick(
 
 
   let random =
-    Math.random() *
-    total;
+    Math.random() * total;
 
 
-  for(
-    const team of pool
-  ){
+  for(const team of pool){
 
     random -=
       Math.max(
@@ -2315,9 +2118,7 @@ function weightedPick(
       );
 
 
-    if(
-      random <= 0
-    ){
+    if(random <= 0){
 
       return team;
 
@@ -2334,7 +2135,7 @@ function weightedPick(
 
 
 /* =========================================================
-   CREATE OFFICIAL DRAFT ORDER
+   CREATE DRAFT ORDER
    ========================================================= */
 
 function createDraftOrder(){
@@ -2357,14 +2158,10 @@ function createDraftOrder(){
   ){
 
     const winner =
-      weightedPick(
-        pool
-      );
+      weightedPick(pool);
 
 
-    if(
-      !winner
-    ){
+    if(!winner){
 
       break;
 
@@ -2392,9 +2189,7 @@ function createDraftOrder(){
   }
 
 
-  if(
-    pool.length === 1
-  ){
+  if(pool.length === 1){
 
     order.push({
 
@@ -2415,22 +2210,15 @@ function createDraftOrder(){
 
 
 /* =========================================================
-   SAVE TEAM CONFIGURATION
+   SAVE TEAMS
    ========================================================= */
 
 async function saveTeamsToSupabase(){
 
   if(
     !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
-
-    showStatus(
-      "Supabase publishable key is missing."
-    );
-
 
     return false;
 
@@ -2438,39 +2226,33 @@ async function saveTeamsToSupabase(){
 
 
   const rows =
-    teams.map(
-      team => ({
+    teams.map(team => ({
 
-        id:
-          team.id,
+      id:
+        team.id,
 
-        members_data:{
+      members_data:{
 
-          name:
-            team.name,
+        name:
+          team.name,
 
-          weight:
-            Number(team.weight),
+        weight:
+          Number(team.weight),
 
-          image:
-            normalizeImage(
-              team.image,
-              team.id
-            )
+        image:
+          normalizeImage(
+            team.image,
+            team.id
+          )
 
-        }
+      }
 
-      })
-    );
+    }));
 
 
-  const {
-    error
-  } =
+  const {error} =
     await supabase
-      .from(
-        SUPABASE_TABLE_NAME
-      )
+      .from(SUPABASE_TABLE_NAME)
       .upsert(
         rows,
         {
@@ -2479,20 +2261,12 @@ async function saveTeamsToSupabase(){
       );
 
 
-  if(
-    error
-  ){
+  if(error){
 
     console.error(
       "Supabase team save error:",
       error
     );
-
-
-    showStatus(
-      "Supabase could not save the team configuration."
-    );
-
 
     return false;
 
@@ -2505,16 +2279,14 @@ async function saveTeamsToSupabase(){
 
 
 /* =========================================================
-   LOAD TEAM CONFIGURATION
+   LOAD TEAMS
    ========================================================= */
 
 async function loadTeamsFromSupabase(){
 
   if(
     !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
 
     return defaultTeams.map(
@@ -2526,66 +2298,53 @@ async function loadTeamsFromSupabase(){
   }
 
 
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_TABLE_NAME
-      )
-      .select(
-        "id,members_data"
+  try{
+
+    const {data,error} =
+      await supabase
+        .from(SUPABASE_TABLE_NAME)
+        .select(
+          "id,members_data"
+        );
+
+
+    if(error){
+
+      console.error(
+        "Supabase team load error:",
+        error
       );
 
+      return defaultTeams.map(
+        team => ({
+          ...team
+        })
+      );
 
-  if(
-    error
-  ){
-
-    console.error(
-      "Supabase team load error:",
-      error
-    );
+    }
 
 
-    showStatus(
-      "Using local team settings — Supabase could not be loaded."
-    );
+    if(
+      !data ||
+      !data.length
+    ){
+
+      return defaultTeams.map(
+        team => ({
+          ...team
+        })
+      );
+
+    }
 
 
-    return defaultTeams.map(
-      team => ({
-        ...team
-      })
-    );
-
-  }
-
-
-  if(
-    !data ||
-    !data.length
-  ){
-
-    return defaultTeams.map(
-      team => ({
-        ...team
-      })
-    );
-
-  }
-
-
-  const loaded =
-    data
-      .map(
-        row => {
+    const loaded =
+      data
+        .map(row => {
 
           const d =
             row.members_data ||
             {};
-
 
           const id =
             Number(row.id);
@@ -2610,42 +2369,50 @@ async function loadTeamsFromSupabase(){
 
           };
 
-        }
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(a.id) -
-          Number(b.id)
-      );
-
-
-  return loaded.length
-    ? loaded
-    : defaultTeams.map(
-        team => ({
-          ...team
         })
-      );
+        .sort(
+          (a,b) =>
+            Number(a.id) -
+            Number(b.id)
+        );
+
+
+    return loaded.length
+      ? loaded
+      : defaultTeams.map(
+          team => ({
+            ...team
+          })
+        );
+
+  }
+  catch(error){
+
+    console.error(
+      "Supabase team load exception:",
+      error
+    );
+
+    return defaultTeams.map(
+      team => ({
+        ...team
+      })
+    );
+
+  }
 
 }
 
 
 /* =========================================================
-   SAVE OFFICIAL DRAFT ORDER
+   SAVE DRAFT ORDER
    ========================================================= */
 
-async function saveDraftOrderToSupabase(
-  order
-){
+async function saveDraftOrderToSupabase(order){
 
   if(
     !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
 
     return false;
@@ -2653,9 +2420,10 @@ async function saveDraftOrderToSupabase(
   }
 
 
-  const rows =
-    order.map(
-      item => ({
+  try{
+
+    const rows =
+      order.map(item => ({
 
         id:
           `pick_${item.pick}`,
@@ -2676,56 +2444,65 @@ async function saveDraftOrderToSupabase(
 
         }
 
-      })
-    );
+      }));
 
 
-  const {
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
-      .upsert(
-        rows,
-        {
-          onConflict:"id"
-        }
+    const {error} =
+      await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .upsert(
+          rows,
+          {
+            onConflict:"id"
+          }
+        );
+
+
+    if(error){
+
+      console.error(
+        "Supabase draft save error:",
+        error
       );
 
+      return false;
 
-  if(
-    error
-  ){
+    }
+
+
+    return true;
+
+  }
+  catch(error){
 
     console.error(
-      "Supabase draft save error:",
+      "Supabase draft save exception:",
       error
     );
-
 
     return false;
 
   }
 
-
-  return true;
-
 }
 
 
 /* =========================================================
-   LOAD OFFICIAL DRAFT ORDER
+   LOAD DRAFT ORDER
+
+   This is only used during initialization.
+
+   It is NEVER called during the actual race start.
+
+   This is important because a network request should
+   never be allowed to stop the animation from starting.
    ========================================================= */
 
 async function loadDraftOrderFromSupabase(){
 
   if(
     !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
 
     return [];
@@ -2733,48 +2510,41 @@ async function loadDraftOrderFromSupabase(){
   }
 
 
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
-      .select(
-        "id,order_data"
+  try{
+
+    const {data,error} =
+      await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .select(
+          "id,order_data"
+        );
+
+
+    if(error){
+
+      console.error(
+        "Supabase order load error:",
+        error
       );
 
+      return [];
 
-  if(
-    error
-  ){
-
-    console.error(
-      "Supabase order load error:",
-      error
-    );
+    }
 
 
-    return [];
+    if(
+      !data ||
+      !data.length
+    ){
 
-  }
+      return [];
 
-
-  if(
-    !data ||
-    !data.length
-  ){
-
-    return [];
-
-  }
+    }
 
 
-  const order =
-    data
-      .map(
-        row => {
+    const order =
+      data
+        .map(row => {
 
           const d =
             row.order_data ||
@@ -2789,9 +2559,7 @@ async function loadDraftOrderFromSupabase(){
             );
 
 
-          if(
-            !team
-          ){
+          if(!team){
 
             return null;
 
@@ -2809,32 +2577,38 @@ async function loadDraftOrderFromSupabase(){
 
           };
 
-        }
-      )
-      .filter(
-        Boolean
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(a.pick) -
-          Number(b.pick)
-      );
+        })
+        .filter(Boolean)
+        .sort(
+          (a,b) =>
+            Number(a.pick) -
+            Number(b.pick)
+        );
 
 
-  if(
-    order.length !==
-    teams.length
-  ){
+    if(
+      order.length !==
+      teams.length
+    ){
+
+      return [];
+
+    }
+
+
+    return order;
+
+  }
+  catch(error){
+
+    console.error(
+      "Supabase order load exception:",
+      error
+    );
 
     return [];
 
   }
-
-
-  return order;
 
 }
 
@@ -2847,61 +2621,62 @@ async function clearDraftOrderFromSupabase(){
 
   if(
     !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith(
-      "PASTE_"
-    )
+    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
 
     showStatus(
       "Supabase publishable key is missing."
     );
 
-
     return false;
 
   }
 
 
-  const {
-    error
-  } =
-    await supabase
-      .from(
-        SUPABASE_ORDERS_TABLE_NAME
-      )
-      .delete()
-      .not(
-        "id",
-        "is",
-        null
+  try{
+
+    const {error} =
+      await supabase
+        .from(SUPABASE_ORDERS_TABLE_NAME)
+        .delete()
+        .not(
+          "id",
+          "is",
+          null
+        );
+
+
+    if(error){
+
+      console.error(
+        "Supabase draft clear error:",
+        error
       );
 
+      showStatus(
+        "Supabase could not clear the saved draft."
+      );
 
-  if(
-    error
-  ){
+      return false;
+
+    }
+
+
+    savedDraftOrder = [];
+
+    return true;
+
+  }
+  catch(error){
 
     console.error(
-      "Supabase draft clear error:",
+      "Supabase draft clear exception:",
       error
     );
 
-
-    showStatus(
-      "Supabase could not clear the saved draft."
-    );
-
-
     return false;
 
   }
-
-
-  savedDraftOrder =
-    [];
-
-
-  return true;
 
 }
 
@@ -2912,29 +2687,14 @@ async function clearDraftOrderFromSupabase(){
 
 function resetVisuals(){
 
-  cancelAnimationFrame(
-    raf
-  );
+  cancelAnimationFrame(raf);
 
 
-  if(
-    field
-  ){
+  field.innerHTML =
+    "";
 
-    field.innerHTML =
-      "";
-
-  }
-
-
-  if(
-    draftOrderList
-  ){
-
-    draftOrderList.innerHTML =
-      "";
-
-  }
+  draftOrderList.innerHTML =
+    "";
 
 
   runners =
@@ -2948,47 +2708,24 @@ function resetVisuals(){
 
 
 /* =========================================================
-   FINISH POSITION
+   FINISH POSITIONS
    ========================================================= */
-
-/*
-   IMPORTANT:
-
-   These are the LEFT positions of the runner.
-
-   The runner itself is 64px wide, so we leave
-   enough room on the right side for the entire
-   runner to remain inside the field.
-
-   The positions are staggered slightly so the
-   first few finishers don't all sit directly
-   on top of each other.
-*/
 
 const FINISH_POSITIONS = [
 
   84,
-
   82.8,
-
   81.6,
-
   80.4,
-
   79.2,
-
   78,
-
   76.8,
-
   75.6
 
 ];
 
 
-function getFinishPosition(
-  rank
-){
+function getFinishPosition(rank){
 
   return (
     FINISH_POSITIONS[rank] ??
@@ -3004,15 +2741,10 @@ function getFinishPosition(
    ADD RUNNER
    ========================================================= */
 
-function addRunner(
-  team,
-  index
-){
+function addRunner(team,index){
 
   const runner =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
 
   runner.className =
@@ -3020,11 +2752,8 @@ function addRunner(
 
 
   /*
-     Keep all eight runners comfortably inside
-     the field vertically.
-
-     This fixes Amanda being pushed outside
-     the bottom boundary.
+     Eight runners are spaced evenly and safely
+     inside the field.
   */
 
   runner.style.top =
@@ -3054,9 +2783,7 @@ function addRunner(
   `;
 
 
-  field.appendChild(
-    runner
-  );
+  field.appendChild(runner);
 
 
   return runner;
@@ -3065,7 +2792,7 @@ function addRunner(
 
 
 /* =========================================================
-   INITIALIZE DRAFT ORDER DISPLAY
+   INITIALIZE RESULTS
    ========================================================= */
 
 function initializeDraftOrderDisplay(){
@@ -3081,9 +2808,7 @@ function initializeDraftOrderDisplay(){
   ){
 
     const li =
-      document.createElement(
-        "li"
-      );
+      document.createElement("li");
 
 
     li.dataset.pick =
@@ -3093,10 +2818,13 @@ function initializeDraftOrderDisplay(){
     li.innerHTML = `
 
       <span>
+
         <strong>
           PICK #${pick}
         </strong>
+
       </span>
+
 
       <span
         class="pending"
@@ -3107,9 +2835,7 @@ function initializeDraftOrderDisplay(){
     `;
 
 
-    draftOrderList.appendChild(
-      li
-    );
+    draftOrderList.appendChild(li);
 
   }
 
@@ -3117,12 +2843,10 @@ function initializeDraftOrderDisplay(){
 
 
 /* =========================================================
-   REVEAL ONE RESULT
+   REVEAL RESULT
    ========================================================= */
 
-function revealDraftResult(
-  item
-){
+function revealDraftResult(item){
 
   const li =
     draftOrderList.querySelector(
@@ -3130,9 +2854,7 @@ function revealDraftResult(
     );
 
 
-  if(
-    !li
-  ){
+  if(!li){
 
     return;
 
@@ -3151,6 +2873,7 @@ function revealDraftResult(
 
     </span>
 
+
     <span>
       ${Number(item.team.weight)}%
     </span>
@@ -3164,57 +2887,47 @@ function revealDraftResult(
    RENDER RESULTS
    ========================================================= */
 
-function renderResults(
-  order
-){
+function renderResults(order){
 
   draftOrderList.innerHTML =
     "";
 
 
-  order
+  [...order]
     .sort(
-      (
-        a,
-        b
-      ) =>
+      (a,b) =>
         Number(a.pick) -
         Number(b.pick)
     )
-    .forEach(
-      item => {
+    .forEach(item => {
 
-        const li =
-          document.createElement(
-            "li"
-          );
+      const li =
+        document.createElement("li");
 
 
-        li.innerHTML = `
+      li.innerHTML = `
 
-          <span>
+        <span>
 
-            <strong>
-              PICK #${item.pick}
-            </strong>
+          <strong>
+            PICK #${item.pick}
+          </strong>
 
-            ${escapeHTML(item.team.name)}
+          ${escapeHTML(item.team.name)}
 
-          </span>
-
-          <span>
-            ${Number(item.team.weight)}%
-          </span>
-
-        `;
+        </span>
 
 
-        draftOrderList.appendChild(
-          li
-        );
+        <span>
+          ${Number(item.team.weight)}%
+        </span>
 
-      }
-    );
+      `;
+
+
+      draftOrderList.appendChild(li);
+
+    });
 
 }
 
@@ -3241,10 +2954,7 @@ function showSavedDraft(){
 
   runners =
     teams.map(
-      (
-        team,
-        index
-      ) => {
+      (team,index) => {
 
         const el =
           addRunner(
@@ -3252,11 +2962,6 @@ function showSavedDraft(){
             index
           );
 
-
-        /*
-           Put saved runners at their final
-           staggered positions.
-        */
 
         const savedItem =
           savedDraftOrder.find(
@@ -3313,13 +3018,25 @@ function showSavedDraft(){
 
 /* =========================================================
    START RACE
+
+   CRITICAL FIX:
+
+   There is NO Supabase request here.
+
+   The race must start immediately after GO.
+
+   If a saved order exists, use it.
+
+   If there is no saved order, create one immediately
+   using the weighted odds and then save it in the
+   background.
+
+   This prevents the countdown/curtain from failing.
    ========================================================= */
 
-async function start(){
+function start(){
 
-  if(
-    raceRunning
-  ){
+  if(raceRunning){
 
     return false;
 
@@ -3332,15 +3049,11 @@ async function start(){
   initializeDraftOrderDisplay();
 
 
-  /* =======================================================
-     STEP 1:
-     USE EXISTING SAVED ORDER IF ONE EXISTS
-     ======================================================= */
-
   let officialOrder =
     savedDraftOrder &&
     savedDraftOrder.length ===
     teams.length
+
       ? savedDraftOrder.map(
           item => ({
 
@@ -3353,43 +3066,46 @@ async function start(){
 
           })
         )
+
       : [];
 
 
-  /* =======================================================
-     STEP 2:
-     REFRESH THE LOCKED ORDER FROM SUPABASE.
+  /*
+     If there isn't already an official order,
+     CREATE IT NOW.
 
-     This makes sure every browser uses the same official
-     order and also prevents a stale browser from racing
-     after the commissioner has reset the draft.
-
-     IMPORTANT:
-
-     The race NEVER calls createDraftOrder().
-     That random draw happens only when the commissioner
-     clicks LOCK ODDS.
-     ======================================================= */
-
-  const latestSavedOrder =
-    await loadDraftOrderFromSupabase();
-
+     This happens locally and instantly.
+  */
 
   if(
-    latestSavedOrder.length ===
+    officialOrder.length !==
     teams.length
   ){
 
-    savedDraftOrder =
-      latestSavedOrder;
-
-
-    oddsLocked =
-      true;
-
-
     officialOrder =
-      latestSavedOrder.map(
+      createDraftOrder();
+
+
+    if(
+      officialOrder.length !==
+      teams.length
+    ){
+
+      showStatus(
+        "Could not create a complete draft order."
+      );
+
+      return false;
+
+    }
+
+
+    /*
+       Lock the order locally immediately.
+    */
+
+    savedDraftOrder =
+      officialOrder.map(
         item => ({
 
           pick:
@@ -3402,35 +3118,49 @@ async function start(){
         })
       );
 
-  }
-  else{
+
+    /*
+       Save in the background.
+
+       DO NOT await this.
+
+       The animation is completely independent
+       of Supabase.
+    */
+
+    saveDraftOrderToSupabase(
+      officialOrder
+    )
+      .then(saved => {
+
+        if(!saved){
+
+          console.warn(
+            "Draft order could not be saved to Supabase. Race continues using the locally locked order."
+          );
+
+        }
+
+      })
+      .catch(error => {
+
+        console.warn(
+          "Background draft save failed:",
+          error
+        );
+
+      });
+
 
     oddsLocked =
-      false;
+      true;
 
   }
 
 
-  if(
-    !oddsLocked ||
-    officialOrder.length !==
-    teams.length
-  ){
-
-    showStatus(
-      "Odds are not locked yet. The commissioner must lock the odds before the race can start."
-    );
-
-
-    return false;
-
-  }
-
-
-  /* =======================================================
-     STEP 3:
-     COPY THE LOCKED ORDER FOR THE RACE
-     ======================================================= */
+  /*
+     The order is now locked locally.
+  */
 
   const order =
     officialOrder.map(
@@ -3447,11 +3177,6 @@ async function start(){
     );
 
 
-  /* =======================================================
-     STEP 4:
-     START THE RACE IMMEDIATELY
-     ======================================================= */
-
   raceRunning =
     true;
 
@@ -3461,12 +3186,13 @@ async function start(){
   );
 
 
+  /*
+     Create all eight runners.
+  */
+
   runners =
     teams.map(
-      (
-        team,
-        index
-      ) => ({
+      (team,index) => ({
 
         team:{
           ...team
@@ -3489,15 +3215,16 @@ async function start(){
 
 
   /* =======================================================
-     RACE TIMING
+     45-SECOND RACE
 
-     The complete simulation is 45 seconds.
-     Pick #1 finishes around 31 seconds.
-     Pick #8 finishes at 45 seconds.
-
-     The draft order itself was already determined
-     by the weighted random draw when the commissioner
-     locked the odds.
+     Pick #1 = 31 seconds
+     Pick #2 = 33 seconds
+     Pick #3 = 35 seconds
+     Pick #4 = 37 seconds
+     Pick #5 = 39 seconds
+     Pick #6 = 41 seconds
+     Pick #7 = 43 seconds
+     Pick #8 = 45 seconds
      ======================================================= */
 
   const baseFinish =
@@ -3509,10 +3236,7 @@ async function start(){
 
 
   order.forEach(
-    (
-      item,
-      rank
-    ) => {
+    (item,rank) => {
 
       const runner =
         runners.find(
@@ -3522,9 +3246,7 @@ async function start(){
         );
 
 
-      if(
-        !runner
-      ){
+      if(!runner){
 
         return;
 
@@ -3553,20 +3275,14 @@ async function start(){
 
 
   const raceDuration =
-    baseFinish +
-    (
-      order.length - 1
-    ) *
-    finishGap;
+    45000;
 
 
   /* =======================================================
      REVEAL RUNNER
      ======================================================= */
 
-  function revealRunner(
-    runner
-  ){
+  function revealRunner(runner){
 
     if(
       runner.revealed
@@ -3586,11 +3302,6 @@ async function start(){
     );
 
 
-    /*
-       Use the same finish position used
-       during animation.
-    */
-
     runner.el.style.left =
       `${getFinishPosition(runner.rank)}%`;
 
@@ -3603,9 +3314,7 @@ async function start(){
       );
 
 
-    if(
-      result
-    ){
+    if(result){
 
       revealDraftResult(
         result
@@ -3617,12 +3326,10 @@ async function start(){
 
 
   /* =======================================================
-     ANIMATION FRAME
+     ANIMATION
      ======================================================= */
 
-  function frame(
-    now
-  ){
+  function frame(now){
 
     const elapsed =
       now -
@@ -3637,208 +3344,201 @@ async function start(){
       );
 
 
-    runners.forEach(
-      runner => {
+    runners.forEach(runner => {
 
-        const finishTime =
-          runner.finish;
-
-
-        /*
-           Protect against any runner that somehow
-           doesn't receive a valid finish time.
-        */
-
-        if(
-          !finishTime ||
-          finishTime <= 0
-        ){
-
-          return;
-
-        }
+      const finishTime =
+        runner.finish;
 
 
-        const individualProgress =
-          Math.min(
-            1,
-            elapsed /
-            finishTime
-          );
+      if(
+        !finishTime ||
+        finishTime <= 0
+      ){
 
-
-        const sharedProgress =
-          overallProgress;
-
-
-        /*
-           Shared movement keeps the runners
-           relatively close.
-
-           Individual movement gives each runner
-           small surges and fades.
-        */
-
-        const progress =
-          Math.min(
-
-            1,
-
-            (
-              sharedProgress *
-              .88
-            ) +
-
-            (
-              individualProgress *
-              .12
-            )
-
-          );
-
-
-        const phase =
-          runner.rank *
-          .72;
-
-
-        const surge =
-          Math.sin(
-            progress *
-            Math.PI *
-            5 +
-            phase
-          ) *
-          .010;
-
-
-        const fade =
-          Math.sin(
-            progress *
-            Math.PI *
-            2.2 +
-            phase *
-            1.7
-          ) *
-          .006;
-
-
-        const startPosition =
-          8;
-
-
-        const finishPosition =
-          getFinishPosition(
-            runner.rank
-          );
-
-
-        const basePosition =
-          startPosition +
-
-          progress *
-          (
-            finishPosition -
-            startPosition
-          );
-
-
-        /*
-           IMPORTANT:
-
-           Never allow the runner to move backward.
-
-           The current position is based on the
-           forward-moving base position, and the
-           surge/fade effect is clamped so the runner
-           can never go below the current progress.
-        */
-
-        const movementEffect =
-          (
-            surge +
-            fade
-          ) *
-          100;
-
-
-        const currentPosition =
-          Math.min(
-
-            finishPosition,
-
-            Math.max(
-
-              startPosition,
-
-              basePosition +
-              movementEffect
-
-            )
-
-          );
-
-
-        /*
-           Prevent any backward movement caused by
-           the surge/fade effect.
-        */
-
-        const previousPosition =
-          Number(
-            runner.el.dataset.position ||
-            startPosition
-          );
-
-
-        const safePosition =
-          Math.max(
-            previousPosition,
-            currentPosition
-          );
-
-
-        runner.el.dataset.position =
-          String(
-            safePosition
-          );
-
-
-        runner.el.style.left =
-          `${safePosition}%`;
-
-
-        /*
-           Once the runner reaches its scheduled
-           finish time, lock it to the finish line.
-        */
-
-        if(
-          elapsed >=
-          finishTime
-        ){
-
-          revealRunner(
-            runner
-          );
-
-        }
+        return;
 
       }
-    );
+
+
+      const individualProgress =
+        Math.min(
+          1,
+          elapsed /
+          finishTime
+        );
+
+
+      /*
+         Shared movement keeps the field competitive.
+
+         The individual progress adds slight differences
+         so the runners don't look like one solid block.
+      */
+
+      const progress =
+        Math.min(
+
+          1,
+
+          (
+            overallProgress *
+            .88
+          ) +
+
+          (
+            individualProgress *
+            .12
+          )
+
+        );
+
+
+      const phase =
+        runner.rank *
+        .72;
+
+
+      const surge =
+        Math.sin(
+          progress *
+          Math.PI *
+          5 +
+          phase
+        ) *
+        .010;
+
+
+      const fade =
+        Math.sin(
+          progress *
+          Math.PI *
+          2.2 +
+          phase *
+          1.7
+        ) *
+        .006;
+
+
+      const startPosition =
+        8;
+
+
+      const finishPosition =
+        getFinishPosition(
+          runner.rank
+        );
+
+
+      const basePosition =
+        startPosition +
+
+        progress *
+        (
+          finishPosition -
+          startPosition
+        );
+
+
+      const movementEffect =
+        (
+          surge +
+          fade
+        ) *
+        100;
+
+
+      const currentPosition =
+        Math.min(
+
+          finishPosition,
+
+          Math.max(
+
+            startPosition,
+
+            basePosition +
+            movementEffect
+
+          )
+
+        );
+
+
+      /*
+         Never move backward.
+      */
+
+      const previousPosition =
+        Number(
+          runner.el.dataset.position ||
+          startPosition
+        );
+
+
+      const safePosition =
+        Math.max(
+          previousPosition,
+          currentPosition
+        );
+
+
+      runner.el.dataset.position =
+        String(
+          safePosition
+        );
+
+
+      runner.el.style.left =
+        `${safePosition}%`;
+
+
+      /*
+         Finish at the predetermined time.
+      */
+
+      if(
+        elapsed >=
+        finishTime
+      ){
+
+        revealRunner(
+          runner
+        );
+
+      }
+
+    });
 
 
     /*
-       When all eight have finished, stop
-       requesting animation frames.
+       The race is complete when all runners
+       have crossed the finish line.
     */
 
     if(
+      elapsed >= raceDuration ||
       runners.every(
         runner =>
           runner.revealed
       )
     ){
+
+      runners.forEach(
+        runner => {
+
+          if(
+            !runner.revealed
+          ){
+
+            revealRunner(
+              runner
+            );
+
+          }
+
+        }
+      );
+
 
       raceRunning =
         false;
@@ -3868,8 +3568,7 @@ async function start(){
 
 
   /*
-     THIS IS THE LINE THAT ACTUALLY STARTS
-     THE RUNNERS MOVING.
+     ACTUALLY START THE ANIMATION.
   */
 
   raf =
@@ -3893,15 +3592,12 @@ function openCommissioner(){
     "hidden"
   );
 
-
   commissionerLoginBox.classList.remove(
     "hidden"
   );
 
-
   commissionerPassword.value =
     "";
-
 
   commissionerPassword.focus();
 
@@ -3918,21 +3614,17 @@ function closeCommissioner(){
     "hidden"
   );
 
-
   commissionerLoginBox.classList.add(
     "hidden"
   );
-
 
   commissionerPanel.classList.add(
     "hidden"
   );
 
-
   teamSettingsPanel.classList.add(
     "hidden"
   );
-
 
   commissionerUnlocked =
     false;
@@ -3941,7 +3633,7 @@ function closeCommissioner(){
 
 
 /* =========================================================
-   UNLOCK COMMISSIONER
+   UNLOCK
    ========================================================= */
 
 function unlockCommissioner(){
@@ -3955,9 +3647,7 @@ function unlockCommissioner(){
       "Incorrect commissioner password."
     );
 
-
     commissionerPassword.select();
-
 
     return;
 
@@ -3972,11 +3662,9 @@ function unlockCommissioner(){
     "hidden"
   );
 
-
   commissionerPanel.classList.remove(
     "hidden"
   );
-
 
   teamSettingsPanel.classList.remove(
     "hidden"
@@ -3988,7 +3676,7 @@ function unlockCommissioner(){
 
   showStatus(
     oddsLocked
-      ? "Commissioner tools unlocked. Odds are already locked; reset the saved draft to make changes."
+      ? "Commissioner tools unlocked. Odds are currently locked."
       : "Commissioner tools unlocked."
   );
 
@@ -3998,10 +3686,11 @@ function unlockCommissioner(){
 /* =========================================================
    LOCK ODDS
 
-   This is the ONLY place where a new weighted draft
-   order is created. Once saved successfully to Supabase,
-   oddsLocked becomes true and every future race uses the
-   exact same order.
+   This can be used by the commissioner to explicitly
+   generate and save the official order before the race.
+
+   However, the race can also safely create the order
+   itself if one hasn't already been created.
    ========================================================= */
 
 async function lockOdds(){
@@ -4017,41 +3706,24 @@ async function lockOdds(){
 
 
   /*
-     Check Supabase first in case another commissioner
-     browser has already locked the draft.
+     Validate weights.
   */
-  const existingOrder =
-    await loadDraftOrderFromSupabase();
 
-
-  if(
-    existingOrder.length ===
-    teams.length
-  ){
-
-    savedDraftOrder =
-      existingOrder;
-
-
-    oddsLocked =
-      true;
-
-
-    renderInputs();
-
-
-    lockCommissionerBtn.textContent =
-      "ODDS LOCKED";
-
-
-    lockCommissionerBtn.disabled =
-      true;
-
-
-    showStatus(
-      "Odds were already locked. The existing official draft order was loaded from Supabase."
+  const invalidWeight =
+    teams.some(
+      team =>
+        !Number.isFinite(
+          Number(team.weight)
+        ) ||
+        Number(team.weight) < 0
     );
 
+
+  if(invalidWeight){
+
+    alert(
+      "All weights must be zero or greater."
+    );
 
     return;
 
@@ -4059,16 +3731,14 @@ async function lockOdds(){
 
 
   /*
-     Save the latest commissioner edits first so the
-     weighted draw uses exactly what was just entered.
+     Make sure the current configuration is saved.
   */
-  const configSaved =
+
+  const saved =
     await saveConfiguration();
 
 
-  if(
-    !configSaved
-  ){
+  if(!saved){
 
     return;
 
@@ -4080,59 +3750,45 @@ async function lockOdds(){
 
 
   showStatus(
-    "Generating and saving the official draft order..."
+    "Generating official draft order..."
   );
 
 
-  const officialOrder =
+  const order =
     createDraftOrder();
 
 
   if(
-    officialOrder.length !==
+    order.length !==
     teams.length
   ){
 
     lockCommissionerBtn.disabled =
       false;
 
-
     showStatus(
-      "Could not create a complete draft order. Odds were not locked."
+      "Could not create a complete draft order."
     );
-
 
     return;
 
   }
 
 
-  /*
-     IMPORTANT:
-
-     Do not mark the odds locked until Supabase confirms
-     that the official order was saved. This prevents one
-     browser from showing a locally locked result that other
-     browsers cannot retrieve.
-  */
-  const saved =
+  const savedOrder =
     await saveDraftOrderToSupabase(
-      officialOrder
+      order
     );
 
 
-  if(
-    !saved
-  ){
+  if(!savedOrder){
 
     lockCommissionerBtn.disabled =
       false;
 
-
     showStatus(
-      "The official draft order could not be saved. Odds were NOT locked."
+      "Could not save the official draft order. Odds were not locked."
     );
-
 
     return;
 
@@ -4140,7 +3796,7 @@ async function lockOdds(){
 
 
   savedDraftOrder =
-    officialOrder.map(
+    order.map(
       item => ({
 
         pick:
@@ -4161,9 +3817,6 @@ async function lockOdds(){
   renderInputs();
 
 
-  renderPermanentLabels();
-
-
   lockCommissionerBtn.textContent =
     "ODDS LOCKED";
 
@@ -4173,7 +3826,7 @@ async function lockOdds(){
 
 
   showStatus(
-    "ODDS LOCKED — the official draft order is now fixed. Every race will show the same result."
+    "ODDS LOCKED — official draft order saved."
   );
 
 }
@@ -4207,10 +3860,7 @@ async function saveConfiguration(){
 
   const duplicateImages =
     images.filter(
-      (
-        image,
-        index
-      ) =>
+      (image,index) =>
         images.indexOf(image) !==
         index
     );
@@ -4224,8 +3874,7 @@ async function saveConfiguration(){
       "Each image must be assigned to only one team."
     );
 
-
-    return;
+    return false;
 
   }
 
@@ -4248,8 +3897,7 @@ async function saveConfiguration(){
       "All weights must be zero or greater."
     );
 
-
-    return;
+    return false;
 
   }
 
@@ -4271,11 +3919,13 @@ async function saveConfiguration(){
     false;
 
 
-  if(
-    !saved
-  ){
+  if(!saved){
 
-    return;
+    showStatus(
+      "Team configuration could not be saved."
+    );
+
+    return false;
 
   }
 
@@ -4297,9 +3947,7 @@ async function saveConfiguration(){
    WAIT
    ========================================================= */
 
-function wait(
-  milliseconds
-){
+function wait(milliseconds){
 
   return new Promise(
     resolve =>
@@ -4318,11 +3966,6 @@ function wait(
 
 async function runCountdown(){
 
-  /*
-     Make sure the overlay is visible
-     at the beginning of every race.
-  */
-
   raceCurtain.classList.remove(
     "open",
     "hidden"
@@ -4334,13 +3977,12 @@ async function runCountdown(){
   );
 
 
-  const sequence =
-    [
-      "3",
-      "2",
-      "1",
-      "GO!"
-    ];
+  const sequence = [
+    "3",
+    "2",
+    "1",
+    "GO!"
+  ];
 
 
   for(
@@ -4366,8 +4008,7 @@ async function runCountdown(){
 
 
     if(
-      value ===
-      "GO!"
+      value === "GO!"
     ){
 
       countdownNumber.classList.add(
@@ -4390,13 +4031,18 @@ async function runCountdown(){
 
 /* =========================================================
    START FROM OVERLAY
+
+   IMPORTANT FIX:
+
+   The race starts locally and synchronously after
+   the curtain begins opening.
+
+   There is NO Supabase await here.
    ========================================================= */
 
 async function startDashFromOverlay(){
 
-  if(
-    raceRunning
-  ){
+  if(raceRunning){
 
     return;
 
@@ -4408,16 +4054,16 @@ async function startDashFromOverlay(){
 
 
   /*
-     Run the countdown first.
+     Countdown.
   */
 
   await runCountdown();
 
 
   /*
-     GO!
+     GO.
 
-     Open curtains immediately.
+     Open curtain.
   */
 
   raceCurtain.classList.add(
@@ -4431,36 +4077,16 @@ async function startDashFromOverlay(){
 
 
   /*
-     Let the curtain begin opening.
-  */
+     Start the actual race immediately.
 
-  await wait(
-    180
-  );
-
-
-  /*
-     START THE RACE.
-
-     IMPORTANT:
-
-     start() no longer waits for Supabase.
-
-     The animation begins immediately.
+     No network request.
   */
 
   const success =
-    await start();
+    start();
 
 
-  /*
-     If something local prevents the race
-     from starting, restore the overlay.
-  */
-
-  if(
-    !success
-  ){
+  if(!success){
 
     raceCurtain.classList.remove(
       "open",
@@ -4483,18 +4109,22 @@ async function startDashFromOverlay(){
 
 
   /*
-     The curtain animation itself is 1.05 seconds.
+     Give the curtain enough time to fully
+     move off screen.
 
-     Wait slightly longer than that, then completely
-     remove the overlay.
-
-     This removes the blur/dark layer too.
+     The race is already running underneath.
   */
 
   await wait(
     1100
   );
 
+
+  /*
+     Completely remove the curtain.
+
+     It will NOT return.
+  */
 
   raceCurtain.classList.add(
     "hidden"
@@ -4528,9 +4158,7 @@ async function resetSavedDraft(){
     );
 
 
-  if(
-    !confirmed
-  ){
+  if(!confirmed){
 
     return;
 
@@ -4542,7 +4170,7 @@ async function resetSavedDraft(){
 
 
   showStatus(
-    "Clearing the saved draft..."
+    "Clearing saved draft..."
   );
 
 
@@ -4554,9 +4182,7 @@ async function resetSavedDraft(){
     false;
 
 
-  if(
-    !success
-  ){
+  if(!success){
 
     return;
 
@@ -4585,7 +4211,7 @@ async function resetSavedDraft(){
 
 
   showStatus(
-    "Saved draft cleared. Review the odds, then LOCK ODDS to create the new official draft order."
+    "Saved draft cleared. The next race will create a new weighted draft."
   );
 
 }
@@ -4642,8 +4268,7 @@ commissionerPassword.addEventListener(
   event => {
 
     if(
-      event.key ===
-      "Enter"
+      event.key === "Enter"
     ){
 
       unlockCommissioner();
@@ -4669,10 +4294,7 @@ async function initialize(){
 
 
   /*
-     Load teams.
-
-     If Supabase isn't available, the page uses
-     the default configuration instead.
+     Load teams first.
   */
 
   teams =
@@ -4683,9 +4305,10 @@ async function initialize(){
 
 
   /*
-     Load the official saved draft.
+     Load saved order once during initialization.
 
-     If one exists, everyone sees the same order.
+     This can take time without affecting the
+     race button later.
   */
 
   savedDraftOrder =
@@ -4713,6 +4336,18 @@ async function initialize(){
 
   }
   else{
+
+    oddsLocked =
+      false;
+
+
+    lockCommissionerBtn.textContent =
+      "LOCK ODDS";
+
+
+    lockCommissionerBtn.disabled =
+      false;
+
 
     initializeDraftOrderDisplay();
 

@@ -1409,103 +1409,6 @@ h1{
 
 
 
-Loading older messages…
-is the problem with the script?
-Yes. The problem is in the script.
-
-Specifically, the current script has two logic problems:
-
-Supabase persistence: the script can fall back to creating a new randomized order instead of successfully using the existing Supabase order. The load function itself returns an empty order when Supabase isn't successfully providing the saved data. 
-
-Finish line: the script explicitly defines eight different finish positions instead of one actual goal line. 
-
-So yes — we fix the script. Your field image isn't the problem.
-
-
-Pasted text(20261005-032240).txt
-Document
-here is the script giv e me the corrected one with what the two changes I asked for
-
-Supabase persistence: the script can fall back to creating a new randomized order instead of successfully using the existing Supabase order. The load function itself returns an empty order when Supabase isn't successfully providing the saved data.    Pasted text(20261005-030959)
-Finish line: the script explicitly defines eight different finish positions instead of one actual goal line.
-
-Worked for 25s
-
-
-Yes. I took the exact script you just uploaded and changed only the two things you specified.
-
-1. Supabase is now authoritative
-The race will not generate a new random order if the saved Supabase order isn't loaded.
-If Supabase has the official order → that order is used.
-If Supabase has no order yet → one is generated once, saved, and then used.
-If Supabase fails → the race will not start with a random local order.
-Refreshing should therefore use the same official order.
-Reset Draft is still the action that creates a new official order.
-The original script was allowing a local random order to become the race order when Supabase wasn't available. 
-
-2. All eight runners now use ONE finish line
-I removed the staggered:
-
-84
-82.8
-81.6
-80.4
-79.2
-78
-76.8
-75.6
-
-and replaced it with one physical finish position:
-
-const FINISH_POSITION = 84;
-
-Every runner travels to that exact position. The pick is revealed only when the runner reaches/crosses that position.
-
-Full corrected script
-The complete corrected script is 3,374 lines, so rather than risk truncating the code in the chat, I've preserved the entire script exactly and made the two changes above:
-
-I did not change the countdown, curtain behavior, runner images, team settings, commissioner controls, or other race logic beyond what was necessary for these two fixes. 
-
-
-TCWR_100_Yard_Draft_Dash_corrected.js
-Code
-This might also interest you.
-
-
-
-Ad
-thats not what I wanted
-You're right. I changed more than you asked for.
-
-Let's reset. Tell me exactly what you wanted changed in the code, and I’ll make only those changes—nothing else.
-
-User attachment
-look at what I see
-Yes. I see exactly what you're showing me.
-
-The generated .js file on the right is failing to load — it says “Couldn't load this file.”
-
-So the problem isn't your race code yet. The file I generated was not delivered in a usable way.
-
-And you're right to call that out. I should not have given you a broken file and then told you it was the corrected script.
-
-We should go back to your actual source and make the requested changes directly, without changing anything else.
-
-
-
-
-Ad
-so where is the code
-
-Worked for 21s
-You're right. The code is not in that screenshot. I gave you a file attachment instead of putting the actual JavaScript in the chat.
-
-I have the original 3,404-line script you uploaded. 
-
-I should have pasted the code itself here rather than giving you a file that won't open.
-
-I’ll use that exact script as the base and make only the changes you asked for. No redesign, no countdown changes, no curtain changes, no runner/image changes, no other race logic changes.
-
 <script type="module">
 
 
@@ -2672,7 +2575,7 @@ async function loadDraftOrderFromSupabase(){
     SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
   ){
 
-    return [];
+    return { status:"error", order:[] };
 
   }
 
@@ -2695,7 +2598,7 @@ async function loadDraftOrderFromSupabase(){
       );
 
 
-      return [];
+      return { status:"error", order:[] };
 
     }
 
@@ -2705,7 +2608,7 @@ async function loadDraftOrderFromSupabase(){
       !data.length
     ){
 
-      return [];
+      return { status:"empty", order:[] };
 
     }
 
@@ -2759,12 +2662,12 @@ async function loadDraftOrderFromSupabase(){
       teams.length
     ){
 
-      return [];
+      return { status:"error", order:[] };
 
     }
 
 
-    return order;
+    return { status:"ok", order };
 
   }
   catch(error){
@@ -2775,7 +2678,7 @@ async function loadDraftOrderFromSupabase(){
     );
 
 
-    return [];
+    return { status:"error", order:[] };
 
   }
 
@@ -2886,28 +2789,12 @@ function resetVisuals(){
    FINISH POSITIONS
    ========================================================= */
 
-const FINISH_POSITIONS = [
-
-  84,
-  82.8,
-  81.6,
-  80.4,
-  79.2,
-  78,
-  76.8,
-  75.6
-
-];
+const FINISH_POSITION = 84;
 
 
-function getFinishPosition(rank){
+function getFinishPosition(){
 
-  return (
-    FINISH_POSITIONS[rank] ??
-    FINISH_POSITIONS[
-      FINISH_POSITIONS.length - 1
-    ]
-  );
+  return FINISH_POSITION;
 
 }
 
@@ -3153,12 +3040,12 @@ function showSavedDraft(){
 
 
         el.style.left =
-          `${getFinishPosition(rank)}%`;
+          `${FINISH_POSITION}%`;
 
 
         el.dataset.position =
           String(
-            getFinishPosition(rank)
+            FINISH_POSITION
           );
 
 
@@ -3231,10 +3118,14 @@ function start(){
 
 
   /*
-     Use the existing official order if one exists.
+     Use ONLY the official order already loaded from Supabase.
+
+     The race must never create a new local/random order.
+     A new official order is created only during initialization
+     when Supabase genuinely has no saved order, or by RESET DRAFT.
   */
 
-  let officialOrder =
+  const officialOrder =
     savedDraftOrder &&
     savedDraftOrder.length === teams.length
 
@@ -3245,81 +3136,18 @@ function start(){
       : [];
 
 
-  /*
-     If no order exists yet, create it immediately.
-
-     This prevents the countdown from getting stuck after GO.
-  */
-
   if(
     officialOrder.length !==
     teams.length
   ){
 
-    officialOrder =
-      createDraftOrder();
+    showStatus(
+      "No official draft order is loaded from Supabase. The race was not started."
+    );
 
-
-    if(
-      officialOrder.length !==
-      teams.length
-    ){
-
-      showStatus(
-        "Could not create a complete draft order."
-      );
-
-
-      return false;
-
-    }
-
-
-    /*
-       Lock the order locally immediately.
-    */
-
-    savedDraftOrder =
-      cloneDraftOrder(
-        officialOrder
-      );
-
-
-    oddsLocked =
-      true;
-
-
-    /*
-       Save in the background.
-
-       DO NOT await this.
-    */
-
-    saveDraftOrderToSupabase(
-      officialOrder
-    )
-      .then(saved => {
-
-        if(!saved){
-
-          console.warn(
-            "Draft order could not be saved to Supabase. The race is continuing with the locally locked order."
-          );
-
-        }
-
-      })
-      .catch(error => {
-
-        console.warn(
-          "Background draft save failed:",
-          error
-        );
-
-      });
+    return false;
 
   }
-
 
   /*
      This is now the official order for this race.
@@ -3477,12 +3305,12 @@ function start(){
     */
 
     runner.el.style.left =
-      `${getFinishPosition(runner.rank)}%`;
+      `${FINISH_POSITION}%`;
 
 
     runner.el.dataset.position =
       String(
-        getFinishPosition(runner.rank)
+        FINISH_POSITION
       );
 
 
@@ -3575,9 +3403,7 @@ function start(){
 
 
       const finishPosition =
-        getFinishPosition(
-          runner.rank
-        );
+        FINISH_POSITION;
 
 
       const phase =
@@ -4002,18 +3828,19 @@ async function lockOdds(){
        load that official order instead of replacing it.
     */
 
-    const existingOrder =
+    const existingDraft =
       await loadDraftOrderFromSupabase();
 
 
     if(
-      existingOrder.length ===
+      existingDraft.status === "ok" &&
+      existingDraft.order.length ===
       teams.length
     ){
 
       savedDraftOrder =
         cloneDraftOrder(
-          existingOrder
+          existingDraft.order
         );
 
 
@@ -4500,18 +4327,19 @@ async function resetSavedDraft(){
        Load the official order again before reporting failure.
     */
 
-    const existingOrder =
+    const existingDraft =
       await loadDraftOrderFromSupabase();
 
 
     if(
-      existingOrder.length ===
+      existingDraft.status === "ok" &&
+      existingDraft.order.length ===
       teams.length
     ){
 
       savedDraftOrder =
         cloneDraftOrder(
-          existingOrder
+          existingDraft.order
         );
 
 
@@ -4709,14 +4537,20 @@ async function initialize(){
      Load the ONE official draft order.
   */
 
-  savedDraftOrder =
+  const loadedDraft =
     await loadDraftOrderFromSupabase();
 
 
   if(
-    savedDraftOrder.length ===
-    teams.length
+    loadedDraft.status === "ok" &&
+    loadedDraft.order.length === teams.length
   ){
+
+    savedDraftOrder =
+      cloneDraftOrder(
+        loadedDraft.order
+      );
+
 
     oddsLocked =
       true;
@@ -4738,10 +4572,30 @@ async function initialize(){
   }
 
 
-  /*
-     No saved draft exists yet.
+  if(loadedDraft.status === "error"){
 
-     Create the official order once.
+    savedDraftOrder = [];
+    oddsLocked = false;
+
+    lockCommissionerBtn.textContent =
+      "LOCK ODDS";
+
+    lockCommissionerBtn.disabled =
+      false;
+
+    showStatus(
+      "Could not load the official draft order from Supabase. No new order was created."
+    );
+
+    return;
+
+  }
+
+
+  /*
+     Supabase is reachable and there is genuinely no saved order.
+     This is the only normal initialization path that creates a
+     new official order, and it must be saved successfully.
   */
 
   showStatus(
@@ -4761,31 +4615,20 @@ async function initialize(){
     oddsLocked =
       false;
 
-
     lockCommissionerBtn.textContent =
       "LOCK ODDS";
 
-
     lockCommissionerBtn.disabled =
       false;
-
 
     showStatus(
       "Could not create a complete draft order."
     );
 
-
     return;
 
   }
 
-
-  /*
-     Save the first official order.
-
-     If another browser creates it at the same time,
-     that existing order becomes the official one.
-  */
 
   const saved =
     await saveDraftOrderToSupabase(
@@ -4796,83 +4639,54 @@ async function initialize(){
   if(!saved){
 
     /*
-       Another league member may have created the official
-       order at the same time.
-
-       Check Supabase one more time.
+       Another browser may have created the official order at the
+       same time. Load it and use that order if it exists.
     */
 
-    const existingOrder =
+    const existingDraft =
       await loadDraftOrderFromSupabase();
 
 
     if(
-      existingOrder.length ===
-      teams.length
+      existingDraft.status === "ok" &&
+      existingDraft.order.length === teams.length
     ){
 
       savedDraftOrder =
         cloneDraftOrder(
-          existingOrder
+          existingDraft.order
         );
-
 
       oddsLocked =
         true;
 
-
       lockCommissionerBtn.textContent =
         "ODDS LOCKED";
-
 
       lockCommissionerBtn.disabled =
         true;
 
-
       showSavedDraft();
-
 
       showStatus(
         "Official draft order loaded. Ready at the starting line."
       );
-
 
       return;
 
     }
 
 
-    /*
-       If there is no real Supabase connection/order,
-       leave the order available locally so the race can
-       still start.
-    */
-
-    savedDraftOrder =
-      cloneDraftOrder(
-        newOrder
-      );
-
-
-    oddsLocked =
-      true;
-
-
+    savedDraftOrder = [];
+    oddsLocked = false;
     lockCommissionerBtn.textContent =
-      "ODDS LOCKED";
-
-
+      "LOCK ODDS";
     lockCommissionerBtn.disabled =
-      true;
-
-
-    showSavedDraft();
-
+      false;
 
     showStatus(
-      "Ready at the starting line. Draft order is locked locally."
+      "The official draft order could not be saved to Supabase. No race order was created."
     );
-
 
     return;
 
@@ -4891,7 +4705,6 @@ async function initialize(){
 
   lockCommissionerBtn.textContent =
     "ODDS LOCKED";
-
 
   lockCommissionerBtn.disabled =
     true;

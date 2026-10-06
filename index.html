@@ -3017,99 +3017,41 @@ function showSavedDraft(){
               String(team.id)
           );
 
-
         const rank =
           savedItem
             ? Number(savedItem.pick) - 1
             : index;
-
-
         el.style.left =
           `${FINISH_POSITION}%`;
-
-
         el.dataset.position =
           String(
             FINISH_POSITION
           );
-
-
         el.classList.add(
           "finished"
         );
-
-
         return {
-
           team:{
             ...team
           },
-
           el,
-
           revealed:true,
-
           rank
-
         };
-
       }
     );
-
-
+  
   renderResults(
     [...savedDraftOrder]
   );
-
-
   showStatus(
     "Saved draft loaded from Supabase."
   );
 
 }
 
-
-/* =========================================================
-   START RACE
-
-   IMPORTANT:
-
-   If an official order already exists, use it.
-
-   If one does not exist, create it immediately and save
-   it in the background.
-
-   The race itself NEVER waits for Supabase.
-
-   The entire race is 45 seconds.
-
-   Picks are revealed when runners physically reach the
-   finish line.
-   ========================================================= */
-
 function start(){
-
-  if(raceRunning){
-
-    return false;
-
-  }
-
-
-  resetVisuals();
-
-
-  initializeDraftOrderDisplay();
-
-
-  /*
-     Use ONLY the official order already loaded from Supabase.
-
-     The race must never create a new local/random order.
-     A new official order is created only during initialization
-     when Supabase genuinely has no saved order, or by RESET DRAFT.
-  */
-
+  if(raceRunning){ return false; }
   const officialOrder =
     savedDraftOrder &&
     savedDraftOrder.length === teams.length
@@ -4104,10 +4046,6 @@ async function runCountdown(){
 
 /* =========================================================
    START FROM OVERLAY
-
-   The race starts immediately after GO.
-
-   There is NO Supabase request here.
    ========================================================= */
 
 async function startDashFromOverlay(){
@@ -4117,84 +4055,73 @@ async function startDashFromOverlay(){
     return;
 
   }
-
-
   startDashBtn.disabled =
     true;
+  resetVisuals();
+  initializeDraftOrderDisplay();
+  const officialOrder =
+    savedDraftOrder &&
+    savedDraftOrder.length === teams.length
+      ? cloneDraftOrder(savedDraftOrder)
+      : [];
 
 
-  /*
-     Countdown.
-  */
+  if(
+    officialOrder.length !==
+    teams.length
+  ){
+
+    showStatus(
+      "No official draft order is loaded from Supabase. The race was not started."
+    );
+
+    startDashBtn.disabled =
+      false;
+
+    return;
+
+  }
+  runners =
+    teams.map(
+      (team,index) => ({
+        team:{...team},
+        el:addRunner(team,index),
+        finish:0,
+        revealed:false,
+        rank:-1
+      })
+    );
 
   await runCountdown();
-
-
-  /*
-     GO.
-
-     Open the curtain.
-  */
-
   raceCurtain.classList.add(
     "open"
   );
-
 
   raceCurtain.classList.remove(
     "countdown"
   );
 
-
-  /*
-     Start the actual race immediately.
-
-     start() does not wait for Supabase.
-  */
-
   const success =
     start();
-
-
   if(!success){
-
     raceCurtain.classList.remove(
       "open",
       "countdown",
       "hidden"
     );
 
-
     startDashBtn.disabled =
       false;
-
 
     countdownNumber.textContent =
       "3";
 
-
     return;
-
   }
-
-
-  /*
-     Give the curtain enough time to fully move off screen.
-
-     The race is already running underneath.
-  */
 
   await wait(
     1100
   );
-
-
-  /*
-     Completely remove the curtain.
-
-     It will NOT return.
-  */
-
   raceCurtain.classList.add(
     "hidden"
   );

@@ -3163,13 +3163,9 @@ function start(){
 
         const finishPosition =
           FINISH_POSITION;
-
-
         const phase =
           runner.rank *
           .72;
-
-
         const surge =
           Math.sin(
             progress *
@@ -3303,138 +3299,87 @@ function start(){
 
 }
 
-
 /* =========================================================
    COMMISSIONER OPEN
    ========================================================= */
-
 function openCommissioner(){
-
   commissionerBottomButton.classList.add(
     "hidden"
   );
-
-
   commissionerLoginBox.classList.remove(
     "hidden"
   );
-
-
   commissionerPassword.value =
     "";
-
-
   commissionerPassword.focus();
-
 }
-
-
 /* =========================================================
    COMMISSIONER CLOSE
    ========================================================= */
-
 function closeCommissioner(){
-
   commissionerBottomButton.classList.remove(
     "hidden"
   );
-
-
   commissionerLoginBox.classList.add(
     "hidden"
   );
-
-
   commissionerPanel.classList.add(
     "hidden"
   );
-
-
   teamSettingsPanel.classList.add(
     "hidden"
   );
-
-
   commissionerUnlocked =
     false;
-
 }
-
-
 /* =========================================================
    UNLOCK
    ========================================================= */
-
 function unlockCommissioner(){
-
   if(
     commissionerPassword.value !==
     COMMISSIONER_PASSWORD
   ){
-
     alert(
       "Incorrect commissioner password."
     );
-
-
     commissionerPassword.select();
-
-
     return;
 
   }
-
-
   commissionerUnlocked =
     true;
-
-
   commissionerLoginBox.classList.add(
     "hidden"
   );
-
-
   commissionerPanel.classList.remove(
     "hidden"
   );
-
-
   teamSettingsPanel.classList.remove(
     "hidden"
   );
-
-
   renderInputs();
-
-
   showStatus(
     oddsLocked
       ? "Commissioner tools unlocked. Odds are currently locked."
       : "Commissioner tools unlocked."
   );
-
 }
-
 
 /* =========================================================
    LOCK ODDS
    ========================================================= */
-
 async function lockOdds(){
-
   if(
     !commissionerUnlocked ||
     oddsLocked
   ){
-
-    return;
-
+   return;
   }
-st saved =
+const saved =
     await saveConfiguration();
   if(!saved){
     return;
-
   }
   lockCommissionerBtn.disabled =
     true;
@@ -3454,7 +3399,6 @@ st saved =
       "Could not create a complete draft order."
     );
     return;
-
   }
   const savedOrder =
     await saveDraftOrderToSupabase(
@@ -3487,7 +3431,6 @@ st saved =
     order,
     "ODDS LOCKED — official draft order saved."
   );
-
 }
 
 /* =========================================================

@@ -826,14 +826,11 @@ h1{
 
 #startDashBtn{
   width:100%;
-
   padding:
     15px
     24px;
-
   background:#d8b45a;
   color:#071522;
-
   font:
     900
     22px
@@ -851,7 +848,6 @@ h1{
 
 #startDashBtn:hover:not(:disabled){
   transform:translateY(-2px);
-
   box-shadow:
     0
     10px
@@ -880,12 +876,19 @@ h1{
   pointer-events:none;
 }
 
-#raceCurtain.countdown #countdownView{
-  opacity:1;
+#raceCurtain.countdown .left-panel,
+#raceCurtain.countdown .right-panel{
+  opacity:0;
+  pointer-events:none;
 }
 
 #raceCurtain.countdown .race-curtain-content{
   opacity:0;
+  pointer-events:none;
+}
+
+#raceCurtain.countdown #countdownView{
+  opacity:1;
   pointer-events:none;
 }
 
@@ -1017,142 +1020,103 @@ h1{
   .field{
     aspect-ratio:2 / 1;
   }
-
   .player-image{
     width:44px;
     height:44px;
   }
-
   .permanent-labels{
     grid-template-columns:1fr 1fr;
   }
-
   #commissionerPassword{
     min-width:170px;
     width:100%;
   }
-
   .race-flow{
     gap:5px;
   }
-
   .flow-box{
     padding:8px 9px;
     font-size:10px;
   }
-
 }
-
 </style>
-
 </head>
-
-
 <body>
-
 
 <!-- =========================================================
      PRE-RACE OVERLAY
      ========================================================= -->
-
 <div
   id="raceCurtain"
 >
-
   <div
     class="curtain-panel left-panel"
   ></div>
-
   <div
     class="curtain-panel right-panel"
   ></div>
-
-
   <div
     class="race-curtain-content"
   >
-
     <div
       class="curtain-card"
     >
-
       <div
         class="curtain-kicker"
       >
-        TCWR DRAFT NIGHT
+        TCWR Dy_NASTY
       </div>
-
-
       <h2
         class="curtain-title"
       >
         100-YARD DRAFT DASH
       </h2>
-
-
       <div
         class="curtain-subtitle"
       >
         Eight teams. One finish line.
         The order you see is the official draft order.
       </div>
-
-
       <div
         class="main-rule"
       >
-
         <div
           class="main-rule-title"
         >
           HIGHER ODDS = BETTER PICK
         </div>
-
         <div
           class="main-rule-text"
         >
           The higher a team's odds, the better its chance
           of being selected early.
         </div>
-
       </div>
-
-
       <div
         class="race-flow"
       >
-
         <div class="flow-box">
           FIRST ACROSS
         </div>
-
         <div class="flow-arrow">
           →
         </div>
-
         <div class="flow-box">
           PICK #1
         </div>
-
         <div class="flow-arrow">
           •
         </div>
-
         <div class="flow-box">
           LAST ACROSS
         </div>
-
         <div class="flow-arrow">
           →
         </div>
-
         <div class="flow-box">
           PICK #8
         </div>
-
       </div>
-
-
       <p
         class="race-note"
       >
@@ -1160,41 +1124,29 @@ h1{
         the race begins, so everyone watching sees
         the same result.
       </p>
-
-
       <button
         id="startDashBtn"
         type="button"
       >
         LET'S RACE
       </button>
-
     </div>
-
   </div>
-
-
   <div
     id="countdownView"
   >
-
     <div
       class="countdown-label"
     >
       TAKE YOUR MARKS
     </div>
-
     <div
       id="countdownNumber"
     >
       3
     </div>
-
   </div>
-
 </div>
-
-
 <!-- =========================================================
      MAIN PAGE
      ========================================================= -->
@@ -1202,19 +1154,14 @@ h1{
 <div
   class="wrap"
 >
-
   <h1>
     TCWR 100-YARD DRAFT DASH
   </h1>
-
-
   <div
     class="sub"
   >
     WEIGHTED ODDS • 8 RUNNERS • DRAFT ORDER
   </div>
-
-
   <div
     id="status"
     class="status"
@@ -1222,182 +1169,131 @@ h1{
     Ready at the starting line.
   </div>
 
-
   <!-- =======================================================
        COMMISSIONER TEAM SETTINGS
        ======================================================= -->
-
   <div
     id="teamSettingsPanel"
     class="panel hidden"
   >
-
     <div
       class="teams"
       id="teamInputs"
     ></div>
-
-
     <div
       class="lock-note"
     >
       Commissioner tools are unlocked.
       Edit all 8 teams and click SAVE CONFIGURATION.
     </div>
-
   </div>
-
 
   <!-- =======================================================
        RACE + DRAFT ORDER
        ======================================================= -->
-
   <div
     class="race-layout"
   >
-
     <div
       class="race-main"
     >
-
       <div
         class="field"
         id="field"
       ></div>
-
-
       <div
         class="permanent-labels"
         id="permanentLabels"
       ></div>
-
     </div>
-
-
     <div
       class="results"
     >
-
       <div
         class="panel"
       >
-
         <h2>
           Draft Order
         </h2>
-
-
         <ol
           id="draftOrder"
           class="result-list"
         ></ol>
-
       </div>
-
     </div>
-
   </div>
-
 
   <!-- =======================================================
        COMMISSIONER
        ======================================================= -->
-
   <div
     id="commissionerArea"
   >
-
     <button
       id="commissionerBottomButton"
       type="button"
     >
       COMMISSIONER
     </button>
-
-
     <div
       id="commissionerLoginBox"
       class="hidden"
     >
-
       <input
         id="commissionerPassword"
         type="password"
         placeholder="Commissioner password"
         autocomplete="off"
       >
-
-
       <button
         id="unlockCommissionerBtn"
         type="button"
       >
         UNLOCK
       </button>
-
-
       <button
         id="cancelCommissionerBtn"
         type="button"
       >
         CANCEL
       </button>
-
     </div>
-
-
     <div
       id="commissionerPanel"
       class="hidden"
     >
-
       <h3>
         Commissioner Controls
       </h3>
-
-
       <div
         class="lock-note"
       >
       </div>
-
-
       <div
         class="commissioner-actions"
       >
-
         <button
           id="saveConfigBtn"
           type="button"
         >
           SAVE CONFIGURATION
         </button>
-
-
         <button
           id="resetDraftBtn"
           type="button"
         >
           RESET SAVED DRAFT
         </button>
-
-
         <button
           id="lockCommissionerBtn"
           type="button"
         >
           LOCK ODDS
         </button>
-
       </div>
-
     </div>
-
   </div>
-
 </div>
-
-
 
 <script type="module">
 
@@ -1406,13 +1302,26 @@ h1{
    ========================================================= */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-const COMMISSIONER_PASSWORD = 'Asher'; 
-const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
-const SUPABASE_TABLE_NAME = 'draft_configs';
-const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const COMMISSIONER_PASSWORD = 'Asher';
+
+const SUPABASE_URL =
+  'https://jheqfwykhvyngfqawknr.supabase.co';
+
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+
+const SUPABASE_TABLE_NAME =
+  'draft_configs';
+
+const SUPABASE_ORDERS_TABLE_NAME =
+  'draft_orders';
+
+const supabase =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 
 /* =========================================================
    IMAGE FILES
@@ -1430,7 +1339,6 @@ const IMAGE_FILES = [
   "image8.jpeg"
 
 ];
-
 
 /* =========================================================
    DEFAULT TEAMS
@@ -1507,21 +1415,16 @@ let teams =
 
 let runners = [];
 
-
 let savedDraftOrder = [];
-
 
 let raceRunning =
   false;
 
-
 let commissionerUnlocked =
   false;
 
-
 let oddsLocked =
   false;
-
 
 let raf =
   0;
@@ -1534,73 +1437,80 @@ let raf =
 const field =
   document.getElementById("field");
 
-
 const draftOrderList =
   document.getElementById("draftOrder");
-
 
 const permanentLabels =
   document.getElementById("permanentLabels");
 
-
 const teamSettingsPanel =
   document.getElementById("teamSettingsPanel");
-
 
 const teamInputs =
   document.getElementById("teamInputs");
 
-
 const statusElement =
   document.getElementById("status");
 
-
 const commissionerBottomButton =
-  document.getElementById("commissionerBottomButton");
-
+  document.getElementById(
+    "commissionerBottomButton"
+  );
 
 const commissionerLoginBox =
-  document.getElementById("commissionerLoginBox");
-
+  document.getElementById(
+    "commissionerLoginBox"
+  );
 
 const commissionerPanel =
-  document.getElementById("commissionerPanel");
-
+  document.getElementById(
+    "commissionerPanel"
+  );
 
 const commissionerPassword =
-  document.getElementById("commissionerPassword");
-
+  document.getElementById(
+    "commissionerPassword"
+  );
 
 const unlockCommissionerBtn =
-  document.getElementById("unlockCommissionerBtn");
-
+  document.getElementById(
+    "unlockCommissionerBtn"
+  );
 
 const cancelCommissionerBtn =
-  document.getElementById("cancelCommissionerBtn");
-
+  document.getElementById(
+    "cancelCommissionerBtn"
+  );
 
 const lockCommissionerBtn =
-  document.getElementById("lockCommissionerBtn");
-
+  document.getElementById(
+    "lockCommissionerBtn"
+  );
 
 const saveConfigBtn =
-  document.getElementById("saveConfigBtn");
-
+  document.getElementById(
+    "saveConfigBtn"
+  );
 
 const resetDraftBtn =
-  document.getElementById("resetDraftBtn");
-
+  document.getElementById(
+    "resetDraftBtn"
+  );
 
 const raceCurtain =
-  document.getElementById("raceCurtain");
-
+  document.getElementById(
+    "raceCurtain"
+  );
 
 const startDashBtn =
-  document.getElementById("startDashBtn");
-
+  document.getElementById(
+    "startDashBtn"
+  );
 
 const countdownNumber =
-  document.getElementById("countdownNumber");
+  document.getElementById(
+    "countdownNumber"
+  );
 
 
 /* =========================================================
@@ -1683,22 +1593,19 @@ function normalizeImage(value,id){
 
 function renderInputs(){
 
-  teamInputs.innerHTML = "";
-
+  teamInputs.innerHTML =
+    "";
 
   const disabled =
     oddsLocked
       ? "disabled"
       : "";
 
-
   const header =
     document.createElement("div");
 
-
   header.className =
     "team-editor-header";
-
 
   header.innerHTML = `
 
@@ -1710,7 +1617,6 @@ function renderInputs(){
 
   `;
 
-
   teamInputs.appendChild(header);
 
 
@@ -1718,7 +1624,6 @@ function renderInputs(){
 
     const row =
       document.createElement("div");
-
 
     row.className =
       "team-edit";
@@ -1732,7 +1637,6 @@ function renderInputs(){
             file === team.image
               ? "selected"
               : "";
-
 
           return `
 
@@ -1788,7 +1692,12 @@ function renderInputs(){
         <img
           class="team-image-preview"
           id="image-preview-${team.id}"
-          src="${escapeHTML(normalizeImage(team.image,team.id))}"
+          src="${escapeHTML(
+            normalizeImage(
+              team.image,
+              team.id
+            )
+          )}"
           alt=""
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
         >
@@ -1825,8 +1734,7 @@ function renderInputs(){
 
 }
 
-
-/* =========================================================
+  /* =========================================================
    EDITOR LISTENERS
    ========================================================= */
 
@@ -1872,14 +1780,11 @@ function updateTeamFromEditor(event){
   const element =
     event.target;
 
-
   const id =
     String(element.dataset.id);
 
-
   const type =
     element.dataset.type;
-
 
   const team =
     teams.find(
@@ -1935,7 +1840,6 @@ function updateTeamFromEditor(event){
       element.value =
         team.image;
 
-
       return;
 
     }
@@ -1959,12 +1863,13 @@ function updateTeamFromEditor(event){
       preview.src =
         team.image;
 
-
       preview.style.display =
         "block";
 
 
-      if(preview.nextElementSibling){
+      if(
+        preview.nextElementSibling
+      ){
 
         preview.nextElementSibling.style.display =
           "none";
@@ -2003,7 +1908,6 @@ function renderPermanentLabels(){
 
     const box =
       document.createElement("div");
-
 
     box.className =
       "permanent-team";
@@ -2134,7 +2038,7 @@ function weightedPick(pool){
 
 
 /* =========================================================
-   CREATE DRAFT ORDER next fix
+   CREATE DRAFT ORDER
    ========================================================= */
 
 function createDraftOrder(){
@@ -2207,9 +2111,8 @@ function createDraftOrder(){
 
 }
 
-
 /* =========================================================
-   CLONE DRAFT ORDER next fix
+   CLONE DRAFT ORDER
    ========================================================= */
 
 function cloneDraftOrder(order){
@@ -2228,6 +2131,60 @@ function cloneDraftOrder(order){
   );
 
 }
+
+
+/* =========================================================
+   APPLY OFFICIAL DRAFT ORDER
+   ========================================================= */
+
+function applyOfficialDraftOrder(
+  order,
+  message
+){
+
+  if(
+    !order ||
+    order.length !== teams.length
+  ){
+
+    return false;
+
+  }
+
+
+  savedDraftOrder =
+    cloneDraftOrder(order);
+
+
+  oddsLocked =
+    true;
+
+
+  renderInputs();
+
+
+  lockCommissionerBtn.textContent =
+    "ODDS LOCKED";
+
+
+  lockCommissionerBtn.disabled =
+    true;
+
+
+  showSavedDraft();
+
+
+  if(message){
+
+    showStatus(message);
+
+  }
+
+
+  return true;
+
+}
+
 
 /* =========================================================
    SAVE TEAMS
@@ -2437,16 +2394,8 @@ async function loadTeamsFromSupabase(){
 
 }
 
-
 /* =========================================================
    SAVE DRAFT ORDER
-
-   IMPORTANT:
-
-   INSERT is used instead of UPSERT so an existing official
-   draft cannot be silently overwritten.
-
-   The saved order is the source of truth for the race.
    ========================================================= */
 
 async function saveDraftOrderToSupabase(order){
@@ -2529,10 +2478,6 @@ async function saveDraftOrderToSupabase(order){
 
 /* =========================================================
    LOAD DRAFT ORDER
-
-   This is only used during initialization/reset.
-
-   It is NEVER called during the actual race.
    ========================================================= */
 
 async function loadDraftOrderFromSupabase(){
@@ -2671,14 +2616,14 @@ async function loadDraftOrderFromSupabase(){
 
 
 /* =========================================================
-   CLEAR SAVED DRAFT Next fix
+   CLEAR SAVED DRAFT
    ========================================================= */
 
 async function clearDraftOrderFromSupabase(){
 
   if(
-    !SUPABASE_PUBLISHABLE_KEY ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")
+    !SUPABASE_ANON_KEY ||
+    SUPABASE_ANON_KEY.startsWith("PASTE_")
   ){
 
     showStatus(
@@ -2771,17 +2716,11 @@ function resetVisuals(){
 
 
 /* =========================================================
-   FINISH POSITIONS
+   FINISH POSITION
    ========================================================= */
 
-const FINISH_POSITION = 84;
-
-
-function getFinishPosition(){
-
-  return FINISH_POSITION;
-
-}
+const FINISH_POSITION =
+  84;
 
 
 /* =========================================================
@@ -2796,28 +2735,15 @@ function addRunner(team,index){
 
   runner.className =
     "runner";
-
-
-  /*
-     Eight runners are spaced evenly and safely
-     inside the field.
-  */
-
   runner.style.top =
     `${12 + index * 10.8}%`;
-
-
   runner.style.left =
     "8%";
-
-
   const image =
     normalizeImage(
       team.image,
       team.id
     );
-
-
   runner.innerHTML = `
 
     <img
@@ -2828,13 +2754,8 @@ function addRunner(team,index){
     >
 
   `;
-
-
   field.appendChild(runner);
-
-
   return runner;
-
 }
 
 
@@ -2994,11 +2915,7 @@ function showSavedDraft(){
     return;
 
   }
-
-
   resetVisuals();
-
-
   runners =
     teams.map(
       (team,index) => {
@@ -3008,15 +2925,12 @@ function showSavedDraft(){
             team,
             index
           );
-
-
         const savedItem =
           savedDraftOrder.find(
             item =>
               String(item.team.id) ===
               String(team.id)
           );
-
         const rank =
           savedItem
             ? Number(savedItem.pick) - 1
@@ -3024,12 +2938,11 @@ function showSavedDraft(){
         el.style.left =
           `${FINISH_POSITION}%`;
         el.dataset.position =
-          String(
-            FINISH_POSITION
-          );
+          String(FINISH_POSITION);
         el.classList.add(
           "finished"
         );
+
         return {
           team:{
             ...team
@@ -3040,32 +2953,35 @@ function showSavedDraft(){
         };
       }
     );
-  
+
   renderResults(
     [...savedDraftOrder]
   );
+
   showStatus(
     "Saved draft loaded from Supabase."
   );
-
 }
 
+/* =========================================================
+   START RACE
+   ========================================================= */
+
 function start(){
-  if(raceRunning){ return false; }
-  const officialOrder =
+  if(raceRunning){
+    return false;
+
+  }
+  const order =
     savedDraftOrder &&
     savedDraftOrder.length === teams.length
 
       ? cloneDraftOrder(
           savedDraftOrder
         )
-
       : [];
-
-
   if(
-    officialOrder.length !==
-    teams.length
+    order.length !== teams.length
   ){
 
     showStatus(
@@ -3073,31 +2989,17 @@ function start(){
     );
 
     return false;
-
   }
-
-  /*
-     This is now the official order for this race.
-  */
-
-  const order =
-    cloneDraftOrder(
-      officialOrder
-    );
-
 
   raceRunning =
     true;
-
-
   showStatus(
     "The draft is locked in — the race is on!"
   );
 
-
-  /*
-     Create all eight runners.
-  */
+  /* =======================================================
+     CREATE ALL RUNNERS
+     ======================================================= */
 
   runners =
     teams.map(
@@ -3121,48 +3023,16 @@ function start(){
 
       })
     );
-
-
-  /* =======================================================
-     45-SECOND RACE
-
-     The ENTIRE race lasts 45 seconds.
-
-     The final runner reaches the finish line at exactly
-     45 seconds.
-
-     Earlier runners cross progressively before that.
-
-     These are movement/finish times — NOT reveal timers.
-
-     Pick #1 = 35.00 seconds
-     Pick #2 = 36.43 seconds
-     Pick #3 = 37.86 seconds
-     Pick #4 = 39.29 seconds
-     Pick #5 = 40.71 seconds
-     Pick #6 = 42.14 seconds
-     Pick #7 = 43.57 seconds
-     Pick #8 = 45.00 seconds
-     ======================================================= */
-
   const raceDuration =
     45000;
-
-
   const firstFinish =
     35000;
-
-
   const finishWindow =
     raceDuration -
     firstFinish;
-
-
   const finishGap =
     finishWindow /
     (teams.length - 1);
-
-
   order.forEach(
     (item,rank) => {
 
@@ -3179,23 +3049,12 @@ function start(){
         return;
 
       }
-
-
       runner.pick =
         item.pick;
 
 
       runner.rank =
         rank;
-
-
-      /*
-         This determines when the runner reaches the
-         physical goal line.
-
-         It is NOT an independent reveal timer.
-      */
-
       runner.finish =
         firstFinish +
         rank *
@@ -3203,17 +3062,12 @@ function start(){
 
     }
   );
-
-
   const startTime =
     performance.now();
 
 
   /* =======================================================
      REVEAL RUNNER
-
-     A runner is revealed ONLY after its visual position
-     has reached the actual finish position.
      ======================================================= */
 
   function revealRunner(runner){
@@ -3223,22 +3077,12 @@ function start(){
       return;
 
     }
-
-
-    /*
-       The runner has physically reached the goal line.
-
-       Keep it at the exact finish position.
-    */
-
     runner.el.style.left =
       `${FINISH_POSITION}%`;
 
 
     runner.el.dataset.position =
-      String(
-        FINISH_POSITION
-      );
+      String(FINISH_POSITION);
 
 
     runner.revealed =
@@ -3268,9 +3112,8 @@ function start(){
 
   }
 
-
   /* =======================================================
-     ANIMATION
+     ANIMATION FRAME
      ======================================================= */
 
   function frame(now){
@@ -3280,210 +3123,152 @@ function start(){
       startTime;
 
 
-    runners.forEach(runner => {
+    runners.forEach(
+      runner => {
 
-      const finishTime =
-        runner.finish;
-
-
-      if(
-        !finishTime ||
-        finishTime <= 0
-      ){
-
-        return;
-
-      }
+        const finishTime =
+          runner.finish;
 
 
-      /*
-         Individual progress is based on how far this
-         particular runner should have traveled by now.
-      */
+        if(
+          !finishTime ||
+          finishTime <= 0
+        ){
 
-      const individualProgress =
-        Math.min(
-          1,
-          elapsed /
-          finishTime
-        );
+          return;
+
+        }
 
 
-      /*
-         Smooth acceleration.
-
-         This changes the appearance of the run without
-         changing the runner's scheduled crossing time.
-      */
-
-      const progress =
-        1 -
-        Math.pow(
-          1 -
-          individualProgress,
-          1.18
-        );
-
-
-      const startPosition =
-        8;
-
-
-      const finishPosition =
-        FINISH_POSITION;
-
-
-      const phase =
-        runner.rank *
-        .72;
-
-
-      /*
-         Small lane-specific movement.
-
-         The effect fades to zero at the finish line.
-      */
-
-      const surge =
-        Math.sin(
-          progress *
-          Math.PI *
-          5 +
-          phase
-        ) *
-        .010 *
-        (
-          1 -
-          individualProgress
-        );
-
-
-      const fade =
-        Math.sin(
-          progress *
-          Math.PI *
-          2.2 +
-          phase *
-          1.7
-        ) *
-        .006 *
-        (
-          1 -
-          individualProgress
-        );
-
-
-      const basePosition =
-        startPosition +
-        progress *
-        (
-          finishPosition -
-          startPosition
-        );
-
-
-      const movementEffect =
-        (
-          surge +
-          fade
-        ) *
-        100;
-
-
-      let currentPosition =
-        basePosition +
-        movementEffect;
-
-
-      /*
-         BEFORE reaching the finish time:
-
-         Keep the runner inside the field and prevent it
-         from reaching the finish line early.
-
-         AT the finish time:
-
-         Put the runner exactly on the finish line.
-      */
-
-      if(
-        individualProgress < 1
-      ){
-
-        currentPosition =
+        const individualProgress =
           Math.min(
-            finishPosition - 0.15,
-            Math.max(
-              startPosition,
-              currentPosition
-            )
+            1,
+            elapsed /
+            finishTime
           );
 
+
+        const progress =
+          1 -
+          Math.pow(
+            1 -
+            individualProgress,
+            1.18
+          );
+
+
+        const startPosition =
+          8;
+
+
+        const finishPosition =
+          FINISH_POSITION;
+
+
+        const phase =
+          runner.rank *
+          .72;
+
+
+        const surge =
+          Math.sin(
+            progress *
+            Math.PI *
+            5 +
+            phase
+          ) *
+          .010 *
+          (
+            1 -
+            individualProgress
+          );
+
+
+        const fade =
+          Math.sin(
+            progress *
+            Math.PI *
+            2.2 +
+            phase *
+            1.7
+          ) *
+          .006 *
+          (
+            1 -
+            individualProgress
+          );
+
+
+        const basePosition =
+          startPosition +
+          progress *
+          (
+            finishPosition -
+            startPosition
+          );
+
+
+        const movementEffect =
+          (
+            surge +
+            fade
+          ) *
+          100;
+
+
+        let currentPosition =
+          basePosition +
+          movementEffect;
+        if(
+          individualProgress < 1
+        ){
+
+          currentPosition =
+            Math.min(
+              finishPosition - 0.15,
+              Math.max(
+                startPosition,
+                currentPosition
+              )
+            );
+
+        }
+        else{
+
+          currentPosition =
+            finishPosition;
+
+        }
+
+        const previousPosition =
+          Number(
+            runner.el.dataset.position ||
+            startPosition
+          );
+        const safePosition =
+          Math.max(
+            previousPosition,
+            currentPosition
+          );
+        runner.el.dataset.position =
+          String(
+            safePosition
+          );
+        runner.el.style.left =
+          `${safePosition}%`;
+        if(
+          safePosition >=
+          finishPosition
+        ){
+
+          revealRunner(
+            runner
+          );
+
+        }
+
       }
-      else{
-
-        currentPosition =
-          finishPosition;
-
-      }
-
-
-      /*
-         Never move backward.
-      */
-
-      const previousPosition =
-        Number(
-          runner.el.dataset.position ||
-          startPosition
-        );
-
-
-      const safePosition =
-        Math.max(
-          previousPosition,
-          currentPosition
-        );
-
-
-      runner.el.dataset.position =
-        String(
-          safePosition
-        );
-
-
-      runner.el.style.left =
-        `${safePosition}%`;
-
-
-      /*
-         THE PICK IS REVEALED BECAUSE THE RUNNER HAS
-         REACHED THE GOAL LINE.
-
-         There is no separate reveal countdown.
-      */
-
-      if(
-        safePosition >=
-        finishPosition
-      ){
-
-        revealRunner(
-          runner
-        );
-
-      }
-
-    });
-
-
-    /*
-       The race is complete only when every runner has
-       physically crossed the finish line.
-
-       The final runner reaches the line at 45 seconds.
-    */
-
+    );
     if(
       runners.every(
         runner =>
@@ -3493,37 +3278,21 @@ function start(){
 
       raceRunning =
         false;
-
-
       renderResults(
         cloneDraftOrder(
           savedDraftOrder
         )
       );
-
-
       showStatus(
         "DRAFT ORDER COMPLETE — Pick #1 is the winner."
       );
-
-
       return;
-
     }
-
-
     raf =
       requestAnimationFrame(
         frame
       );
-
   }
-
-
-  /*
-     Start the animation.
-  */
-
   raf =
     requestAnimationFrame(
       frame
@@ -3649,12 +3418,6 @@ function unlockCommissioner(){
 
 /* =========================================================
    LOCK ODDS
-
-   This can be used by the commissioner to explicitly
-   generate and save the official order before the race.
-
-   Once saved, the order is immutable until RESET DRAFT
-   is used.
    ========================================================= */
 
 async function lockOdds(){
@@ -3667,62 +3430,19 @@ async function lockOdds(){
     return;
 
   }
-
-
-  /*
-     Validate weights.
-  */
-
-  const invalidWeight =
-    teams.some(
-      team =>
-        !Number.isFinite(
-          Number(team.weight)
-        ) ||
-        Number(team.weight) < 0
-    );
-
-
-  if(invalidWeight){
-
-    alert(
-      "All weights must be zero or greater."
-    );
-
-
-    return;
-
-  }
-
-
-  /*
-     Make sure the current configuration is saved.
-  */
-
-  const saved =
+st saved =
     await saveConfiguration();
-
-
   if(!saved){
-
     return;
 
   }
-
-
   lockCommissionerBtn.disabled =
     true;
-
-
   showStatus(
     "Generating official draft order..."
   );
-
-
   const order =
     createDraftOrder();
-
-
   if(
     order.length !==
     teams.length
@@ -3730,119 +3450,45 @@ async function lockOdds(){
 
     lockCommissionerBtn.disabled =
       false;
-
-
     showStatus(
       "Could not create a complete draft order."
     );
-
-
     return;
 
   }
-
-
   const savedOrder =
     await saveDraftOrderToSupabase(
       order
     );
-
-
   if(!savedOrder){
-
-    /*
-       If another browser created the order first,
-       load that official order instead of replacing it.
-    */
-
-    const existingDraft =
+ const existingDraft =
       await loadDraftOrderFromSupabase();
-
-
     if(
       existingDraft.status === "ok" &&
       existingDraft.order.length ===
       teams.length
     ){
 
-      savedDraftOrder =
-        cloneDraftOrder(
-          existingDraft.order
-        );
-
-
-      oddsLocked =
-        true;
-
-
-      renderInputs();
-
-
-      lockCommissionerBtn.textContent =
-        "ODDS LOCKED";
-
-
-      lockCommissionerBtn.disabled =
-        true;
-
-
-      showSavedDraft();
-
-
-      showStatus(
+      applyOfficialDraftOrder(
+        existingDraft.order,
         "Official draft order already existed and was loaded."
       );
-
-
       return;
-
     }
-
 
     lockCommissionerBtn.disabled =
       false;
-
-
     showStatus(
       "Could not save the official draft order. Odds were not locked."
     );
-
-
     return;
-
   }
-
-
-  savedDraftOrder =
-    cloneDraftOrder(
-      order
-    );
-
-
-  oddsLocked =
-    true;
-
-
-  renderInputs();
-
-
-  lockCommissionerBtn.textContent =
-    "ODDS LOCKED";
-
-
-  lockCommissionerBtn.disabled =
-    true;
-
-
-  showSavedDraft();
-
-
-  showStatus(
+  applyOfficialDraftOrder(
+    order,
     "ODDS LOCKED — official draft order saved."
   );
 
 }
-
 
 /* =========================================================
    SAVE CONFIGURATION
@@ -4047,60 +3693,31 @@ async function runCountdown(){
 /* =========================================================
    START FROM OVERLAY
    ========================================================= */
-
 async function startDashFromOverlay(){
 
   if(raceRunning){
-
     return;
-
+  }
+  const officialOrder =
+    savedDraftOrder &&
+    savedDraftOrder.length === teams.length
+      ? cloneDraftOrder(
+          savedDraftOrder
+        )
+      : [];
+  if(
+    officialOrder.length !==
+    teams.length
+  ){
+    showStatus(
+      "No official draft order is loaded from Supabase. The race was not started."
+    );
+    return;
   }
   startDashBtn.disabled =
     true;
   resetVisuals();
   initializeDraftOrderDisplay();
-  const officialOrder =
-    savedDraftOrder &&
-    savedDraftOrder.length === teams.length
-      ? cloneDraftOrder(savedDraftOrder)
-      : [];
-
-
-  if(
-    officialOrder.length !==
-    teams.length
-  ){
-
-    showStatus(
-      "No official draft order is loaded from Supabase. The race was not started."
-    );
-
-    startDashBtn.disabled =
-      false;
-
-    return;
-
-  }
-  runners =
-    teams.map(
-      (team,index) => ({
-        team:{...team},
-        el:addRunner(team,index),
-        finish:0,
-        revealed:false,
-        rank:-1
-      })
-    );
-
-  await runCountdown();
-  raceCurtain.classList.add(
-    "open"
-  );
-
-  raceCurtain.classList.remove(
-    "countdown"
-  );
-
   const success =
     start();
   if(!success){
@@ -4109,36 +3726,29 @@ async function startDashFromOverlay(){
       "countdown",
       "hidden"
     );
-
     startDashBtn.disabled =
       false;
-
     countdownNumber.textContent =
       "3";
-
     return;
   }
-
-  await wait(
-    1100
+  await runCountdown();
+  raceCurtain.classList.add(
+    "open"
   );
+  raceCurtain.classList.remove(
+    "countdown"
+  );
+  await wait(1100);
   raceCurtain.classList.add(
     "hidden"
   );
-
-
   startDashBtn.disabled =
     false;
 
 }
-
-
 /* =========================================================
    RESET SAVED DRAFT
-
-   RESET creates a genuinely new official draft order.
-
-   That new order is saved BEFORE another race can start.
    ========================================================= */
 
 async function resetSavedDraft(){
@@ -4249,37 +3859,14 @@ async function resetSavedDraft(){
       teams.length
     ){
 
-      savedDraftOrder =
-        cloneDraftOrder(
-          existingDraft.order
-        );
-
-
-      oddsLocked =
-        true;
-
-
-      lockCommissionerBtn.textContent =
-        "ODDS LOCKED";
-
-
-      lockCommissionerBtn.disabled =
-        true;
-
-
-      resetVisuals();
-
-
-      showSavedDraft();
+      applyOfficialDraftOrder(
+        existingDraft.order,
+        "New official draft order saved. Ready at the starting line."
+      );
 
 
       resetDraftBtn.disabled =
         false;
-
-
-      showStatus(
-        "New official draft order saved. Ready at the starting line."
-      );
 
 
       return;
@@ -4316,37 +3903,14 @@ async function resetSavedDraft(){
   }
 
 
-  savedDraftOrder =
-    cloneDraftOrder(
-      newOrder
-    );
-
-
-  oddsLocked =
-    true;
-
-
-  lockCommissionerBtn.textContent =
-    "ODDS LOCKED";
-
-
-  lockCommissionerBtn.disabled =
-    true;
-
-
-  resetVisuals();
-
-
-  showSavedDraft();
+  applyOfficialDraftOrder(
+    newOrder,
+    "New official draft order saved. Ready at the starting line."
+  );
 
 
   resetDraftBtn.disabled =
     false;
-
-
-  showStatus(
-    "New official draft order saved. Ready at the starting line."
-  );
 
 }
 
@@ -4455,28 +4019,14 @@ async function initialize(){
 
   if(
     loadedDraft.status === "ok" &&
-    loadedDraft.order.length === teams.length
+    loadedDraft.order.length ===
+    teams.length
   ){
 
-    savedDraftOrder =
-      cloneDraftOrder(
-        loadedDraft.order
-      );
-
-
-    oddsLocked =
-      true;
-
-
-    lockCommissionerBtn.textContent =
-      "ODDS LOCKED";
-
-
-    lockCommissionerBtn.disabled =
-      true;
-
-
-    showSavedDraft();
+    applyOfficialDraftOrder(
+      loadedDraft.order,
+      "Saved draft loaded from Supabase."
+    );
 
 
     return;
@@ -4484,158 +4034,79 @@ async function initialize(){
   }
 
 
-  if(loadedDraft.status === "error"){
-
+  if(
+    loadedDraft.status ===
+    "error"
+  ){
     savedDraftOrder = [];
-    oddsLocked = false;
-
+    oddsLocked =
+      false;
     lockCommissionerBtn.textContent =
       "LOCK ODDS";
-
     lockCommissionerBtn.disabled =
       false;
-
     showStatus(
       "Could not load the official draft order from Supabase. No new order was created."
     );
-
     return;
-
   }
-
-
-  /*
-     Supabase is reachable and there is genuinely no saved order.
-     This is the only normal initialization path that creates a
-     new official order, and it must be saved successfully.
-  */
-
   showStatus(
     "Creating the official draft order..."
   );
-
-
   const newOrder =
     createDraftOrder();
-
-
   if(
     newOrder.length !==
     teams.length
   ){
-
     oddsLocked =
       false;
-
     lockCommissionerBtn.textContent =
       "LOCK ODDS";
-
     lockCommissionerBtn.disabled =
       false;
-
     showStatus(
       "Could not create a complete draft order."
     );
-
     return;
-
   }
-
-
   const saved =
     await saveDraftOrderToSupabase(
       newOrder
     );
-
-
   if(!saved){
-
-    /*
-       Another browser may have created the official order at the
-       same time. Load it and use that order if it exists.
-    */
-
     const existingDraft =
       await loadDraftOrderFromSupabase();
-
-
     if(
       existingDraft.status === "ok" &&
-      existingDraft.order.length === teams.length
+      existingDraft.order.length ===
+      teams.length
     ){
-
-      savedDraftOrder =
-        cloneDraftOrder(
-          existingDraft.order
-        );
-
-      oddsLocked =
-        true;
-
-      lockCommissionerBtn.textContent =
-        "ODDS LOCKED";
-
-      lockCommissionerBtn.disabled =
-        true;
-
-      showSavedDraft();
-
-      showStatus(
+      applyOfficialDraftOrder(
+        existingDraft.order,
         "Official draft order loaded. Ready at the starting line."
       );
-
       return;
-
     }
-
-
     savedDraftOrder = [];
-    oddsLocked = false;
+    oddsLocked =
+      false;
     lockCommissionerBtn.textContent =
       "LOCK ODDS";
     lockCommissionerBtn.disabled =
       false;
-
     showStatus(
       "The official draft order could not be saved to Supabase. No race order was created."
     );
-
     return;
-
   }
-
-
-  savedDraftOrder =
-    cloneDraftOrder(
-      newOrder
-    );
-
-
-  oddsLocked =
-    true;
-
-
-  lockCommissionerBtn.textContent =
-    "ODDS LOCKED";
-
-  lockCommissionerBtn.disabled =
-    true;
-
-
-  showSavedDraft();
-
-
-  showStatus(
+  applyOfficialDraftOrder(
+    newOrder,
     "Official draft order saved. Ready at the starting line."
   );
 
 }
-
-
 initialize();
-
 </script>
-
-
 </body>
 </html>

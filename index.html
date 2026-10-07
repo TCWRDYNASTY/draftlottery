@@ -1291,10 +1291,10 @@ function startRace() {
 
   raceStartTime = performance.now();
 
-  if (raceCurtain) {
-    raceCurtain.classList.remove("countdown");
-    raceCurtain.classList.add("open");
-  }
+if (raceCurtain) {
+  raceCurtain.classList.add("hidden");
+  raceCurtain.classList.remove("countdown");
+}
 
   if (status) {
     status.textContent = "The race is on!";

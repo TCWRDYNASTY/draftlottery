@@ -1011,21 +1011,17 @@ const RUNNER_HEIGHT = 64;
 
 /* =========================================================
    RUNNER VERTICAL POSITIONS
-   These are starting positions only.
-   Each runner can move slightly during the race.
    ========================================================= */
-
 const START_Y_POSITIONS = [
-  18,
-  29,
-  40,
-  51,
-  62,
+  14,
+  25,
+  37,
+  49,
+  61,
   73,
-  82,
-  91
+  83,
+  87
 ];
-
 /* =========================================================
    RACE STATE
    ========================================================= */
@@ -1556,7 +1552,13 @@ function revealRunner(runner) {
     return;
   }
 
+  const finalLeft = runner.element.style.left;
+  const finalTop = runner.element.style.top;
+
   runner.finished = true;
+
+  runner.element.style.left = finalLeft;
+  runner.element.style.top = finalTop;
 
   runner.element.classList.add("finished");
 

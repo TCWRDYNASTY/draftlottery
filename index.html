@@ -161,7 +161,7 @@ h1{
   z-index:10;
   width:64px;
   height:64px;
-  transition:left .15s linear;
+  transition:none;
 }
 .player-image{
   display:block;
@@ -1473,29 +1473,15 @@ function checkFinish(runner) {
   }
 
   const fieldRect = field.getBoundingClientRect();
-
-  const runnerRect =
-    runner.element.getBoundingClientRect();
+  const runnerRect = runner.element.getBoundingClientRect();
 
   const finishX =
     fieldRect.left +
-    fieldRect.width *
-    (FINISH_PERCENT / 100);
+    fieldRect.width * (FINISH_PERCENT / 100);
 
-  /*
-    The entire image must clear the finish line.
-  */
+  const runnerRight = runnerRect.right;
 
-  const runnerLeft =
-    runnerRect.left;
-
-  const runnerRight =
-    runnerRect.right;
-
-  if (
-    runnerLeft >= finishX &&
-    runnerRight > finishX
-  ) {
+  if (runnerRight >= finishX) {
     revealRunner(runner);
   }
 }
@@ -1509,17 +1495,23 @@ function revealRunner(runner) {
     return;
   }
 
+  const fieldRect = field.getBoundingClientRect();
+  const runnerRect = runner.element.getBoundingClientRect();
+
+  const finalLeft =
+    runnerRect.left -
+    fieldRect.left;
+
+  const finalTop =
+    runnerRect.top -
+    fieldRect.top;
+
   runner.finished = true;
 
   runner.element.style.transition = "none";
 
-  const finalLeft = runner.element.style.left;
-  const finalTop = runner.element.style.top;
-
-  runner.element.style.left = finalLeft;
-  runner.element.style.top = finalTop;
-
-  void runner.element.offsetWidth;
+  runner.element.style.left = `${finalLeft}px`;
+  runner.element.style.top = `${finalTop}px`;
 
   runner.element.classList.add("finished");
 

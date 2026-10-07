@@ -1509,13 +1509,17 @@ function revealRunner(runner) {
     return;
   }
 
+  runner.finished = true;
+
+  runner.element.style.transition = "none";
+
   const finalLeft = runner.element.style.left;
   const finalTop = runner.element.style.top;
 
-  runner.finished = true;
-
   runner.element.style.left = finalLeft;
   runner.element.style.top = finalTop;
+
+  void runner.element.offsetWidth;
 
   runner.element.classList.add("finished");
 

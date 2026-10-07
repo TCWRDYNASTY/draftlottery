@@ -1459,49 +1459,8 @@ function updateRunner(runner, elapsed) {
    VERTICAL RUNNER MOVEMENT
    ========================================================= */
 
-function updateRunnerVerticalPosition(runner, seconds) {
-  const fieldHeight = field.clientHeight;
-
-  const runnerHalfHeight = RUNNER_HEIGHT / 2;
-
-  const safeTop =
-    runnerHalfHeight + 8;
-
-  const safeBottom =
-    fieldHeight - runnerHalfHeight - 8;
-
-  const safeHeight =
-    Math.max(0, safeBottom - safeTop);
-
-  const baseY =
-    (runner.startY / 100) * fieldHeight;
-
-  const verticalWave =
-    Math.sin(
-      seconds * 1.15 +
-      runner.index * 1.8
-    ) * 18;
-
-  const verticalWaveTwo =
-    Math.sin(
-      seconds * 2.15 +
-      runner.index * 2.7
-    ) * 7;
-
-  let y =
-    baseY +
-    verticalWave +
-    verticalWaveTwo;
-
-  y = Math.max(
-    safeTop,
-    Math.min(safeBottom, y)
-  );
-
-  const yPercent =
-    (y / fieldHeight) * 100;
-
-  runner.element.style.top = `${yPercent}%`;
+function updateRunnerVerticalPosition(runner) {
+  runner.element.style.top = `${runner.startY}%`;
 }
 
 /* =========================================================
@@ -1524,9 +1483,6 @@ function checkFinish(runner) {
     (FINISH_PERCENT / 100);
 
   /*
-    The runner is not finished when it merely touches
-    the finish line.
-
     The entire image must clear the finish line.
   */
 

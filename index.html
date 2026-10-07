@@ -1052,9 +1052,11 @@ h1{
   <div
     class="curtain-panel left-panel"
   ></div>
+
   <div
     class="curtain-panel right-panel"
   ></div>
+
   <div
     class="race-curtain-content"
   >
@@ -1066,17 +1068,20 @@ h1{
       >
         TCWR Dy_NASTY
       </div>
+
       <h2
         class="curtain-title"
       >
         100-YARD DRAFT DASH
       </h2>
+
       <div
         class="curtain-subtitle"
       >
         Eight teams. One finish line.
         The order you see is the official draft order.
       </div>
+
       <div
         class="main-rule"
       >
@@ -1085,6 +1090,7 @@ h1{
         >
           HIGHER ODDS = BETTER PICK
         </div>
+
         <div
           class="main-rule-text"
         >
@@ -1092,38 +1098,38 @@ h1{
           of being selected early.
         </div>
       </div>
+
       <div
         class="race-flow"
       >
         <div class="flow-box">
           FIRST ACROSS
         </div>
+
         <div class="flow-arrow">
           →
         </div>
+
         <div class="flow-box">
           PICK #1
         </div>
+
         <div class="flow-arrow">
           •
         </div>
+
         <div class="flow-box">
           LAST ACROSS
         </div>
+
         <div class="flow-arrow">
           →
         </div>
+
         <div class="flow-box">
           PICK #8
         </div>
       </div>
-      <p
-        class="race-note"
-      >
-        The official draft order is locked in before
-        the race begins, so everyone watching sees
-        the same result.
-      </p>
       <button
         id="startDashBtn"
         type="button"
@@ -1132,6 +1138,7 @@ h1{
       </button>
     </div>
   </div>
+
   <div
     id="countdownView"
   >
@@ -1147,6 +1154,7 @@ h1{
     </div>
   </div>
 </div>
+  
 <!-- =========================================================
      MAIN PAGE
      ========================================================= -->
@@ -2589,8 +2597,6 @@ async function loadDraftOrderFromSupabase(){
       };
 
     }
-
-
     return {
       status:"ok",
       order
@@ -2603,8 +2609,6 @@ async function loadDraftOrderFromSupabase(){
       "Supabase order load exception:",
       error
     );
-
-
     return {
       status:"error",
       order:[]
@@ -2614,11 +2618,9 @@ async function loadDraftOrderFromSupabase(){
 
 }
 
-
 /* =========================================================
    CLEAR SAVED DRAFT
    ========================================================= */
-
 async function clearDraftOrderFromSupabase(){
 
   if(
@@ -2629,15 +2631,10 @@ async function clearDraftOrderFromSupabase(){
     showStatus(
       "Supabase publishable key is missing."
     );
-
-
     return false;
-
   }
 
-
   try{
-
     const {error} =
       await supabase
         .from(SUPABASE_ORDERS_TABLE_NAME)
@@ -2648,28 +2645,18 @@ async function clearDraftOrderFromSupabase(){
           null
         );
 
-
     if(error){
 
       console.error(
         "Supabase draft clear error:",
         error
       );
-
-
       showStatus(
         "Supabase could not clear the saved draft."
       );
-
-
       return false;
-
     }
-
-
     savedDraftOrder = [];
-
-
     return true;
 
   }
@@ -2679,41 +2666,25 @@ async function clearDraftOrderFromSupabase(){
       "Supabase draft clear exception:",
       error
     );
-
-
     return false;
-
   }
-
 }
-
 
 /* =========================================================
    RESET VISUALS
    ========================================================= */
 
 function resetVisuals(){
-
   cancelAnimationFrame(raf);
-
-
   field.innerHTML =
     "";
-
-
   draftOrderList.innerHTML =
     "";
-
-
   runners =
     [];
-
-
   raceRunning =
     false;
-
 }
-
 
 /* =========================================================
    FINISH POSITION
@@ -2721,7 +2692,6 @@ function resetVisuals(){
 
 const FINISH_POSITION =
   84;
-
 
 /* =========================================================
    ADD RUNNER
@@ -3641,54 +3611,44 @@ async function startDashFromOverlay(){
   if(raceRunning){
     return;
   }
+
   const officialOrder =
     savedDraftOrder &&
     savedDraftOrder.length === teams.length
-      ? cloneDraftOrder(
-          savedDraftOrder
-        )
+      ? cloneDraftOrder(savedDraftOrder)
       : [];
+
   if(
-    officialOrder.length !==
-    teams.length
+    officialOrder.length !== teams.length
   ){
     showStatus(
       "No official draft order is loaded from Supabase. The race was not started."
     );
     return;
   }
-  startDashBtn.disabled =
-    true;
+
+  startDashBtn.disabled = true;
   resetVisuals();
   initializeDraftOrderDisplay();
-  const success =
-    start();
+  const success = start();
   if(!success){
     raceCurtain.classList.remove(
       "open",
       "countdown",
       "hidden"
     );
-    startDashBtn.disabled =
-      false;
-    countdownNumber.textContent =
-      "3";
+
+    startDashBtn.disabled = false;
+    countdownNumber.textContent = "3";
     return;
   }
-  await runCountdown();
-  raceCurtain.classList.add(
-    "open"
-  );
-  raceCurtain.classList.remove(
-    "countdown"
-  );
-  await wait(1100);
-  raceCurtain.classList.add(
-    "hidden"
-  );
-  startDashBtn.disabled =
-    false;
 
+  await runCountdown();
+  raceCurtain.classList.add("open");
+  raceCurtain.classList.remove("countdown");
+  await wait(1100);
+  raceCurtain.classList.add("hidden");
+  startDashBtn.disabled = false;
 }
 /* =========================================================
    RESET SAVED DRAFT

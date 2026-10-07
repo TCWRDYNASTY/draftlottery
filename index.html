@@ -3607,30 +3607,16 @@ async function runCountdown(){
    START FROM OVERLAY
    ========================================================= */
 async function startDashFromOverlay(){
-
   if(raceRunning){
     return;
   }
 
-  const officialOrder =
-    savedDraftOrder &&
-    savedDraftOrder.length === teams.length
-      ? cloneDraftOrder(savedDraftOrder)
-      : [];
-
-  if(
-    officialOrder.length !== teams.length
-  ){
-    showStatus(
-      "No official draft order is loaded from Supabase. The race was not started."
-    );
-    return;
-  }
-
   startDashBtn.disabled = true;
-  resetVisuals();
-  initializeDraftOrderDisplay();
-  const success = start();
+  await runCountdown();
+  raceCurtain.classList.add("open");
+  raceCurtain.classList.remove("countdown");
+  await wait(180);
+  const success = await start();
   if(!success){
     raceCurtain.classList.remove(
       "open",
@@ -3639,14 +3625,12 @@ async function startDashFromOverlay(){
     );
 
     startDashBtn.disabled = false;
+
     countdownNumber.textContent = "3";
+
     return;
   }
-
-  await runCountdown();
-  raceCurtain.classList.add("open");
-  raceCurtain.classList.remove("countdown");
-  await wait(1100);
+  await wait(900);
   raceCurtain.classList.add("hidden");
   startDashBtn.disabled = false;
 }
@@ -3882,13 +3866,6 @@ commissionerPassword.addEventListener(
 
 /* =========================================================
    INITIALIZE
-
-   If an official draft already exists, load it.
-
-   If one does NOT exist, create it ONCE.
-
-   The race itself never generates a new order unless there
-   genuinely is no existing order.
    ========================================================= */
 
 async function initialize(){

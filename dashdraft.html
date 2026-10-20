@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TCWR 100-YARD DRAFT DASH</title>
 
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800;900&family=Montserrat:wght@600;700;800&display=swap');
 
@@ -57,7 +58,7 @@ button {
 }
 
 #start,
-#commissionerBtn {
+#commissionerLogin {
   background: #d8b45a;
   color: #071522;
 }
@@ -186,34 +187,73 @@ button {
   display: none !important;
 }
 
+/* COMMISSIONER LOGIN */
+
 #commissionerArea {
   margin-bottom: 16px;
 }
 
-#commissionerLoginBox,
+.commissioner-tools {
+  margin-top: 10px;
+  padding: 14px;
+  background: #0c1d2b;
+  border: 1px solid #294354;
+  border-radius: 12px;
+}
+
+#commissionerLoginForm {
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 14px;
+  background: #071522;
+  border: 1px solid #294354;
+  border-radius: 8px;
+}
+
+#commissionerLoginForm label {
+  display: block;
+  margin-bottom: 8px;
+  color: #9fb0ba;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.commissioner-login-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#commissionerPassword {
+  flex: 1;
+  min-width: 170px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid #405765;
+  background: #081722;
+  color: #fff;
+  font-family: Montserrat, Arial, sans-serif;
+}
+
+#unlockCommissionerBtn {
+  background: #d8b45a;
+  color: #071522;
+}
+
+#cancelCommissionerBtn {
+  background: #243746;
+  color: #fff;
+}
+
 #commissionerPanel {
   background: #0c1d2b;
   border: 1px solid #294354;
   border-radius: 12px;
   padding: 14px;
   margin-top: 10px;
-}
-
-#commissionerLoginBox {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-#commissionerPassword {
-  padding: 10px 12px;
-  border-radius: 7px;
-  border: 1px solid #405765;
-  background: #081722;
-  color: #fff;
-  min-width: 220px;
 }
 
 #commissionerPanel h3 {
@@ -359,11 +399,15 @@ button {
   }
 
   #commissionerPassword {
-    min-width: 170px;
-    width: 100%;
+    min-width: 0;
+  }
+
+  .commissioner-login-actions button {
+    flex: 1;
   }
 }
 </style>
+
 </head>
 
 <body>
@@ -378,21 +422,40 @@ button {
 <div class="controls">
   <button id="start">START THE RACE</button>
   <button id="reset">RESET</button>
-  <button id="commissionerBtn" type="button">COMMISSIONER</button>
+  <button id="commissionerLogin" type="button">COMMISSIONER</button>
 </div>
 
 <div id="commissionerArea">
 
-  <div id="commissionerLoginBox" class="hidden">
-    <input
-      id="commissionerPassword"
-      type="password"
-      placeholder="Commissioner password"
+  <div class="commissioner-tools">
+
+    <form
+      id="commissionerLoginForm"
+      class="hidden"
       autocomplete="off"
     >
+      <label for="commissionerPassword">
+        Commissioner Password
+      </label>
 
-    <button id="unlockCommissionerBtn" type="button">UNLOCK</button>
-    <button id="cancelCommissionerBtn" type="button">CANCEL</button>
+      <div class="commissioner-login-actions">
+        <input
+          id="commissionerPassword"
+          type="password"
+          placeholder="Enter password"
+          autocomplete="current-password"
+        >
+
+        <button id="unlockCommissionerBtn" type="submit">
+          UNLOCK
+        </button>
+
+        <button id="cancelCommissionerBtn" type="button">
+          CANCEL
+        </button>
+      </div>
+    </form>
+
   </div>
 
   <div id="commissionerPanel" class="hidden">
@@ -409,6 +472,7 @@ button {
       <button id="lockCommissionerBtn" type="button">LOCK</button>
     </div>
   </div>
+
 </div>
 
 <div id="status" class="status">Ready at the starting line.</div>
@@ -433,6 +497,7 @@ button {
 </div>
 
 </div>
+
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -489,16 +554,33 @@ const status = document.getElementById("status");
 const draftOrderList = document.getElementById("draftOrder");
 const permanentLabels = document.getElementById("permanentLabels");
 
-const commissionerBtn = document.getElementById("commissionerBtn");
-const commissionerLoginBox = document.getElementById("commissionerLoginBox");
-const commissionerPanel = document.getElementById("commissionerPanel");
-const commissionerPassword = document.getElementById("commissionerPassword");
+const commissionerLogin = document.getElementById("commissionerLogin");
+const commissionerLoginForm = document.getElementById("commissionerLoginForm");
+const commissionerPasswordInput = document.getElementById("commissionerPassword");
 const unlockCommissionerBtn = document.getElementById("unlockCommissionerBtn");
 const cancelCommissionerBtn = document.getElementById("cancelCommissionerBtn");
 const lockCommissionerBtn = document.getElementById("lockCommissionerBtn");
+const commissionerPanel = document.getElementById("commissionerPanel");
 const saveConfigBtn = document.getElementById("saveConfigBtn");
 const resetDraftBtn = document.getElementById("resetDraftBtn");
 
+
+/* =========================================================
+   COMMISSIONER LOGIN DISPLAY
+   ========================================================= */
+
+function openCommissionerLogin() {
+  commissionerLoginForm.classList.remove("hidden");
+  commissionerLogin.classList.add("hidden");
+  commissionerPasswordInput.focus();
+}
+
+function closeCommissionerLogin() {
+  commissionerLoginForm.classList.add("hidden");
+  commissionerLogin.classList.remove("hidden");
+  commissionerPasswordInput.value = "";
+}
+  
 /* =========================================================
    HELPERS
    ========================================================= */

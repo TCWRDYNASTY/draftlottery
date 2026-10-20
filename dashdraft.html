@@ -1280,13 +1280,10 @@ document.getElementById("reset").addEventListener("click", () => {
   renderPermanentLabels();
 });
 
-commissionerBtn.onclick = function (event) {
-  event.preventDefault();
-  event.stopPropagation();
-
+commissionerBtn.addEventListener("click", function () {
+  alert("Commissioner button clicked!");
   commissionerLoginBox.classList.remove("hidden");
-  commissionerPassword.focus();
-};
+});
 
 unlockCommissionerBtn.addEventListener("click", unlockCommissioner);
 

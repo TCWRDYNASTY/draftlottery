@@ -983,49 +983,39 @@ async function clearDraftOrderFromSupabase() {
   return true;
 }
 
+
 /* =========================================================
    COMMISSIONER LOCK
    ========================================================= */
-
-function openCommissioner() {
-  commissionerLoginBox.classList.remove("hidden");
-  commissionerPassword.focus();
-}
-
-function closeCommissioner() {
-  commissionerLoginBox.classList.add("hidden");
-  commissionerPassword.value = "";
-}
 
 function lockCommissioner() {
   commissionerUnlocked = false;
 
   commissionerPanel.classList.add("hidden");
 
-  closeCommissioner();
+  closeCommissionerLogin();
   renderInputs();
 
   showStatus("Commissioner tools locked.");
 }
 
 function unlockCommissioner() {
-  if (commissionerPassword.value !== COMMISSIONER_PASSWORD) {
+  if (commissionerPasswordInput.value !== COMMISSIONER_PASSWORD) {
     showStatus("Incorrect commissioner password.");
-    commissionerPassword.select();
+    commissionerPasswordInput.select();
     return;
   }
 
   commissionerUnlocked = true;
 
-  commissionerLoginBox.classList.add("hidden");
+  closeCommissionerLogin();
   commissionerPanel.classList.remove("hidden");
-
-  commissionerPassword.value = "";
 
   renderInputs();
 
   showStatus("Commissioner tools unlocked.");
 }
+
 
 /* =========================================================
    SAVE CONFIGURATION
@@ -1362,20 +1352,16 @@ document.getElementById("reset").addEventListener("click", () => {
   renderPermanentLabels();
 });
 
-commissionerBtn.addEventListener("click", function () {
-  alert("Commissioner button clicked!");
-  commissionerLoginBox.classList.remove("hidden");
+
+commissionerLogin.addEventListener("click", openCommissionerLogin);
+
+commissionerLoginForm.addEventListener("submit", event => {
+  event.preventDefault();
+  unlockCommissioner();
 });
 
-unlockCommissionerBtn.addEventListener("click", unlockCommissioner);
+cancelCommissionerBtn.addEventListener("click", closeCommissionerLogin);
 
-commissionerPassword.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    unlockCommissioner();
-  }
-});
-
-cancelCommissionerBtn.addEventListener("click", closeCommissioner);
 
 lockCommissionerBtn.addEventListener("click", lockCommissioner);
 

@@ -724,7 +724,7 @@ function renderPermanentLabels() {
   });
 }
 
-  /* =========================================================
+/* =========================================================
    REFRESH RUNNER LABELS
    ========================================================= */
 function refreshRunnerLabels() {
@@ -738,7 +738,7 @@ function refreshRunnerLabels() {
     const tag = r.el.querySelector(".tag");
 
     if (tag) {
-      tag.innerHTML = ${escapeHTML(team.name)} • ${team.weight}%;
+      tag.innerHTML = `${escapeHTML(team.name)} • ${team.weight}%`;
     }
 
     const image = r.el.querySelector(".player-image");

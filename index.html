@@ -1160,11 +1160,22 @@ async function start() {
   // Generate Pick #8, #7, #6, #5, #4, #3, #2, #1.
   const order = createReverseDraftOrder();
 
-  if (order.length !== teams.length) {
-    raceRunning = false;
-    showStatus("Could not create a complete draft order.");
-    return;
-  }
+console.log("Number of teams:", teams.length);
+console.log("Number of draft picks:", order.length);
+console.log("Team IDs:", teams.map(t => t.id));
+console.log("Draft picks:", order.map(o => ({
+  pick: o.pick,
+  teamId: o.team.id,
+  teamName: o.team.name
+})));
+
+if (order.length !== teams.length) {
+  raceRunning = false;
+  showStatus(
+    `Draft order incomplete: ${order.length} picks for ${teams.length} teams.`
+  );
+  return;
+}
 
   savedDraftOrder = order.map(x => ({
     pick: x.pick,

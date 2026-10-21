@@ -727,6 +727,7 @@ function renderPermanentLabels() {
 /* =========================================================
    REFRESH RUNNER LABELS
    ========================================================= */
+
 function refreshRunnerLabels() {
   runners.forEach(r => {
     const team = teams.find(t => t.id === r.team.id);
@@ -810,25 +811,26 @@ function createReverseDraftOrder() {
    SUPABASE — LOAD TEAM CONFIGURATION
    ========================================================= */
 
-async function loadDraftOrderFromSupabase() {
-    console.log('Checking for saved draft order...');
-    const { data, error } = await supabase
-        .from(SUPABASE_ORDERS_TABLE_NAME)
-        .select('order_data')
-        .order('order_data->>pick', { ascending: false });
-    
-    if (error) {
-        console.error('Error fetching draft order:', error);
-        return null;
-    }
+async function loadDraftOrderFromSupabaseInitial() {
+  console.log("Checking for saved draft order...");
 
-    if (data && data.length > 0) {
-        console.log('Draft order found in Supabase:', data);
-        return data.map(item => item.order_data);
-    }
+  const { data, error } = await supabase
+    .from(SUPABASE_ORDERS_TABLE_NAME)
+    .select("order_data")
+    .order("order_data->>pick", { ascending: false });
 
-    console.log('No draft order found in the database.');
+  if (error) {
+    console.error("Error fetching draft order:", error);
     return null;
+  }
+
+  if (data && data.length > 0) {
+    console.log("Draft order found in Supabase:", data);
+    return data.map(item => item.order_data);
+  }
+
+  console.log("No draft order found in the database.");
+  return null;
 }
 
 /* =========================================================
@@ -843,7 +845,7 @@ async function saveTeamsToSupabase() {
       name: team.name,
       weight: Number(team.weight),
       image: team.image || "",
-      originalWeightDisplay: ${team.weight}%
+      originalWeightDisplay: `${team.weight}%`
     }
   }));
 
@@ -864,29 +866,32 @@ async function saveTeamsToSupabase() {
    SUPABASE — SAVE DRAFT ORDER
    ========================================================= */
 
-  async function saveDraftOrderToSupabase(draftOrder) {
-    console.log('Saving draft order to Supabase...', draftOrder);
-    
-    const formattedData = draftOrder.map(pick => ({
-        id: pick_${pick.pick},
-        order_data: {
-            pick: pick.pick,
-            member: pick.member,
-            originalWeightDisplay: pick.originalWeightDisplay
-        }
-    }));
+async function saveDraftOrderToSupabase(draftOrder) {
+  console.log("Saving draft order to Supabase...", draftOrder);
 
-    const { data, error } = await supabase
-        .from('draft_orders')
-        .upsert(formattedData, { onConflict: 'id' })
-        .select();
-
-    if (error) {
-        console.error('Error saving draft order to Supabase:', error);
-        return false;
+  const formattedData = draftOrder.map(pick => ({
+    id: `pick_${pick.pick}`,
+    order_data: {
+      pick: pick.pick,
+      member: pick.member ?? pick.team?.name ?? "",
+      memberId: pick.memberId ?? pick.team?.id ?? null,
+      originalWeightDisplay:
+        pick.originalWeightDisplay ?? `${pick.team?.weight ?? 0}%`
     }
-    console.log('Draft order saved successfully:', data);
-    return true;
+  }));
+
+  const { data, error } = await supabase
+    .from(SUPABASE_ORDERS_TABLE_NAME)
+    .upsert(formattedData, { onConflict: "id" })
+    .select();
+
+  if (error) {
+    console.error("Error saving draft order to Supabase:", error);
+    return false;
+  }
+
+  console.log("Draft order saved successfully:", data);
+  return true;
 }
 
 /* =========================================================
@@ -911,6 +916,7 @@ async function loadDraftOrderFromSupabase() {
   return data
     .map(row => {
       const d = row.order_data || {};
+
       const team = teams.find(t =>
         d.memberId != null
           ? Number(t.id) === Number(d.memberId)
@@ -934,7 +940,6 @@ async function loadDraftOrderFromSupabase() {
     .filter(item => Number.isInteger(item.pick) && item.pick > 0)
     .sort((a, b) => b.pick - a.pick);
 }
-
 
 /* =========================================================
    SUPABASE — RESET SAVED DRAFT

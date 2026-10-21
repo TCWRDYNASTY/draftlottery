@@ -506,21 +506,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
    SUPABASE
    ========================================================= */
 
-const COMMISSIONER_PASSWORD = 'Asher';
-
-const SUPABASE_URL =
-  'https://jheqfwykhvyngfqawknr.supabase.co';
-
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGciOiJIUzI1NiIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
-
+const COMMISSIONER_PASSWORD = 'Asher'; 
+const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 const SUPABASE_TABLE_NAME = 'draft_configs';
 const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
-
-const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* =========================================================
    DEFAULT TEAMS

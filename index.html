@@ -863,6 +863,41 @@ async function saveTeamsToSupabase() {
 }
 
 /* =========================================================
+   SUPABASE — LOAD TEAM CONFIGURATION
+   ========================================================= */
+
+async function loadTeamsFromSupabase() {
+  console.log("Loading team configuration from Supabase...");
+
+  const { data, error } = await supabase
+    .from(SUPABASE_TABLE_NAME)
+    .select("id, members_data")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Supabase team load error:", error);
+    showStatus("Could not load teams from Supabase. Using default teams.");
+    return defaultTeams.map(team => ({ ...team }));
+  }
+
+  if (!data || data.length === 0) {
+    console.log("No saved team configuration found. Using default teams.");
+    return defaultTeams.map(team => ({ ...team }));
+  }
+
+  const loadedTeams = data.map(row => ({
+    id: Number(row.id),
+    name: row.members_data?.name ?? "",
+    weight: Number(row.members_data?.weight) || 1,
+    image: row.members_data?.image ?? ""
+  }));
+
+  console.log("Teams loaded successfully:", loadedTeams);
+  return loadedTeams;
+}
+
+  
+/* =========================================================
    SUPABASE — SAVE DRAFT ORDER
    ========================================================= */
 

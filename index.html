@@ -1548,30 +1548,24 @@ lockButton.addEventListener("click", () => {
    ========================================================= */
 (async function initApp() {
   await loadMembersFromSupabase();
+
+  // Always create eight empty pick slots.
   buildDraftOrder();
 
   try {
-    const savedOrder = await loadDraftOrderFromSupabase();
-    if (savedOrder && savedOrder.length > 0) {
-      savedOrder.forEach((item, index) => {
-        const pick = item.pick || index + 1;
-        const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-        if (listItem) {
-          const result = listItem.querySelector("span:last-child");
-          if (result) {
-            result.classList.remove("pending");
-            result.textContent = item.teamName;
-          }
-          if (pick === 1) listItem.style.color = "var(--gold-bright)";
-        }
-      });
-      showStatus("Saved draft loaded from Supabase.");
+    // Load the saved order without revealing the results.
+    savedDraftOrder = await loadDraftOrderFromSupabase();
+
+    if (savedDraftOrder && savedDraftOrder.length > 0) {
+      showStatus("Saved draft loaded. Ready to race.");
     } else {
       showStatus("No saved draft results. Ready for a new race.");
     }
   } catch (err) {
+    console.error("Could not load saved draft:", err);
     showStatus("Ready for a new race.");
   }
+
   buildRunners();
 })();
 </script>

@@ -194,31 +194,37 @@ h1 {
 }
 
 .result-list li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   min-width: 0;
-  padding: 10px 8px;
-  border-bottom: 1px solid rgba(142, 205, 255, .13);
+  padding: 13px 10px;
+  margin-bottom: 5px;
+  border: 1px solid rgba(142, 205, 255, .13);
+  border-radius: 7px;
+  background: rgba(8, 27, 42, .75);
   color: #e8f1f7;
   font-size: .875rem;
   line-height: 1.35;
+}
+
+.result-list li span:last-child {
+  min-width: 0;
   overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .result-list li:first-child {
+  border-color: rgba(244, 211, 124, .5);
+  background: rgba(244, 211, 124, .08);
   color: var(--gold-bright);
-  font-size: .98rem;
   font-weight: 800;
 }
 
-.result-list li:last-child {
-  border-bottom: 0;
-}
-
-.result-list .pending {
+.result-list li .pending {
   color: #718692;
+  font-weight: 500;
 }
 
 /* =========================================================
@@ -1230,9 +1236,9 @@ function revealRunner(runner) {
   runner.element.classList.add("finished");
 
   revealedPicks++;
-  const pick = revealedPicks;
-  const teamIndex = activeDraftOrderMapping[pick - 1] ?? runner.index;
-  const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
+const pick = revealedPicks;
+const teamIndex = runner.index;
+const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
 
   const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
   if (listItem) {
@@ -1542,6 +1548,8 @@ lockButton.addEventListener("click", () => {
    ========================================================= */
 (async function initApp() {
   await loadMembersFromSupabase();
+  buildDraftOrder();
+
   try {
     const savedOrder = await loadDraftOrderFromSupabase();
     if (savedOrder && savedOrder.length > 0) {

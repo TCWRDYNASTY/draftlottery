@@ -407,16 +407,10 @@ button {
   }
 }
 </style>
+
 </head>
 
 <body>
-<!-- =========================================================
-     PRE-RACE OVERLAY
-     ========================================================= -->
-<audio id="lotteryMusic" preload="auto">
-  <source src="Lottery War Room.mp3" type="audio/mpeg">
-</audio>
-  
 <div class="wrap">
 
 <h1>TCWR 100-YARD DRAFT DASH</h1>
@@ -512,12 +506,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
    SUPABASE
    ========================================================= */
 
-const COMMISSIONER_PASSWORD = 'Asher'; 
-const SUPABASE_URL = 'https://jheqfwykhvyngfqawknr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+const COMMISSIONER_PASSWORD = 'Asher';
+
+const SUPABASE_URL =
+  'https://jheqfwykhvyngfqawknr.supabase.co';
+
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGciOiJIUzI1NiIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+
 const SUPABASE_TABLE_NAME = 'draft_configs';
 const SUPABASE_ORDERS_TABLE_NAME = 'draft_orders';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 /* =========================================================
    DEFAULT TEAMS
@@ -817,26 +820,41 @@ function createReverseDraftOrder() {
    SUPABASE — LOAD TEAM CONFIGURATION
    ========================================================= */
 
-async function loadDraftOrderFromSupabaseInitial() {
-  console.log("Checking for saved draft order...");
-
+async function loadTeamsFromSupabase() {
   const { data, error } = await supabase
-    .from(SUPABASE_ORDERS_TABLE_NAME)
-    .select("order_data")
-    .order("order_data->>pick", { ascending: false });
+    .from(SUPABASE_TABLE_NAME)
+    .select("id,members_data");
 
   if (error) {
-    console.error("Error fetching draft order:", error);
-    return null;
+    console.error("Supabase team load error:", error);
+
+    showStatus("Using local teams — Supabase could not be loaded.");
+
+    return defaultTeams.map(t => ({ ...t }));
   }
 
-  if (data && data.length > 0) {
-    console.log("Draft order found in Supabase:", data);
-    return data.map(item => item.order_data);
+  if (!data || !data.length) {
+    return defaultTeams.map(t => ({ ...t }));
   }
 
-  console.log("No draft order found in the database.");
-  return null;
+  const loaded = data
+    .map(row => {
+      const d = row.members_data || {};
+
+      return {
+        id: Number(row.id),
+        name: d.name || `Team ${row.id}`,
+        weight: Number(d.weight) || 1,
+        image: d.image || "",
+        originalWeightDisplay: d.originalWeightDisplay ||
+          `${Number(d.weight) || 1}%`
+      };
+    })
+    .sort((a, b) => a.id - b.id);
+
+  return loaded.length
+    ? loaded
+    : defaultTeams.map(t => ({ ...t }));
 }
 
 /* =========================================================
@@ -869,69 +887,30 @@ async function saveTeamsToSupabase() {
 }
 
 /* =========================================================
-   SUPABASE — LOAD TEAM CONFIGURATION
-   ========================================================= */
-
-async function loadTeamsFromSupabase() {
-  console.log("Loading team configuration from Supabase...");
-
-  const { data, error } = await supabase
-    .from(SUPABASE_TABLE_NAME)
-    .select("id, members_data")
-    .order("id", { ascending: true });
-
-  if (error) {
-    console.error("Supabase team load error:", error);
-    showStatus("Could not load teams from Supabase. Using default teams.");
-    return defaultTeams.map(team => ({ ...team }));
-  }
-
-  if (!data || data.length === 0) {
-    console.log("No saved team configuration found. Using default teams.");
-    return defaultTeams.map(team => ({ ...team }));
-  }
-
-  const loadedTeams = data.map(row => ({
-    id: Number(row.id),
-    name: row.members_data?.name ?? "",
-    weight: Number(row.members_data?.weight) || 1,
-    image: row.members_data?.image ?? ""
-  }));
-
-  console.log("Teams loaded successfully:", loadedTeams);
-  return loadedTeams;
-}
-
-  
-/* =========================================================
    SUPABASE — SAVE DRAFT ORDER
    ========================================================= */
 
-async function saveDraftOrderToSupabase(draftOrder) {
-  console.log("Saving draft order to Supabase...", draftOrder);
+async function saveDraftOrderToSupabase(order) {
+  const rows = order.map(item => ({
+    id: `pick_${item.pick}`,
 
-  const formattedData = draftOrder.map(pick => ({
-    id: `pick_${pick.pick}`,
     order_data: {
-      pick: pick.pick,
-      member: pick.member ?? pick.team?.name ?? "",
-      memberId: pick.memberId ?? pick.team?.id ?? null,
-      originalWeightDisplay:
-        pick.originalWeightDisplay ?? `${pick.team?.weight ?? 0}%`
+      pick: item.pick,
+      member: item.team.name,
+      memberId: item.team.id,
+      originalWeightDisplay: `${item.team.weight}%`
     }
   }));
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from(SUPABASE_ORDERS_TABLE_NAME)
-    .upsert(formattedData, { onConflict: "id" })
-    .select();
+    .upsert(rows, { onConflict: "id" });
 
   if (error) {
-    console.error("Error saving draft order to Supabase:", error);
+    console.error("Supabase draft save error:", error);
     return false;
   }
 
-  console.log("Draft order saved successfully:", data);
   return true;
 }
 
@@ -958,6 +937,8 @@ async function loadDraftOrderFromSupabase() {
     .map(row => {
       const d = row.order_data || {};
 
+      // Support current memberId data and older rows
+      // that stored only the team's name in member.
       const team = teams.find(t =>
         d.memberId != null
           ? Number(t.id) === Number(d.memberId)
@@ -1184,30 +1165,22 @@ async function start() {
   raceRunning = true;
 
   showStatus("Drawing reverse odds — Pick #8 goes first...");
+
+  // Generate Pick #8, #7, #6, #5, #4, #3, #2, #1.
   const order = createReverseDraftOrder();
 
-console.log("Number of teams:", teams.length);
-console.log("Number of draft picks:", order.length);
-console.log("Team IDs:", teams.map(t => t.id));
-console.log("Draft picks:", order.map(o => ({
-  pick: o.pick,
-  teamId: o.team.id,
-  teamName: o.team.name
-})));
-
-if (order.length !== teams.length) {
-  raceRunning = false;
-  showStatus(
-    `Draft order incomplete: ${order.length} picks for ${teams.length} teams.`
-  );
-  return;
-}
+  if (order.length !== teams.length) {
+    raceRunning = false;
+    showStatus("Could not create a complete draft order.");
+    return;
+  }
 
   savedDraftOrder = order.map(x => ({
     pick: x.pick,
     team: { ...x.team }
   }));
 
+  // Save immediately so the result survives a refresh.
   const saved = await saveDraftOrderToSupabase(savedDraftOrder);
 
   if (!saved) {
@@ -1215,6 +1188,8 @@ if (order.length !== teams.length) {
     showStatus("Draft generated, but Supabase could not save it.");
     return;
   }
+
+  // Keep every runner visible after finishing.
   runners = teams.map((team, index) => ({
     team: { ...team },
     el: addRunner(team, index),
@@ -1224,6 +1199,8 @@ if (order.length !== teams.length) {
 
   const min = Math.min(...teams.map(t => t.weight));
   const max = Math.max(...teams.map(t => t.weight));
+
+  // Pick #8 gets the earliest finish; Pick #1 gets the latest.
   order.forEach((item, rank) => {
     const runner = runners.find(r => r.team.id === item.team.id);
 
@@ -1249,6 +1226,8 @@ if (order.length !== teams.length) {
     if (r.revealed) return;
 
     r.revealed = true;
+
+    // Keep the player permanently visible.
     r.el.classList.add("finished");
 
     const tag = r.el.querySelector(".tag");

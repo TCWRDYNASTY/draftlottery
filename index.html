@@ -1142,8 +1142,15 @@ function runCountdown() {
   showNumber();
 }
 
+function prepareDraftOrderMapping() {
+  activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
+}
+
 function startRace() {
   if (raceRunning) return;
+
+  prepareDraftOrderMapping();
+
   raceRunning = true;
   raceStartTime = performance.now();
 

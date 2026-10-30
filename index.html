@@ -258,10 +258,9 @@ h1 {
 
 .runner {
   position: absolute;
-  left: 8%;
   z-index: 10;
-  width: clamp(44px, 5.5vw, 64px);
-  height: clamp(44px, 5.5vw, 64px);
+  width: clamp(42px, 5vw, 60px);
+  height: clamp(42px, 5vw, 60px);
   transform: translateY(-50%);
   transition: none;
   will-change: left, top;
@@ -281,7 +280,27 @@ h1 {
   border-radius: 50%;
   object-fit: cover;
   background: var(--navy-900);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .58), 0 0 12px rgba(244, 190, 61, .12);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .65), 0 0 14px rgba(244, 190, 61, .25);
+}
+
+/* Mini label floating below runner token for clarity */
+.runner-tag {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  transform: translateX(-50%);
+  background: rgba(4, 16, 27, 0.9);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-family: 'Barlow Condensed', Impact, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  letter-spacing: 0.03em;
 }
 
 /* =========================================================
@@ -991,10 +1010,12 @@ const commissionerStatusMessage = document.getElementById("commissionerStatus");
    RACE SETTINGS & STATE
    ========================================================= */
 const RUNNER_COUNT = 8;
-const START_PERCENT = 8;
+const START_PERCENT = 5;
 const FINISH_PERCENT = 97;
 
-const START_Y_POSITIONS = [14, 25, 37, 49, 61, 73, 83, 87];
+// Staggered horizontal start positions (staggered wave) & well-spaced vertical lanes
+const START_X_OFFSETS = [5.0, 7.5, 5.0, 7.5, 5.0, 7.5, 5.0, 7.5];
+const START_Y_POSITIONS = [12, 24, 36, 48, 60, 72, 82, 90];
 const FINISH_TIMES = [67.5, 71.0, 74.5, 78.0, 81.0, 84.0, 87.0, 90.0];
 
 let runners = [];
@@ -1020,10 +1041,11 @@ function buildRunners() {
   runners = [];
 
   for (let i = 0; i < RUNNER_COUNT; i++) {
+    const startX = START_X_OFFSETS[i];
     const runner = document.createElement("div");
     runner.className = "runner";
     runner.dataset.index = i;
-    runner.style.left = `${START_PERCENT}%`;
+    runner.style.left = `${startX}%`;
     runner.style.top = `${START_Y_POSITIONS[i]}%`;
 
     const image = document.createElement("img");
@@ -1031,19 +1053,28 @@ function buildRunners() {
     image.src = IMAGE_FILES[i];
     image.alt = currentMembers[i]?.name || `Team ${i + 1}`;
     image.draggable = false;
-
     runner.appendChild(image);
+
+    // Mini tag showing team name right under runner
+    const tag = document.createElement("div");
+    tag.className = "runner-tag";
+    const teamNameStr = currentMembers[i]?.name || `Team ${i + 1}`;
+    tag.textContent = teamNameStr.length > 12 ? teamNameStr.substring(0, 10) + '..' : teamNameStr;
+    runner.appendChild(tag);
+
     field.appendChild(runner);
 
     runners.push({
       element: runner,
       image,
+      tag,
       index: i,
       progress: 0,
       finished: false,
       finishTime: FINISH_TIMES[i],
+      startX: startX,
       startY: START_Y_POSITIONS[i],
-      previousLeft: START_PERCENT
+      previousLeft: startX
     });
   }
 }
@@ -1185,7 +1216,7 @@ function startRace() {
   runners.forEach((runner) => {
     runner.progress = 0;
     runner.finished = false;
-    runner.previousLeft = START_PERCENT;
+    runner.previousLeft = runner.startX;
     runner.element.classList.remove("finished");
     runner.element.style.transition = "none";
   });
@@ -1227,8 +1258,8 @@ function updateRunner(runner, elapsed) {
   }
 
   runner.progress = adjustedProgress;
-  const left = START_PERCENT + (FINISH_PERCENT - START_PERCENT) * adjustedProgress;
-  runner.element.style.left = `${Math.max(START_PERCENT, Math.min(FINISH_PERCENT, left))}%`;
+  const left = runner.startX + (FINISH_PERCENT - runner.startX) * adjustedProgress;
+  runner.element.style.left = `${Math.max(runner.startX, Math.min(FINISH_PERCENT, left))}%`;
 }
 
 function checkFinish(runner) {
@@ -1253,6 +1284,9 @@ function revealRunner(runner) {
   runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
   runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
   runner.element.classList.add("finished");
+
+  // Hide mini tag upon crossing finish line to keep results clean
+  if (runner.tag) runner.tag.style.display = 'none';
 
   revealedPicks++;
   const pick = revealedPicks;
@@ -1556,7 +1590,7 @@ resetDraftButton.addEventListener("click", async () => {
 
 lockButton.addEventListener("click", () => {
   commissionerUnlocked = false;
-  commissionerPanel.classList.add("hidden");
+  commissionerPanel.classList.add6("hidden");
   loginBox.classList.add("hidden");
   passwordInput.value = "";
   showStatus("Commissioner panel locked.");

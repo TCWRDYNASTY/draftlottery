@@ -1177,21 +1177,11 @@ function prepareDraftOrderMapping() {
   activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
 }
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 function runWeightedLottery() {
   let pool = currentMembers.map((member, index) => ({
     index: index,
     weight: Math.max(1, Number(member.weight) || 1)
   }));
-
-  shuffleArray(pool);
 
   let lotteryOrder = [];
 
@@ -1221,12 +1211,14 @@ function startRace() {
 
   let finishingIndices = [];
 
+  // If a saved draft order already exists in Supabase, replay that exact outcome!
   if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
     finishingIndices = savedDraftOrder.map(item => {
       const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
       return memberIndex !== -1 ? memberIndex : 0;
     });
   } else {
+    // Otherwise, run a new weighted lottery for a fresh race
     finishingIndices = runWeightedLottery();
   }
 
@@ -1344,7 +1336,7 @@ async function saveCompletedDraft() {
 
   try {
     await saveDraftOrderToSupabase(finalOrderData);
-    savedDraftOrder = finalOrderData;
+    savedDraftOrder = finalOrderData; // Lock in memory
     fadeOutDraftMusic(2000);
   } catch (err) {
     console.error("Auto-saving draft order failed:", err);
@@ -1423,6 +1415,7 @@ async function loadMembersFromSupabase() {
     return false;
   }
 
+  // Stable sort by id to assign consistent image indices (0 to 7)
   const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   currentMembers = sortedRows.map((row, idx) => ({
@@ -1525,55 +1518,21 @@ async function saveDraftOrderToSupabase(draftOrder) {
   return true;
 }
 
-
-    async function resetDraftResults() {
-  const confirmed = confirm(
-    "Reset the saved draft results? Team names and weights will be preserved."
-  );
-
+async function resetDraftResults() {
+  const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
   if (!confirmed) return false;
-
-  try {
-    // Delete the saved draft results from Supabase.
-    const { error } = await supabase
-      .from(ORDERS_TABLE)
-      .delete()
-      .not("id", "is", null);
-
-    if (error) throw error;
-
-    // Verify that the saved draft results were actually deleted.
-    const { data: remainingRows, error: verifyError } = await supabase
-      .from(ORDERS_TABLE)
-      .select("id")
-      .limit(1);
-
-    if (verifyError) throw verifyError;
-
-    if (remainingRows && remainingRows.length > 0) {
-      throw new Error(
-        "Supabase did not delete the saved draft results. Check the DELETE permissions for the draft_orders table."
-      );
-    }
-
-    // Clear the saved order from the browser's memory.
-    savedDraftOrder = null;
-
-    // Reset the race while preserving team names and weights.
-    resetRace();
-
-    showStatus(
-      "Draft results reset. Ready for a new race with updated odds!"
-    );
-
-    return true;
-
-  } catch (error) {
-    console.error("Could not reset draft results:", error);
-    showStatus(error.message || "Could not reset draft results.");
+  const { error } = await supabase.from(ORDERS_TABLE).delete().not("id", "is", null);
+  if (error) {
+    showStatus("Could not reset draft results.");
     return false;
   }
+  savedDraftOrder = null;
+  resetRace();
+
+  showStatus("Draft results reset. Ready for a new race with updated odds!");
+  return true;
 }
+
 /* =========================================================
    COMMISSIONER EVENT LISTENERS
    ========================================================= */
@@ -1629,13 +1588,20 @@ saveConfigButton.addEventListener("click", async () => {
       }
     }));
 
+    // 1. Save new configuration / weights to Supabase
     const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
     if (error) throw error;
+
+    // 2. Clear old saved draft order so new odds generate a fresh race next time
+    await supabase.from(ORDERS_TABLE).delete().not("id", "is", null);
+    savedDraftOrder = null;
+    buildDraftOrder();
+    resetRace();
 
     currentMembers = editedMembers;
     renderTeamSettings();
     buildPermanentLabels();
-    showStatus("Configuration saved successfully.");
+    showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
   } catch (error) {
     showStatus(error.message || "Could not save configuration.");
   } finally {
@@ -1689,6 +1655,7 @@ lockButton.addEventListener("click", () => {
 (async function initApp() {
   await loadMembersFromSupabase();
 
+  // Always create eight empty pick slots showing "Pending..."
   buildDraftOrder();
 
   try {

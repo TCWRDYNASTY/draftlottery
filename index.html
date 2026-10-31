@@ -937,10 +937,12 @@ h1 {
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 /* =========================================================
-   SUPABASE CONNECTION & CONFIG
-   ========================================================= */
+SUPABASE CONNECTION & CONFIG
+========================================================= */
 const SUPABASE_URL = "https://jheqfwykhvyngfqawknr.supabase.co";
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.
+LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 
 const CONFIG_TABLE = "draft_configs";
 const ORDERS_TABLE = "draft_orders";
@@ -949,22 +951,22 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const COMMISSIONER_PASSWORD = "Asher";
 
 /* =========================================================
-   IMAGE FILES
-   ========================================================= */
+IMAGE FILES
+========================================================= */
 const IMAGE_FILES = [
-  "image1.jpeg",
-  "image2.jpeg",
-  "image3.jpeg",
-  "image4.jpeg",
-  "image5.jpeg",
-  "image6.jpeg",
-  "image7.jpeg",
-  "image8.jpeg"
+"image1.jpeg",
+"image2.jpeg",
+"image3.jpeg",
+"image4.jpeg",
+"image5.jpeg",
+"image6.jpeg",
+"image7.jpeg",
+"image8.jpeg"
 ];
 
 /* =========================================================
-   DOM ELEMENTS
-   ========================================================= */
+DOM ELEMENTS
+========================================================= */
 const field = document.getElementById("field");
 const draftOrder = document.getElementById("draftOrder");
 const status = document.getElementById("status");
@@ -987,8 +989,8 @@ const lockButton = document.getElementById("lockCommissionerBtn");
 const commissionerStatusMessage = document.getElementById("commissionerStatus");
 
 /* =========================================================
-   RACE SETTINGS & STATE
-   ========================================================= */
+RACE SETTINGS & STATE
+========================================================= */
 const RUNNER_COUNT = 8;
 const START_PERCENT = 5;
 const FINISH_PERCENT = 97;
@@ -1007,669 +1009,728 @@ let activeDraftOrderMapping = [0, 1, 2, 3, 4, 5, 6, 7];
 let savedDraftOrder = null;
 
 function showStatus(msg) {
-  if (commissionerStatusMessage) commissionerStatusMessage.textContent = msg;
-  if (status) status.textContent = msg;
+if (commissionerStatusMessage) commissionerStatusMessage.textContent = msg;
+if (status) status.textContent = msg;
 }
 
 /* =========================================================
-   BUILD RUNNERS, DRAFT ORDER, & TEAM KEY
-   ========================================================= */
+BUILD RUNNERS, DRAFT ORDER, & TEAM KEY
+========================================================= */
 function buildRunners() {
-  field.innerHTML = "";
-  runners = [];
+field.innerHTML = "";
+runners = [];
 
-  for (let i = 0; i < RUNNER_COUNT; i++) {
-    const startX = START_X_OFFSETS[i];
-    const runner = document.createElement("div");
-    runner.className = "runner";
-    runner.dataset.index = i;
-    runner.style.left = `${startX}%`;
-    runner.style.top = `${START_Y_POSITIONS[i]}%`;
+for (let i = 0; i < RUNNER_COUNT; i++) {
+const startX = START_X_OFFSETS[i];
+const runner = document.createElement("div");
+runner.className = "runner";
+runner.dataset.index = i;
+runner.style.left = `${startX}%`;
+runner.style.top = `${START_Y_POSITIONS[i]}%`;
 
-    const member = currentMembers[i];
-    const imageIndex = member?.imageIndex ?? i;
+const member = currentMembers[i];
+const imageIndex = member?.imageIndex ?? i;
 
-    const image = document.createElement("img");
-    image.className = "player-image";
-    image.src = IMAGE_FILES[imageIndex];
-    image.alt = member?.name || `Team ${i + 1}`;
-    image.draggable = false;
-    runner.appendChild(image);
+const image = document.createElement("img");
+image.className = "player-image";
+image.src = IMAGE_FILES[imageIndex];
+image.alt = member?.name || `Team ${i + 1}`;
+image.draggable = false;
+runner.appendChild(image);
 
-    field.appendChild(runner);
+field.appendChild(runner);
 
-    runners.push({
-      element: runner,
-      image,
-      index: i,
-      progress: 0,
-      finished: false,
-      finishTime: FINISH_TIMES[i],
-      startX: startX,
-      startY: START_Y_POSITIONS[i],
-      previousLeft: startX
-    });
-  }
+runners.push({
+element: runner,
+image,
+index: i,
+progress: 0,
+finished: false,
+finishTime: FINISH_TIMES[i],
+startX: startX,
+startY: START_Y_POSITIONS[i],
+previousLeft: startX
+});
+}
 }
 
 function buildDraftOrder() {
-  draftOrder.innerHTML = "";
-  for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
-    const li = document.createElement("li");
-    li.dataset.pick = pick;
+draftOrder.innerHTML = "";
+for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
+const li = document.createElement("li");
+li.dataset.pick = pick;
 
-    const label = document.createElement("span");
-    label.textContent = `PICK #${pick}`;
+const label = document.createElement("span");
+label.textContent = `PICK #${pick}`;
 
-    const result = document.createElement("span");
-    result.className = "pending";
-    result.textContent = "Pending...";
+const result = document.createElement("span");
+result.className = "pending";
+result.textContent = "Pending...";
 
-    li.appendChild(label);
-    li.appendChild(result);
-    draftOrder.appendChild(li);
-  }
+li.appendChild(label);
+li.appendChild(result);
+draftOrder.appendChild(li);
+}
 }
 
 function buildPermanentLabels() {
-  if (!permanentLabels) return;
-  permanentLabels.innerHTML = "";
+if (!permanentLabels) return;
+permanentLabels.innerHTML = "";
 
-  for (let i = 0; i < RUNNER_COUNT; i++) {
-    const member = currentMembers[i];
-    const imageIndex = member?.imageIndex ?? i;
-    const team = document.createElement("div");
-    team.className = "permanent-team";
+for (let i = 0; i < RUNNER_COUNT; i++) {
+const member = currentMembers[i];
+const imageIndex = member?.imageIndex ?? i;
+const team = document.createElement("div");
+team.className = "permanent-team";
 
-    const image = document.createElement("img");
-    image.src = IMAGE_FILES[imageIndex];
-    image.alt = member?.name || `Team ${i + 1}`;
-    image.draggable = false;
+const image = document.createElement("img");
+image.src = IMAGE_FILES[imageIndex];
+image.alt = member?.name || `Team ${i + 1}`;
+image.draggable = false;
 
-    const text = document.createElement("div");
-    text.className = "permanent-team-text";
+const text = document.createElement("div");
+text.className = "permanent-team-text";
 
-    const name = document.createElement("div");
-    name.className = "permanent-team-name";
-    name.textContent = member?.name || `TEAM ${i + 1}`;
+const name = document.createElement("div");
+name.className = "permanent-team-name";
+name.textContent = member?.name || `TEAM ${i + 1}`;
 
-    const odds = document.createElement("div");
-    odds.className = "permanent-team-odds";
-    odds.textContent = `Weight: ${member?.weight || 1}`;
+const odds = document.createElement("div");
+odds.className = "permanent-team-odds";
+odds.textContent = `Weight: ${member?.weight || 1}`;
 
-    text.appendChild(name);
-    text.appendChild(odds);
-    team.appendChild(image);
-    team.appendChild(text);
-    permanentLabels.appendChild(team);
-  }
+text.appendChild(name);
+text.appendChild(odds);
+team.appendChild(image);
+team.appendChild(text);
+permanentLabels.appendChild(team);
+}
 }
 
 function resetRace() {
-  cancelAnimationFrame(animationFrame);
-  raceRunning = false;
-  raceStartTime = 0;
-  revealedPicks = 0;
+cancelAnimationFrame(animationFrame);
+raceRunning = false;
+raceStartTime = 0;
+revealedPicks = 0;
 
-  buildRunners();
-  buildDraftOrder();
-  buildPermanentLabels();
+buildRunners();
+buildDraftOrder();
+buildPermanentLabels();
 
-  if (status) status.textContent = "Ready at the starting line.";
-  if (raceCurtain) {
-    raceCurtain.classList.remove("open", "countdown", "hidden");
-  }
-  if (countdownNumber) {
-    countdownNumber.classList.remove("pop", "go");
-    countdownNumber.textContent = "3";
-  }
-  if (startDashBtn) startDashBtn.disabled = false;
+if (status) status.textContent = "Ready at the starting line.";
+if (raceCurtain) {
+raceCurtain.classList.remove("open", "countdown", "hidden");
+}
+if (countdownNumber) {
+countdownNumber.classList.remove("pop", "go");
+countdownNumber.textContent = "3";
+}
+if (startDashBtn) startDashBtn.disabled = false;
 }
 
 /* =========================================================
-   COUNTDOWN & ANIMATION ENGINE
-   ========================================================= */
+COUNTDOWN & ANIMATION ENGINE
+========================================================= */
 function startCountdown() {
-  if (raceRunning) return;
-  if (startDashBtn) startDashBtn.disabled = true;
-  if (raceCurtain) raceCurtain.classList.add("countdown");
-  runCountdown();
+if (raceRunning) return;
+if (startDashBtn) startDashBtn.disabled = true;
+if (raceCurtain) raceCurtain.classList.add("countdown");
+runCountdown();
 }
 
 function runCountdown() {
-  const numbers = ["3", "2", "1"];
-  let index = 0;
+const numbers = ["3", "2", "1"];
+let index = 0;
 
-  function showNumber() {
-    if (!countdownNumber) {
-      startRace();
-      return;
-    }
-    countdownNumber.classList.remove("pop");
-    void countdownNumber.offsetWidth;
-    countdownNumber.textContent = numbers[index];
-    countdownNumber.classList.add("pop");
-    index++;
+function showNumber() {
+if (!countdownNumber) {
+startRace();
+return;
+}
+countdownNumber.classList.remove("pop");
+void countdownNumber.offsetWidth;
+countdownNumber.textContent = numbers[index];
+countdownNumber.classList.add("pop");
+index++;
 
-    if (index < numbers.length) {
-      setTimeout(showNumber, 750);
-      return;
-    }
+if (index < numbers.length) {
+setTimeout(showNumber, 750);
+return;
+}
 
-    setTimeout(() => {
-      countdownNumber.classList.remove("pop");
-      countdownNumber.classList.add("go");
-      countdownNumber.textContent = "GO!";
+setTimeout(() => {
+countdownNumber.classList.remove("pop");
+countdownNumber.classList.add("go");
+countdownNumber.textContent = "GO!";
 
-      setTimeout(() => {
-        if (raceCurtain) {
-          raceCurtain.classList.add("open");
-          setTimeout(() => raceCurtain.classList.add("hidden"), 1000);
-        }
-        startRace();
-      }, 500);
-    }, 750);
-  }
-  showNumber();
+setTimeout(() => {
+if (raceCurtain) {
+raceCurtain.classList.add("open");
+setTimeout(() => raceCurtain.classList.add("hidden"), 1000);
+}
+startRace();
+}, 500);
+}, 750);
+}
+showNumber();
 }
 
 function prepareDraftOrderMapping() {
-  activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
+activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
 }
 
 function runWeightedLottery() {
-  let pool = currentMembers.map((member, index) => ({
-    index: index,
-    weight: Math.max(1, Number(member.weight) || 1)
-  }));
+let pool = currentMembers.map((member, index) => ({
+index: index,
+weight: Math.max(1, Number(member.weight) || 1)
+}));
 
-  let lotteryOrder = [];
+let lotteryOrder = [];
 
-  while (pool.length > 0) {
-    const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
-    let randomVal = Math.random() * totalWeight;
-    
-    let selectedIndex = -1;
-    for (let i = 0; i < pool.length; i++) {
-      randomVal -= pool[i].weight;
-      if (randomVal <= 0) {
-        selectedIndex = i;
-        break;
-      }
-    }
-    
-    if (selectedIndex === -1) selectedIndex = pool.length - 1;
-    lotteryOrder.push(pool[selectedIndex].index);
-    pool.splice(selectedIndex, 1);
-  }
+while (pool.length > 0) {
+const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+let randomVal = Math.random() * totalWeight;
 
-  return lotteryOrder;
+let selectedIndex = -1;
+for (let i = 0; i < pool.length; i++) {
+randomVal -= pool[i].weight;
+if (randomVal <= 0) {
+selectedIndex = i;
+break;
 }
-    
+}
+
+if (selectedIndex === -1) selectedIndex = pool.length - 1;
+lotteryOrder.push(pool[selectedIndex].index);
+pool.splice(selectedIndex, 1);
+}
+
+return lotteryOrder;
+}
+
 function startRace() {
-  if (raceRunning) return;
+if (raceRunning) return;
 
-  let finishingIndices = [];
+let finishingIndices = [];
 
-  // If a saved draft order already exists in Supabase, replay that exact outcome!
-  if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
-    finishingIndices = savedDraftOrder.map(item => {
-      const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
-      return memberIndex !== -1 ? memberIndex : 0;
-    });
-  } else {
-    // Otherwise, run a new weighted lottery for a fresh race
-    finishingIndices = runWeightedLottery();
-  }
+// If a saved draft order already exists in Supabase, replay that exact outcome!
+if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
+finishingIndices = savedDraftOrder.map(item => {
+const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
+return memberIndex;
+});
 
-  finishingIndices.forEach((originalIndex, placeIndex) => {
-    runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
-  });
+if (finishingIndices.some(index => index === -1) ||
+new Set(finishingIndices).size !== RUNNER_COUNT) {
+showStatus("Saved draft results do not match the current team settings. Reset the draft before running a new race.");
+if (startDashBtn) startDashBtn.disabled = false;
+return;
+}
+} else {
+// Otherwise, run a new weighted lottery for a fresh race
+finishingIndices = runWeightedLottery();
+}
 
-  raceRunning = true;
-  raceStartTime = performance.now();
+finishingIndices.forEach((originalIndex, placeIndex) => {
+runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
+});
 
-  if (status) status.textContent = "The race is on!";
-  if (startDashBtn) startDashBtn.disabled = true;
+raceRunning = true;
+raceStartTime = performance.now();
 
-  runners.forEach((runner) => {
-    runner.progress = 0;
-    runner.finished = false;
-    runner.previousLeft = runner.startX;
-    runner.element.classList.remove("finished");
-    runner.element.style.transition = "none";
-  });
+if (status) status.textContent = "The race is on!";
+if (startDashBtn) startDashBtn.disabled = true;
 
-  animationFrame = requestAnimationFrame(animateRace);
+runners.forEach((runner) => {
+runner.progress = 0;
+runner.finished = false;
+runner.previousLeft = runner.startX;
+runner.element.classList.remove("finished");
+runner.element.style.transition = "none";
+});
+
+animationFrame = requestAnimationFrame(animateRace);
 }
 
 function animateRace(timestamp) {
-  if (!raceRunning) return;
-  const elapsed = timestamp - raceStartTime;
+if (!raceRunning) return;
+const elapsed = timestamp - raceStartTime;
 
-  runners.forEach((runner) => {
-    if (runner.finished) return;
-    updateRunner(runner, elapsed);
-    checkFinish(runner);
-  });
+runners.forEach((runner) => {
+if (runner.finished) return;
+updateRunner(runner, elapsed);
+checkFinish(runner);
+});
 
-  if (revealedPicks >= RUNNER_COUNT) {
-    finishRace();
-    return;
-  }
-  animationFrame = requestAnimationFrame(animateRace);
+if (revealedPicks >= RUNNER_COUNT) {
+finishRace();
+return;
+}
+animationFrame = requestAnimationFrame(animateRace);
 }
 
 function updateRunner(runner, elapsed) {
-  const seconds = elapsed / 1000;
-  const targetSeconds = runner.finishTime;
-  let progress = Math.min(seconds / targetSeconds, 1);
+const seconds = elapsed / 1000;
+const targetSeconds = runner.finishTime;
+let progress = Math.min(seconds / targetSeconds, 1);
 
-  const surgeOne = Math.sin(seconds * 2.4 + runner.index * 1.7) * 0.025;
-  const surgeTwo = Math.sin(seconds * 5.2 + runner.index * 2.9) * 0.012;
-  const midRaceSurge = Math.sin(seconds * 1.25 + runner.index * 2.2) * 0.035;
+const surgeOne = Math.sin(seconds * 2.4 + runner.index * 1.7) * 0.025;
+const surgeTwo = Math.sin(seconds * 5.2 + runner.index * 2.9) * 0.012;
+const midRaceSurge = Math.sin(seconds * 1.25 + runner.index * 2.2) * 0.035;
 
-  let adjustedProgress = progress + (surgeOne + surgeTwo + midRaceSurge) * progress;
-  adjustedProgress = Math.max(0, adjustedProgress);
+let adjustedProgress = progress + (surgeOne + surgeTwo + midRaceSurge) * progress;
+adjustedProgress = Math.max(0, adjustedProgress);
 
-  if (seconds < targetSeconds) {
-    adjustedProgress = Math.min(adjustedProgress, 0.965);
-  }
+if (seconds < targetSeconds) {
+adjustedProgress = Math.min(adjustedProgress, 0.965);
+}
 
-  runner.progress = adjustedProgress;
-  const left = runner.startX + (FINISH_PERCENT - runner.startX) * adjustedProgress;
-  runner.element.style.left = `${Math.max(runner.startX, Math.min(FINISH_PERCENT, left))}%`;
+runner.progress = adjustedProgress;
+const left = runner.startX + (FINISH_PERCENT - runner.startX) * adjustedProgress;
+runner.element.style.left = `${Math.max(runner.startX, Math.min(FINISH_PERCENT, left))}%`;
 }
 
 function checkFinish(runner) {
-  if (runner.finished) return;
-  const fieldRect = field.getBoundingClientRect();
-  const runnerRect = runner.element.getBoundingClientRect();
-  const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
+if (runner.finished) return;
+const fieldRect = field.getBoundingClientRect();
+const runnerRect = runner.element.getBoundingClientRect();
+const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
 
-  if (runnerRect.right >= finishX) {
-    revealRunner(runner);
-  }
+if (runnerRect.right >= finishX) {
+revealRunner(runner);
+}
 }
 
 function revealRunner(runner) {
-  if (runner.finished) return;
+if (runner.finished) return;
 
-  const fieldRect = field.getBoundingClientRect();
-  const runnerRect = runner.element.getBoundingClientRect();
+const fieldRect = field.getBoundingClientRect();
+const runnerRect = runner.element.getBoundingClientRect();
 
-  runner.finished = true;
-  runner.element.style.transition = "none";
-  runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
-  runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
-  runner.element.classList.add("finished");
+runner.finished = true;
+runner.element.style.transition = "none";
+runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
+runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
+runner.element.classList.add("finished");
 
-  revealedPicks++;
-  const pick = revealedPicks;
-  const teamIndex = runner.index;
-  const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
+revealedPicks++;
+const pick = revealedPicks;
+const teamIndex = runner.index;
+const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
 
-  const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-  if (listItem) {
-    const result = listItem.querySelector("span:last-child");
-    if (result) {
-      result.classList.remove("pending");
-      result.textContent = teamName;
-    }
-    if (pick === 1) listItem.style.color = "var(--gold-bright)";
-  }
+const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
+if (listItem) {
+const result = listItem.querySelector("span:last-child");
+if (result) {
+result.classList.remove("pending");
+result.textContent = teamName;
+}
+if (pick === 1) listItem.style.color = "var(--gold-bright)";
+}
 
-  if (status) status.textContent = `Pick #${pick}: ${teamName}`;
+if (status) status.textContent = `Pick #${pick}: ${teamName}`;
 
-  if (revealedPicks === RUNNER_COUNT) {
-    saveCompletedDraft();
-  }
+if (revealedPicks === RUNNER_COUNT) {
+saveCompletedDraft();
+}
 }
 
 async function saveCompletedDraft() {
-  const finalOrderData = [];
-  for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
-    const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-    const teamName = listItem ? listItem.querySelector("span:last-child").textContent : "";
-    finalOrderData.push({ pick, teamName });
-  }
+const finalOrderData = [];
+for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
+const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
+const teamName = listItem ? listItem.querySelector("span:last-child").textContent : "";
+finalOrderData.push({ pick, teamName });
+}
 
-  try {
-    await saveDraftOrderToSupabase(finalOrderData);
-    savedDraftOrder = finalOrderData; // Lock in memory
-    fadeOutDraftMusic(2000);
-  } catch (err) {
-    console.error("Auto-saving draft order failed:", err);
-  }
+try {
+await saveDraftOrderToSupabase(finalOrderData);
+savedDraftOrder = finalOrderData; // Lock in memory only after Supabase confirms the save.
+showStatus("Draft order saved successfully.");
+fadeOutDraftMusic(2000);
+} catch (err) {
+console.error("Auto-saving draft order failed:", err);
+showStatus("Draft finished, but saving failed. Check the browser console.");
+}
 }
 
 function finishRace() {
-  raceRunning = false;
-  cancelAnimationFrame(animationFrame);
-  animationFrame = null;
-  if (status) status.textContent = "Draft order complete.";
-  if (startDashBtn) startDashBtn.disabled = false;
+raceRunning = false;
+cancelAnimationFrame(animationFrame);
+animationFrame = null;
+if (status) status.textContent = "Draft order complete.";
+if (startDashBtn) startDashBtn.disabled = false;
 }
 
 /* =========================================================
-   AUDIO CONTROLS
-   ========================================================= */
+AUDIO CONTROLS
+========================================================= */
 const draftMusic = document.getElementById("draftMusic");
 
 async function startDraftMusic() {
-  if (!draftMusic) return;
-  draftMusic.volume = 0.55;
-  draftMusic.currentTime = 0;
-  try {
-    await draftMusic.play();
-  } catch (error) {
-    console.warn("Draft music could not start:", error);
-  }
+if (!draftMusic) return;
+draftMusic.volume = 0.55;
+draftMusic.currentTime = 0;
+try {
+await draftMusic.play();
+} catch (error) {
+console.warn("Draft music could not start:", error);
+}
 }
 
 function stopDraftMusic() {
-  if (!draftMusic) return;
-  draftMusic.pause();
-  draftMusic.currentTime = 0;
-  draftMusic.volume = 0.55;
+if (!draftMusic) return;
+draftMusic.pause();
+draftMusic.currentTime = 0;
+draftMusic.volume = 0.55;
 }
 
 let draftMusicFadeFrame = null;
 function fadeOutDraftMusic(duration = 2000) {
-  if (!draftMusic || draftMusic.paused) return;
-  if (draftMusicFadeFrame) {
-    cancelAnimationFrame(draftMusicFadeFrame);
-    draftMusicFadeFrame = null;
-  }
-  const startingVolume = draftMusic.volume;
-  const startTime = performance.now();
+if (!draftMusic || draftMusic.paused) return;
+if (draftMusicFadeFrame) {
+cancelAnimationFrame(draftMusicFadeFrame);
+draftMusicFadeFrame = null;
+}
+const startingVolume = draftMusic.volume;
+const startTime = performance.now();
 
-  const fadeStep = (now) => {
-    const progress = Math.min((now - startTime) / duration, 1);
-    draftMusic.volume = Math.max(0, startingVolume * (1 - progress));
-    if (progress < 1) {
-      draftMusicFadeFrame = requestAnimationFrame(fadeStep);
-    } else {
-      draftMusicFadeFrame = null;
-      stopDraftMusic();
-    }
-  };
-  draftMusicFadeFrame = requestAnimationFrame(fadeStep);
+const fadeStep = (now) => {
+const progress = Math.min((now - startTime) / duration, 1);
+draftMusic.volume = Math.max(0, startingVolume * (1 - progress));
+if (progress < 1) {
+draftMusicFadeFrame = requestAnimationFrame(fadeStep);
+} else {
+draftMusicFadeFrame = null;
+stopDraftMusic();
+}
+};
+draftMusicFadeFrame = requestAnimationFrame(fadeStep);
 }
 
 if (startDashBtn) {
-  startDashBtn.addEventListener("click", async () => {
-    await startDraftMusic();
-    startCountdown();
-  });
+startDashBtn.addEventListener("click", async () => {
+await startDraftMusic();
+startCountdown();
+});
 }
 
 /* =========================================================
-   SUPABASE DATA OPERATIONS
-   ========================================================= */
+SUPABASE DATA OPERATIONS
+========================================================= */
 async function loadMembersFromSupabase() {
-  const { data, error } = await supabase.from(CONFIG_TABLE).select("id, members_data");
-  if (error) {
-    console.error("Could not load team settings:", error);
-    showStatus("Could not load team settings from Supabase.");
-    return false;
-  }
+const { data, error } = await supabase.from(CONFIG_TABLE).select("id, members_data");
+if (error) {
+console.error("Could not load team settings:", error);
+showStatus("Could not load team settings from Supabase.");
+return false;
+}
 
-  // Stable sort by id to assign consistent image indices (0 to 7)
-  const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+// Match the original lottery site's team ordering: highest weight first.
+const sortedRows = (data || []).sort(
+(a, b) => Number(b.members_data?.weight ?? 1) - Number(a.members_data?.weight ?? 1)
+);
 
-  currentMembers = sortedRows.map((row, idx) => ({
-    id: row.id,
-    name: row.members_data?.name ?? "",
-    weight: Number(row.members_data?.weight ?? 1),
-    originalWeightDisplay: row.members_data?.originalWeightDisplay ?? "",
-    color: row.members_data?.color ?? null,
-    imageIndex: row.members_data?.imageIndex ?? idx
-  }));
+currentMembers = sortedRows.map((row, idx) => ({
+id: row.id,
+name: row.members_data?.name ?? "",
+weight: Number(row.members_data?.weight ?? 1),
+originalWeightDisplay: row.members_data?.originalWeightDisplay ?? "",
+color: row.members_data?.color ?? null,
+imageIndex: row.members_data?.imageIndex ?? idx
+}));
 
-  renderTeamSettings();
-  buildPermanentLabels();
-  return true;
+renderTeamSettings();
+buildPermanentLabels();
+return true;
 }
 
 function renderTeamSettings() {
-  memberConfigInputs.replaceChildren();
-  currentMembers.forEach((member, index) => {
-    const row = document.createElement("div");
-    row.className = "team-edit";
-    row.dataset.memberId = String(member.id);
+memberConfigInputs.replaceChildren();
+currentMembers.forEach((member, index) => {
+const row = document.createElement("div");
+row.className = "team-edit";
+row.dataset.memberId = String(member.id);
 
-    const imagePicker = document.createElement("div");
-    imagePicker.className = "team-image-picker";
-    const image = document.createElement("img");
-    image.className = "team-image-preview";
-    image.src = IMAGE_FILES[member.imageIndex ?? index] || "";
-    image.alt = `${member.name} image`;
-    image.draggable = false;
-    const imageLabel = document.createElement("span");
-    imageLabel.textContent = `T${index + 1}`;
-    imagePicker.append(image, imageLabel);
+const imagePicker = document.createElement("div");
+imagePicker.className = "team-image-picker";
+const image = document.createElement("img");
+image.className = "team-image-preview";
+image.src = IMAGE_FILES[member.imageIndex ?? index] || "";
+image.alt = `${member.name} image`;
+image.draggable = false;
+const imageLabel = document.createElement("span");
+imageLabel.textContent = `T${index + 1}`;
+imagePicker.append(image, imageLabel);
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.className = "team-name-input";
-    nameInput.value = member.name;
-    nameInput.placeholder = "Team name";
-    nameInput.maxLength = 100;
+const nameInput = document.createElement("input");
+nameInput.type = "text";
+nameInput.className = "team-name-input";
+nameInput.value = member.name;
+nameInput.placeholder = "Team name";
+nameInput.maxLength = 100;
 
-    const weightInput = document.createElement("input");
-    weightInput.type = "number";
-    weightInput.className = "team-weight-input";
-    weightInput.value = member.weight;
-    weightInput.min = "1";
-    weightInput.max = "100000";
-    weightInput.step = "1";
-    weightInput.required = true;
+const weightInput = document.createElement("input");
+weightInput.type = "number";
+weightInput.className = "team-weight-input";
+weightInput.value = member.weight;
+weightInput.min = "1";
+weightInput.max = "100000";
+weightInput.step = "1";
+weightInput.required = true;
 
-    row.append(imagePicker, nameInput, weightInput);
-    memberConfigInputs.appendChild(row);
-  });
+row.append(imagePicker, nameInput, weightInput);
+memberConfigInputs.appendChild(row);
+});
 }
 
 function readEditedMembers() {
-  const rows = [...memberConfigInputs.querySelectorAll(".team-edit")];
-  return rows.map(row => {
-    const oldMember = currentMembers.find(m => String(m.id) === row.dataset.memberId);
-    const name = row.querySelector(".team-name-input").value.trim();
-    const weight = Number(row.querySelector(".team-weight-input").value);
+const rows = [...memberConfigInputs.querySelectorAll(".team-edit")];
+return rows.map(row => {
+const oldMember = currentMembers.find(m => String(m.id) === row.dataset.memberId);
+const name = row.querySelector(".team-name-input").value.trim();
+const weight = Number(row.querySelector(".team-weight-input").value);
 
-    if (!name) throw new Error("Every team must have a name.");
-    if (!Number.isInteger(weight) || weight < 1) {
-      throw new Error(`Enter a positive whole-number weight for ${name}.`);
-    }
+if (!name) throw new Error("Every team must have a name.");
+if (!Number.isInteger(weight) || weight < 1) {
+throw new Error(`Enter a positive whole-number weight for ${name}.`);
+}
 
-    return {
-      id: oldMember.id,
-      name,
-      weight,
-      originalWeightDisplay: oldMember.originalWeightDisplay,
-      color: oldMember.color,
-      imageIndex: oldMember.imageIndex
-    };
-  });
+return {
+id: oldMember.id,
+name,
+weight,
+originalWeightDisplay: oldMember.originalWeightDisplay,
+color: oldMember.color,
+imageIndex: oldMember.imageIndex
+};
+});
+}
+
+async function saveDraftOrderToSupabase(finalOrderData) {
+// Store the original site's "member" field, while also retaining
+// "teamName" for the Draft Dash site's own race replay.
+const formattedData = finalOrderData.map(item => ({
+id: `pick_${item.pick}`,
+order_data: {
+pick: item.pick,
+member: item.teamName,
+teamName: item.teamName
+}
+}));
+
+const { error } = await supabase
+.from(ORDERS_TABLE)
+.upsert(formattedData, { onConflict: "id" });
+
+if (error) {
+console.error("Could not save completed draft:", error);
+throw error;
+}
+return true;
 }
 
 async function loadDraftOrderFromSupabase() {
-  const { data, error } = await supabase.from(ORDERS_TABLE).select("order_data");
-  if (error) {
-    console.error("Could not load draft results:", error);
-    throw error;
-  }
-  if (!data || data.length === 0) return null;
-  const sorted = data.map(row => row.order_data).filter(Boolean).sort((a, b) => Number(a.pick) - Number(b.pick));
-  if (sorted.length === 0 || sorted.some(s => !s.teamName || s.teamName === "")) return null;
-  return sorted;
+const { data, error } = await supabase.from(ORDERS_TABLE).select("order_data");
+if (error) {
+console.error("Could not load draft results:", error);
+throw error;
+}
+if (!data || data.length === 0) return null;
+
+// Accept both the original lottery site's "member" field and the
+// Draft Dash site's "teamName" field.
+const sorted = data
+.map(row => row.order_data)
+.filter(Boolean)
+.map(item => ({
+pick: Number(item.pick),
+teamName: item.teamName || item.member || ""
+}))
+.sort((a, b) => a.pick - b.pick);
+
+const hasCompleteOrder =
+sorted.length === RUNNER_COUNT &&
+sorted.every(item => item.pick >= 1 && item.pick <= RUNNER_COUNT && item.teamName) &&
+new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
+new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
+
+return hasCompleteOrder ? sorted : null;
 }
 
 async function clearSavedDraftInSupabase() {
-  const blankData = Array.from({ length: RUNNER_COUNT }, (_, i) => ({
-    id: `pick_${i + 1}`,
-    order_data: { pick: i + 1, teamName: "" }
-  }));
-  const { error } = await supabase.from(ORDERS_TABLE).upsert(blankData, { onConflict: "id" });
-  if (error) {
-    console.error("Could not clear saved draft:", error);
-    return false;
-  }
-  return true;
+// Match the original site's reset behavior: remove saved result rows.
+const { error } = await supabase
+.from(ORDERS_TABLE)
+.delete()
+.not("id", "is", null);
+
+if (error) {
+console.error("Could not clear saved draft:", error);
+return false;
+}
+return true;
 }
 
 async function resetDraftResults() {
-  const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
-  if (!confirmed) return false;
-  
-  await clearSavedDraftInSupabase();
-  savedDraftOrder = null;
-  resetRace();
+const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
+if (!confirmed) return false;
 
-  showStatus("Draft results reset. Ready for a new race with updated odds!");
-  return true;
+const cleared = await clearSavedDraftInSupabase();
+if (!cleared) {
+showStatus("Could not reset saved draft results. Check the browser console.");
+return false;
+}
+
+savedDraftOrder = null;
+resetRace();
+
+showStatus("Draft results reset. Ready for a new race with updated odds!");
+return true;
 }
 
 /* =========================================================
-   COMMISSIONER EVENT LISTENERS
-   ========================================================= */
+COMMISSIONER EVENT LISTENERS
+========================================================= */
 commissionerButton.addEventListener("click", () => {
-  if (commissionerUnlocked) {
-    commissionerPanel.classList.toggle("hidden");
-    return;
-  }
-  loginBox.classList.remove("hidden");
-  passwordInput.focus();
+if (commissionerUnlocked) {
+commissionerPanel.classList.toggle("hidden");
+return;
+}
+loginBox.classList.remove("hidden");
+passwordInput.focus();
 });
 
 loginBox.addEventListener("submit", async event => {
-  event.preventDefault();
-  if (passwordInput.value !== COMMISSIONER_PASSWORD) {
-    showStatus("Incorrect password.");
-    passwordInput.value = "";
-    passwordInput.focus();
-    return;
-  }
+event.preventDefault();
+if (passwordInput.value !== COMMISSIONER_PASSWORD) {
+showStatus("Incorrect password.");
+passwordInput.value = "";
+passwordInput.focus();
+return;
+}
 
-  commissionerUnlocked = true;
-  loginBox.classList.add("hidden");
-  commissionerPanel.classList.remove("hidden");
-  passwordInput.value = "";
-  unlockButton.disabled = true;
+commissionerUnlocked = true;
+loginBox.classList.add("hidden");
+commissionerPanel.classList.remove("hidden");
+passwordInput.value = "";
+unlockButton.disabled = true;
 
-  const loaded = await loadMembersFromSupabase();
-  unlockButton.disabled = false;
-  if (loaded) showStatus("Team settings loaded from Supabase.");
+const loaded = await loadMembersFromSupabase();
+unlockButton.disabled = false;
+if (loaded) showStatus("Team settings loaded from Supabase.");
 });
 
 cancelButton.addEventListener("click", () => {
-  loginBox.classList.add("hidden");
-  passwordInput.value = "";
-  showStatus("");
+loginBox.classList.add("hidden");
+passwordInput.value = "";
+showStatus("");
 });
 
 saveConfigButton.addEventListener("click", async () => {
-  if (!commissionerUnlocked) return;
-  saveConfigButton.disabled = true;
+if (!commissionerUnlocked) return;
+saveConfigButton.disabled = true;
 
-  try {
-    const editedMembers = readEditedMembers();
-    const formattedData = editedMembers.map(member => ({
-      id: member.id,
-      members_data: {
-        name: member.name,
-        weight: member.weight,
-        originalWeightDisplay: member.originalWeightDisplay,
-        color: member.color,
-        imageIndex: member.imageIndex
-      }
-    }));
+try {
+const editedMembers = readEditedMembers();
+const formattedData = editedMembers.map(member => ({
+id: member.id,
+members_data: {
+name: member.name,
+weight: member.weight,
+originalWeightDisplay: member.originalWeightDisplay,
+color: member.color,
+imageIndex: member.imageIndex
+}
+}));
 
-    // 1. Save new configuration / weights to Supabase
-    const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
-    if (error) throw error;
+// 1. Save new configuration / weights to Supabase
+const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
+if (error) throw error;
 
-    // 2. Clear old saved draft order reliably so new odds generate a fresh race next time
-    await clearSavedDraftInSupabase();
-    savedDraftOrder = null;
-    buildDraftOrder();
-    resetRace();
+// 2. Clear old saved draft order before generating a new race
+const cleared = await clearSavedDraftInSupabase();
 
-    currentMembers = editedMembers;
-    renderTeamSettings();
-    buildPermanentLabels();
-    showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
-  } catch (error) {
-    showStatus(error.message || "Could not save configuration.");
-  } finally {
-    saveConfigButton.disabled = false;
-  }
+if (!cleared) {
+  throw new Error("Configuration saved, but old draft results could not be cleared. Please try again.");
+}
+
+savedDraftOrder = null;
+buildDraftOrder();
+resetRace();
+
+currentMembers = editedMembers;
+renderTeamSettings();
+buildPermanentLabels();
+showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
+} catch (error) {
+showStatus(error.message || "Could not save configuration.");
+} finally {
+saveConfigButton.disabled = false;
+}
 });
 
 resetDraftButton.addEventListener("click", async () => {
-  if (!commissionerUnlocked) return;
-  resetDraftButton.disabled = true;
-  try {
-    const editedMembers = readEditedMembers();
-    const formattedData = editedMembers.map(member => ({
-      id: member.id,
-      members_data: {
-        name: member.name,
-        weight: member.weight,
-        originalWeightDisplay: member.originalWeightDisplay,
-        color: member.color,
-        imageIndex: member.imageIndex
-      }
-    }));
-    const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
-    if (error) throw error;
-    const resetSuccess = await resetDraftResults();
-    if (!resetSuccess) return;
-    commissionerUnlocked = false;
-    commissionerPanel.classList.add("hidden");
-    loginBox.classList.add("hidden");
-    passwordInput.value = "";
-    window.location.reload();
+if (!commissionerUnlocked) return;
+resetDraftButton.disabled = true;
+try {
+const editedMembers = readEditedMembers();
+const formattedData = editedMembers.map(member => ({
+id: member.id,
+members_data: {
+name: member.name,
+weight: member.weight,
+originalWeightDisplay: member.originalWeightDisplay,
+color: member.color,
+imageIndex: member.imageIndex
+}
+}));
+const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
+if (error) throw error;
+const resetSuccess = await resetDraftResults();
+if (!resetSuccess) return;
+commissionerUnlocked = false;
+commissionerPanel.classList.add("hidden");
+loginBox.classList.add("hidden");
+passwordInput.value = "";
+window.location.reload();
 
-  } catch (error) {
-    showStatus(error.message || "Could not save and reset draft.");
-  } finally {
-    resetDraftButton.disabled = false;
-  }
+} catch (error) {
+showStatus(error.message || "Could not save and reset draft.");
+} finally {
+resetDraftButton.disabled = false;
+}
 });
 
 lockButton.addEventListener("click", () => {
-  commissionerUnlocked = false;
-  commissionerPanel.classList.add("hidden");
-  loginBox.classList.add("hidden");
-  passwordInput.value = "";
-  showStatus("Commissioner panel locked.");
+commissionerUnlocked = false;
+commissionerPanel.classList.add("hidden");
+loginBox.classList.add("hidden");
+passwordInput.value = "";
+showStatus("Commissioner panel locked.");
 });
 
 /* =========================================================
-   INITIALIZATION
-   ========================================================= */
+INITIALIZATION
+========================================================= */
 (async function initApp() {
-  await loadMembersFromSupabase();
+await loadMembersFromSupabase();
+buildDraftOrder();
 
-  // Always create eight empty pick slots showing "Pending..."
-  buildDraftOrder();
+try {
+savedDraftOrder = await loadDraftOrderFromSupabase();
 
-  try {
-    savedDraftOrder = await loadDraftOrderFromSupabase();
+if (savedDraftOrder && savedDraftOrder.length > 0) {
+showStatus("Draft order locked. Ready to race.");
+} else {
+showStatus("No saved draft results. Ready for a new race.");
+}
+} catch (err) {
+console.error("Could not load saved draft:", err);
+showStatus("Ready for a new race.");
+}
 
-    if (savedDraftOrder && savedDraftOrder.length > 0) {
-      showStatus("Draft order locked. Ready to race.");
-    } else {
-      showStatus("No saved draft results. Ready for a new race.");
-    }
-  } catch (err) {
-    console.error("Could not load saved draft:", err);
-    showStatus("Ready for a new race.");
-  }
-
-  buildRunners();
+buildRunners();
 })();
 </script>
 </body>

@@ -1521,16 +1521,15 @@ async function saveDraftOrderToSupabase(draftOrder) {
 async function resetDraftResults() {
   const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
   if (!confirmed) return false;
-
   const { error } = await supabase.from(ORDERS_TABLE).delete().not("id", "is", null);
   if (error) {
     showStatus("Could not reset draft results.");
     return false;
   }
   savedDraftOrder = null;
-
-  showStatus("Draft results reset. Team settings have been preserved.");
   resetRace();
+
+  showStatus("Draft results reset. Ready for a new race with updated odds!");
   return true;
 }
 

@@ -1525,21 +1525,55 @@ async function saveDraftOrderToSupabase(draftOrder) {
   return true;
 }
 
-async function resetDraftResults() {
-  const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
+
+    async function resetDraftResults() {
+  const confirmed = confirm(
+    "Reset the saved draft results? Team names and weights will be preserved."
+  );
+
   if (!confirmed) return false;
-  const { error } = await supabase.from(ORDERS_TABLE).delete().not("id", "is", null);
-  if (error) {
-    showStatus("Could not reset draft results.");
+
+  try {
+    // Delete the saved draft results from Supabase.
+    const { error } = await supabase
+      .from(ORDERS_TABLE)
+      .delete()
+      .not("id", "is", null);
+
+    if (error) throw error;
+
+    // Verify that the saved draft results were actually deleted.
+    const { data: remainingRows, error: verifyError } = await supabase
+      .from(ORDERS_TABLE)
+      .select("id")
+      .limit(1);
+
+    if (verifyError) throw verifyError;
+
+    if (remainingRows && remainingRows.length > 0) {
+      throw new Error(
+        "Supabase did not delete the saved draft results. Check the DELETE permissions for the draft_orders table."
+      );
+    }
+
+    // Clear the saved order from the browser's memory.
+    savedDraftOrder = null;
+
+    // Reset the race while preserving team names and weights.
+    resetRace();
+
+    showStatus(
+      "Draft results reset. Ready for a new race with updated odds!"
+    );
+
+    return true;
+
+  } catch (error) {
+    console.error("Could not reset draft results:", error);
+    showStatus(error.message || "Could not reset draft results.");
     return false;
   }
-  savedDraftOrder = null;
-  resetRace();
-
-  showStatus("Draft results reset. Ready for a new race with updated odds!");
-  return true;
 }
-
 /* =========================================================
    COMMISSIONER EVENT LISTENERS
    ========================================================= */

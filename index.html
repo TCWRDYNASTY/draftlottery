@@ -1661,11 +1661,18 @@ resetRace();
 currentMembers = editedMembers;
 renderTeamSettings();
 buildPermanentLabels();
+
 showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
+
+commissionerUnlocked = false;
+commissionerPanel.classList.add("hidden");
+loginBox.classList.add("hidden");
+passwordInput.value = "";
+
 } catch (error) {
-showStatus(error.message || "Could not save configuration.");
+  showStatus(error.message || "Could not save configuration.");
 } finally {
-saveConfigButton.disabled = false;
+  saveConfigButton.disabled = false;
 }
 });
 

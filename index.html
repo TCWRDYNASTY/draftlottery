@@ -1551,7 +1551,28 @@ resetDraftButton.addEventListener("click", async () => {
   if (!commissionerUnlocked) return;
   resetDraftButton.disabled = true;
   try {
-    await resetDraftResults();
+    const editedMembers = readEditedMembers();
+    const formattedData = editedMembers.map(member => ({
+      id: member.id,
+      members_data: {
+        name: member.name,
+        weight: member.weight,
+        originalWeightDisplay: member.originalWeightDisplay,
+        color: member.color
+      }
+    }));
+    const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
+    if (error) throw error;
+    const resetSuccess = await resetDraftResults();
+    if (!resetSuccess) return;
+    commissionerUnlocked = false;
+    commissionerPanel.classList.add("hidden");
+    loginBox.classList.add("hidden");
+    passwordInput.value = "";
+    window.location.reload();
+
+  } catch (error) {
+    showStatus(error.message || "Could not save and reset draft.");
   } finally {
     resetDraftButton.disabled = false;
   }

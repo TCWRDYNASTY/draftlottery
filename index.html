@@ -1425,7 +1425,7 @@ async function loadMembersFromSupabase() {
     originalWeightDisplay: row.members_data?.originalWeightDisplay ?? "",
     color: row.members_data?.color ?? null,
     imageIndex: row.members_data?.imageIndex ?? idx
-  })).sort((a, b) => Number(b.weight) - Number(a.weight));
+  })).
 
   renderTeamSettings();
   buildPermanentLabels();

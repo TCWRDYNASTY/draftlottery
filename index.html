@@ -1415,7 +1415,6 @@ async function loadMembersFromSupabase() {
     return false;
   }
 
-  // Stable sort by id to assign consistent image indices (0 to 7)
   const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   currentMembers = sortedRows.map((row, idx) => ({
@@ -1425,7 +1424,7 @@ async function loadMembersFromSupabase() {
     originalWeightDisplay: row.members_data?.originalWeightDisplay ?? "",
     color: row.members_data?.color ?? null,
     imageIndex: row.members_data?.imageIndex ?? idx
-  })).
+  }));
 
   renderTeamSettings();
   buildPermanentLabels();

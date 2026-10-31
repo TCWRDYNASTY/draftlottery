@@ -1415,6 +1415,7 @@ async function loadMembersFromSupabase() {
     return false;
   }
 
+  // Stable sort by id to assign consistent image indices (0 to 7)
   const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   currentMembers = sortedRows.map((row, idx) => ({
@@ -1500,26 +1501,17 @@ async function loadDraftOrderFromSupabase() {
     throw error;
   }
   if (!data || data.length === 0) return null;
-  return data.map(row => row.order_data).filter(Boolean).sort((a, b) => Number(a.pick) - Number(b.pick));
-}
-
-async function saveDraftOrderToSupabase(draftOrder) {
-  if (!Array.isArray(draftOrder) || draftOrder.length === 0) {
-    throw new Error("There are no draft results to save.");
-  }
-  const formattedData = draftOrder.map((pick, index) => ({
-    id: `pick_${pick.pick ?? index + 1}`,
-    order_data: { ...pick, pick: Number(pick.pick ?? index + 1) }
-  }));
-
-  const { error } = await supabase.from(ORDERS_TABLE).upsert(formattedData, { onConflict: "id" });
-  if (error) throw error;
-  return true;
+  const sorted = data.map(row => row.order_data).filter(Boolean).sort((a, b) => Number(a.pick) - Number(b.pick));
+  if (sorted.length === 0 || sorted.some(s => !s.teamName || s.teamName === "")) return null;
+  return sorted;
 }
 
 async function clearSavedDraftInSupabase() {
-  const pickIds = Array.from({ length: RUNNER_COUNT }, (_, i) => `pick_${i + 1}`);
-  const { error } = await supabase.from(ORDERS_TABLE).delete().in("id", pickIds);
+  const blankData = Array.from({ length: RUNNER_COUNT }, (_, i) => ({
+    id: `pick_${i + 1}`,
+    order_data: { pick: i + 1, teamName: "" }
+  }));
+  const { error } = await supabase.from(ORDERS_TABLE).upsert(blankData, { onConflict: "id" });
   if (error) {
     console.error("Could not clear saved draft:", error);
     return false;
@@ -1599,10 +1591,7 @@ saveConfigButton.addEventListener("click", async () => {
     if (error) throw error;
 
     // 2. Clear old saved draft order reliably so new odds generate a fresh race next time
-    const pickIds = Array.from({ length: RUNNER_COUNT }, (_, i) => `pick_${i + 1}`);
-    const { error: deleteError } = await supabase.from(ORDERS_TABLE).delete().in("id", pickIds);
-    if (deleteError) console.error("Could not clear saved draft:", deleteError);
-
+    await clearSavedDraftInSupabase();
     savedDraftOrder = null;
     buildDraftOrder();
     resetRace();

@@ -1177,11 +1177,21 @@ function prepareDraftOrderMapping() {
   activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
 }
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 function runWeightedLottery() {
   let pool = currentMembers.map((member, index) => ({
     index: index,
     weight: Math.max(1, Number(member.weight) || 1)
   }));
+
+  shuffleArray(pool);
 
   let lotteryOrder = [];
 
@@ -1211,14 +1221,12 @@ function startRace() {
 
   let finishingIndices = [];
 
-  // If a saved draft order already exists in Supabase, replay that exact outcome!
   if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
     finishingIndices = savedDraftOrder.map(item => {
       const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
       return memberIndex !== -1 ? memberIndex : 0;
     });
   } else {
-    // Otherwise, run a new weighted lottery for a fresh race
     finishingIndices = runWeightedLottery();
   }
 
@@ -1336,7 +1344,7 @@ async function saveCompletedDraft() {
 
   try {
     await saveDraftOrderToSupabase(finalOrderData);
-    savedDraftOrder = finalOrderData; // Lock in memory
+    savedDraftOrder = finalOrderData;
     fadeOutDraftMusic(2000);
   } catch (err) {
     console.error("Auto-saving draft order failed:", err);
@@ -1415,7 +1423,6 @@ async function loadMembersFromSupabase() {
     return false;
   }
 
-  // Stable sort by id to assign consistent image indices (0 to 7)
   const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   currentMembers = sortedRows.map((row, idx) => ({
@@ -1648,7 +1655,6 @@ lockButton.addEventListener("click", () => {
 (async function initApp() {
   await loadMembersFromSupabase();
 
-  // Always create eight empty pick slots showing "Pending..."
   buildDraftOrder();
 
   try {

@@ -1172,10 +1172,42 @@ function prepareDraftOrderMapping() {
   activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
 }
 
+
+function runWeightedLottery() {
+  let pool = currentMembers.map((member, index) => ({
+    index: index,
+    weight: Math.max(1, Number(member.weight) || 1)
+  }));
+
+  let lotteryOrder = [];
+
+  while (pool.length > 0) {
+    const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+    let randomVal = Math.random() * totalWeight;
+    
+    let selectedIndex = -1;
+    for (let i = 0; i < pool.length; i++) {
+      randomVal -= pool[i].weight;
+      if (randomVal <= 0) {
+        selectedIndex = i;
+        break;
+      }
+    }
+    
+    if (selectedIndex === -1) selectedIndex = pool.length - 1;
+    lotteryOrder.push(pool[selectedIndex].index);
+    pool.splice(selectedIndex, 1);
+  }
+
+  return lotteryOrder;
+}
+    
 function startRace() {
   if (raceRunning) return;
-
-  prepareDraftOrderMapping();
+  const finishingIndices = runWeightedLottery();
+  finishingIndices.forEach((originalIndex, placeIndex) => {
+    runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
+  });
 
   raceRunning = true;
   raceStartTime = performance.now();
@@ -1589,16 +1621,22 @@ lockButton.addEventListener("click", () => {
    ========================================================= */
 (async function initApp() {
   await loadMembersFromSupabase();
-
-  // Always create eight empty pick slots.
   buildDraftOrder();
 
   try {
-    // Load the saved order without revealing the results.
     savedDraftOrder = await loadDraftOrderFromSupabase();
-
     if (savedDraftOrder && savedDraftOrder.length > 0) {
-      showStatus("Saved draft loaded. Ready to race.");
+      savedDraftOrder.forEach(item => {
+        const listItem = draftOrder.querySelector(`li[data-pick="${item.pick}"]`);
+        if (listItem) {
+          const result = listItem.querySelector("span:last-child");
+          if (result) {
+            result.classList.remove("pending");
+            result.textContent = item.teamName;
+          }
+        }
+      });
+      showStatus("Saved draft loaded. Ready.");
     } else {
       showStatus("No saved draft results. Ready for a new race.");
     }

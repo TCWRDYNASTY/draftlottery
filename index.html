@@ -1026,10 +1026,13 @@ function buildRunners() {
     runner.style.left = `${startX}%`;
     runner.style.top = `${START_Y_POSITIONS[i]}%`;
 
+    const member = currentMembers[i];
+    const imageIndex = member?.imageIndex ?? i;
+
     const image = document.createElement("img");
     image.className = "player-image";
-    image.src = IMAGE_FILES[i];
-    image.alt = currentMembers[i]?.name || `Team ${i + 1}`;
+    image.src = IMAGE_FILES[imageIndex];
+    image.alt = member?.name || `Team ${i + 1}`;
     image.draggable = false;
     runner.appendChild(image);
 
@@ -1073,12 +1076,14 @@ function buildPermanentLabels() {
   permanentLabels.innerHTML = "";
 
   for (let i = 0; i < RUNNER_COUNT; i++) {
+    const member = currentMembers[i];
+    const imageIndex = member?.imageIndex ?? i;
     const team = document.createElement("div");
     team.className = "permanent-team";
 
     const image = document.createElement("img");
-    image.src = IMAGE_FILES[i];
-    image.alt = currentMembers[i]?.name || `Team ${i + 1}`;
+    image.src = IMAGE_FILES[imageIndex];
+    image.alt = member?.name || `Team ${i + 1}`;
     image.draggable = false;
 
     const text = document.createElement("div");
@@ -1086,11 +1091,11 @@ function buildPermanentLabels() {
 
     const name = document.createElement("div");
     name.className = "permanent-team-name";
-    name.textContent = currentMembers[i]?.name || `TEAM ${i + 1}`;
+    name.textContent = member?.name || `TEAM ${i + 1}`;
 
     const odds = document.createElement("div");
     odds.className = "permanent-team-odds";
-    odds.textContent = `Weight: ${currentMembers[i]?.weight || 1}`;
+    odds.textContent = `Weight: ${member?.weight || 1}`;
 
     text.appendChild(name);
     text.appendChild(odds);
@@ -1172,7 +1177,6 @@ function prepareDraftOrderMapping() {
   activeDraftOrderMapping = currentMembers.map((m, idx) => idx);
 }
 
-
 function runWeightedLottery() {
   let pool = currentMembers.map((member, index) => ({
     index: index,
@@ -1204,7 +1208,20 @@ function runWeightedLottery() {
     
 function startRace() {
   if (raceRunning) return;
-  const finishingIndices = runWeightedLottery();
+
+  let finishingIndices = [];
+
+  // If a saved draft order already exists in Supabase, replay that exact outcome!
+  if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
+    finishingIndices = savedDraftOrder.map(item => {
+      const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
+      return memberIndex !== -1 ? memberIndex : 0;
+    });
+  } else {
+    // Otherwise, run a new weighted lottery for a fresh race
+    finishingIndices = runWeightedLottery();
+  }
+
   finishingIndices.forEach((originalIndex, placeIndex) => {
     runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
   });
@@ -1319,6 +1336,7 @@ async function saveCompletedDraft() {
 
   try {
     await saveDraftOrderToSupabase(finalOrderData);
+    savedDraftOrder = finalOrderData; // Lock in memory
     fadeOutDraftMusic(2000);
   } catch (err) {
     console.error("Auto-saving draft order failed:", err);
@@ -1397,12 +1415,16 @@ async function loadMembersFromSupabase() {
     return false;
   }
 
-  currentMembers = (data || []).map(row => ({
+  // Stable sort by id to assign consistent image indices (0 to 7)
+  const sortedRows = (data || []).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  currentMembers = sortedRows.map((row, idx) => ({
     id: row.id,
     name: row.members_data?.name ?? "",
     weight: Number(row.members_data?.weight ?? 1),
     originalWeightDisplay: row.members_data?.originalWeightDisplay ?? "",
-    color: row.members_data?.color ?? null
+    color: row.members_data?.color ?? null,
+    imageIndex: row.members_data?.imageIndex ?? idx
   })).sort((a, b) => Number(b.weight) - Number(a.weight));
 
   renderTeamSettings();
@@ -1421,7 +1443,7 @@ function renderTeamSettings() {
     imagePicker.className = "team-image-picker";
     const image = document.createElement("img");
     image.className = "team-image-preview";
-    image.src = IMAGE_FILES[index] || "";
+    image.src = IMAGE_FILES[member.imageIndex ?? index] || "";
     image.alt = `${member.name} image`;
     image.draggable = false;
     const imageLabel = document.createElement("span");
@@ -1466,7 +1488,8 @@ function readEditedMembers() {
       name,
       weight,
       originalWeightDisplay: oldMember.originalWeightDisplay,
-      color: oldMember.color
+      color: oldMember.color,
+      imageIndex: oldMember.imageIndex
     };
   });
 }
@@ -1504,6 +1527,7 @@ async function resetDraftResults() {
     showStatus("Could not reset draft results.");
     return false;
   }
+  savedDraftOrder = null;
   showStatus("Draft results reset. Team settings have been preserved.");
   resetRace();
   return true;
@@ -1559,7 +1583,8 @@ saveConfigButton.addEventListener("click", async () => {
         name: member.name,
         weight: member.weight,
         originalWeightDisplay: member.originalWeightDisplay,
-        color: member.color
+        color: member.color,
+        imageIndex: member.imageIndex
       }
     }));
 
@@ -1588,7 +1613,8 @@ resetDraftButton.addEventListener("click", async () => {
         name: member.name,
         weight: member.weight,
         originalWeightDisplay: member.originalWeightDisplay,
-        color: member.color
+        color: member.color,
+        imageIndex: member.imageIndex
       }
     }));
     const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
@@ -1626,12 +1652,10 @@ lockButton.addEventListener("click", () => {
   buildDraftOrder();
 
   try {
-    // Check if a saved draft exists just to update the status message, 
-    // but DO NOT write the names into the draft order list yet!
     savedDraftOrder = await loadDraftOrderFromSupabase();
 
     if (savedDraftOrder && savedDraftOrder.length > 0) {
-      showStatus("Saved draft found. Ready to race.");
+      showStatus("Draft order locked. Ready to race.");
     } else {
       showStatus("No saved draft results. Ready for a new race.");
     }

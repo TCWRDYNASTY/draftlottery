@@ -1621,22 +1621,17 @@ lockButton.addEventListener("click", () => {
    ========================================================= */
 (async function initApp() {
   await loadMembersFromSupabase();
+
+  // Always create eight empty pick slots showing "Pending..."
   buildDraftOrder();
 
   try {
+    // Check if a saved draft exists just to update the status message, 
+    // but DO NOT write the names into the draft order list yet!
     savedDraftOrder = await loadDraftOrderFromSupabase();
+
     if (savedDraftOrder && savedDraftOrder.length > 0) {
-      savedDraftOrder.forEach(item => {
-        const listItem = draftOrder.querySelector(`li[data-pick="${item.pick}"]`);
-        if (listItem) {
-          const result = listItem.querySelector("span:last-child");
-          if (result) {
-            result.classList.remove("pending");
-            result.textContent = item.teamName;
-          }
-        }
-      });
-      showStatus("Saved draft loaded. Ready.");
+      showStatus("Saved draft found. Ready to race.");
     } else {
       showStatus("No saved draft results. Ready for a new race.");
     }

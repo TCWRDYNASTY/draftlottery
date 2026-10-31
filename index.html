@@ -940,9 +940,8 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 SUPABASE CONNECTION & CONFIG
 ========================================================= */
 const SUPABASE_URL = "https://jheqfwykhvyngfqawknr.supabase.co";
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
-eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.
-LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXFmd3lraHZ5bmdmcWF3a25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NDE3MjEsImV4cCI6MjA2MDUxNzcyMX0.LLWSmRdZW_5XD2Z8NqGB5BTP3hAtk63pOnZiSckf7BM';
 
 const CONFIG_TABLE = "draft_configs";
 const ORDERS_TABLE = "draft_orders";
@@ -1729,9 +1728,9 @@ showStatus("No saved draft results. Ready for a new race.");
 console.error("Could not load saved draft:", err);
 showStatus("Ready for a new race.");
 }
-
 buildRunners();
 })();
 </script>
+
 </body>
 </html>

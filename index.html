@@ -1207,50 +1207,62 @@ pool.splice(selectedIndex, 1);
 return lotteryOrder;
 }
 
-function startRace() {
-if (raceRunning) return;
+async function startRace() {
+    if (raceRunning) return;
 
-let finishingIndices = [];
+    let finishingIndices = [];
 
-// If a saved draft order already exists in Supabase, replay that exact outcome!
-if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
-finishingIndices = savedDraftOrder.map(item => {
-const memberIndex = currentMembers.findIndex(m => m.name === item.teamName);
-return memberIndex;
-});
+    try {
+        // Check Supabase for the latest saved draft order before starting.
+        savedDraftOrder = await loadDraftOrderFromSupabase();
 
-if (finishingIndices.some(index => index === -1) ||
-new Set(finishingIndices).size !== RUNNER_COUNT) {
-showStatus("Saved draft results do not match the current team settings. Reset the draft before running a new race.");
-if (startDashBtn) startDashBtn.disabled = false;
-return;
+        // If a saved draft exists, replay that exact outcome.
+        if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
+            finishingIndices = savedDraftOrder.map(item => {
+                return currentMembers.findIndex(m => m.name === item.teamName);
+            });
+
+            if (
+                finishingIndices.some(index => index === -1) ||
+                new Set(finishingIndices).size !== RUNNER_COUNT
+            ) {
+                showStatus("Saved draft results do not match the current team settings. Reset the draft before running a new race.");
+
+                if (startDashBtn) startDashBtn.disabled = false;
+                return;
+            }
+        } else {
+            // No saved draft exists, so generate a new weighted lottery.
+            finishingIndices = runWeightedLottery();
+        }
+
+        finishingIndices.forEach((originalIndex, placeIndex) => {
+            runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
+        });
+
+        raceRunning = true;
+        raceStartTime = performance.now();
+
+        if (status) status.textContent = "The race is on!";
+        if (startDashBtn) startDashBtn.disabled = true;
+
+        runners.forEach((runner) => {
+            runner.progress = 0;
+            runner.finished = false;
+            runner.previousLeft = runner.startX;
+            runner.element.classList.remove("finished");
+            runner.element.style.transition = "none";
+        });
+
+        animationFrame = requestAnimationFrame(animateRace);
+
+    } catch (error) {
+        console.error("Could not check saved draft order:", error);
+        showStatus("Could not load the saved draft from Supabase. Please try again.");
+
+        if (startDashBtn) startDashBtn.disabled = false;
+    }
 }
-} else {
-// Otherwise, run a new weighted lottery for a fresh race
-finishingIndices = runWeightedLottery();
-}
-
-finishingIndices.forEach((originalIndex, placeIndex) => {
-runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
-});
-
-raceRunning = true;
-raceStartTime = performance.now();
-
-if (status) status.textContent = "The race is on!";
-if (startDashBtn) startDashBtn.disabled = true;
-
-runners.forEach((runner) => {
-runner.progress = 0;
-runner.finished = false;
-runner.previousLeft = runner.startX;
-runner.element.classList.remove("finished");
-runner.element.style.transition = "none";
-});
-
-animationFrame = requestAnimationFrame(animateRace);
-}
-
 function animateRace(timestamp) {
 if (!raceRunning) return;
 const elapsed = timestamp - raceStartTime;

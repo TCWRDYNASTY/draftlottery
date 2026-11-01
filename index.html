@@ -1517,7 +1517,7 @@ return true;
 
     return sorted;
 }
-    
+
 function renderTeamSettings() {
 memberConfigInputs.replaceChildren();
 currentMembers.forEach((member, index) => {
@@ -1611,45 +1611,6 @@ async function saveDraftOrderToSupabase(finalOrderData) {
     return true;
 }
     
-async function loadDraftOrderFromSupabase() {
-    const { data, error } = await supabase
-        .from(ORDERS_TABLE)
-        .select("order_data");
-
-    if (error) {
-        console.error("Could not load draft results:", error);
-        throw error;
-    }
-
-    if (!data || data.length === 0) return null;
-
-    const sorted = data
-        .map(row => row.order_data)
-        .filter(Boolean)
-        .map(item => ({
-            pick: Number(item.pick),
-            teamId: item.memberId ?? item.teamId ?? null,
-            teamName: item.teamName || item.member || ""
-        }))
-        .sort((a, b) => a.pick - b.pick);
-
-    const hasCompleteOrder =
-        sorted.length === RUNNER_COUNT &&
-        sorted.every(item =>
-            Number.isInteger(item.pick) &&
-            item.pick >= 1 &&
-            item.pick <= RUNNER_COUNT &&
-            item.teamName
-        ) &&
-        new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
-        new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
-
-    if (!hasCompleteOrder) {
-        throw new Error("Saved draft results are incomplete or invalid. Reset the draft before continuing.");
-    }
-
-    return sorted;
-}
 
 async function clearSavedDraftInSupabase() {
 const { error } = await supabase

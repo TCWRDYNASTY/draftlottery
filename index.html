@@ -1723,21 +1723,6 @@ passwordInput.value = "";
 }
 });
 
-resetDraftButton.addEventListener("click", async () => {
-if (!commissionerUnlocked) return;
-resetDraftButton.disabled = true;
-try {
-const editedMembers = readEditedMembers();
-const formattedData = editedMembers.map(member => ({
-id: member.id,
-members_data: {
-name: member.name,
-weight: member.weight,
-originalWeightDisplay: member.originalWeightDisplay,
-color: member.color,
-imageIndex: member.imageIndex
-}
-}));
 const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
 if (error) throw error;
 const resetSuccess = await resetDraftResults();

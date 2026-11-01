@@ -1305,50 +1305,51 @@ runner.element.style.left = `${Math.max(runner.startX, Math.min(FINISH_PERCENT, 
 }
 
 function checkFinish(runner) {
-if (runner.finished) return;
-const fieldRect = field.getBoundingClientRect();
-const runnerRect = runner.element.getBoundingClientRect();
-const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
+    if (runner.finished) return;
 
-if (runnerRect.right >= finishX) {
-revealRunner(runner);
-}
-}
+    const fieldRect = field.getBoundingClientRect();
+    const runnerRect = runner.element.getBoundingClientRect();
+    const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
 
-if (revealedPicks === RUNNER_COUNT) {
-    draftSavePromise = saveCompletedDraft();
+    if (runnerRect.right >= finishX) {
+        revealRunner(runner);
+    }
 }
 
-const fieldRect = field.getBoundingClientRect();
-const runnerRect = runner.element.getBoundingClientRect();
+function revealRunner(runner) {
+    const fieldRect = field.getBoundingClientRect();
+    const runnerRect = runner.element.getBoundingClientRect();
 
-runner.finished = true;
-runner.element.style.transition = "none";
-runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
-runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
-runner.element.classList.add("finished");
+    runner.finished = true;
+    runner.element.style.transition = "none";
+    runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
+    runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
+    runner.element.classList.add("finished");
 
-revealedPicks++;
-const pick = revealedPicks;
-const teamIndex = runner.index;
-const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
+    revealedPicks++;
+    const pick = revealedPicks;
+    const teamIndex = runner.index;
+    const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
 
-const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-if (listItem) {
-const result = listItem.querySelector("span:last-child");
-if (result) {
-result.classList.remove("pending");
-result.textContent = teamName;
+    const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
+
+    if (listItem) {
+        const result = listItem.querySelector("span:last-child");
+
+        if (result) {
+            result.classList.remove("pending");
+            result.textContent = teamName;
+        }
+
+        if (pick === 1) listItem.style.color = "var(--gold-bright)";
+    }
+
+    if (status) status.textContent = `Pick #${pick}: ${teamName}`;
+
+    if (revealedPicks === RUNNER_COUNT) {
+        draftSavePromise = saveCompletedDraft();
+    }
 }
-if (pick === 1) listItem.style.color = "var(--gold-bright)";
-}
-
-if (status) status.textContent = `Pick #${pick}: ${teamName}`;
-
-if (revealedPicks === RUNNER_COUNT) {
-saveCompletedDraft();
-}
-
 
 async function saveCompletedDraft() {
     const finalOrderData = [];

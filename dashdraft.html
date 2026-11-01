@@ -1517,7 +1517,7 @@ return true;
 
     return sorted;
 }
-    
+
 function renderTeamSettings() {
 memberConfigInputs.replaceChildren();
 currentMembers.forEach((member, index) => {
@@ -1610,57 +1610,7 @@ async function saveDraftOrderToSupabase(finalOrderData) {
 
     return true;
 }
-
-const { error } = await supabase
-.from(ORDERS_TABLE)
-.upsert(formattedData, { onConflict: "id" });
-
-if (error) {
-console.error("Could not save completed draft:", error);
-throw error;
-}
-return true;
-}
-
-async function loadDraftOrderFromSupabase() {
-    const { data, error } = await supabase
-        .from(ORDERS_TABLE)
-        .select("order_data");
-
-    if (error) {
-        console.error("Could not load draft results:", error);
-        throw error;
-    }
-
-    if (!data || data.length === 0) return null;
-
-    const sorted = data
-        .map(row => row.order_data)
-        .filter(Boolean)
-        .map(item => ({
-            pick: Number(item.pick),
-            teamId: item.memberId ?? item.teamId ?? null,
-            teamName: item.teamName || item.member || ""
-        }))
-        .sort((a, b) => a.pick - b.pick);
-
-    const hasCompleteOrder =
-        sorted.length === RUNNER_COUNT &&
-        sorted.every(item =>
-            Number.isInteger(item.pick) &&
-            item.pick >= 1 &&
-            item.pick <= RUNNER_COUNT &&
-            item.teamName
-        ) &&
-        new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
-        new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
-
-    if (!hasCompleteOrder) {
-        throw new Error("Saved draft results are incomplete or invalid. Reset the draft before continuing.");
-    }
-
-    return sorted;
-}
+    
 
 async function clearSavedDraftInSupabase() {
 const { error } = await supabase
@@ -1760,7 +1710,6 @@ resetRace();
 renderTeamSettings();
 buildPermanentLabels();
 showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
-
 commissionerUnlocked = false;
 commissionerPanel.classList.add("hidden");
 loginBox.classList.add("hidden");
@@ -1770,38 +1719,6 @@ passwordInput.value = "";
   showStatus(error.message || "Could not save configuration.");
 } finally {
   saveConfigButton.disabled = false;
-}
-});
-
-resetDraftButton.addEventListener("click", async () => {
-if (!commissionerUnlocked) return;
-resetDraftButton.disabled = true;
-try {
-const editedMembers = readEditedMembers();
-const formattedData = editedMembers.map(member => ({
-id: member.id,
-members_data: {
-name: member.name,
-weight: member.weight,
-originalWeightDisplay: member.originalWeightDisplay,
-color: member.color,
-imageIndex: member.imageIndex
-}
-}));
-const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
-if (error) throw error;
-const resetSuccess = await resetDraftResults();
-if (!resetSuccess) return;
-commissionerUnlocked = false;
-commissionerPanel.classList.add("hidden");
-loginBox.classList.add("hidden");
-passwordInput.value = "";
-window.location.reload();
-
-} catch (error) {
-showStatus(error.message || "Could not save and reset draft.");
-} finally {
-resetDraftButton.disabled = false;
 }
 });
 

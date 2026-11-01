@@ -921,9 +921,7 @@ h1 {
         <button id="saveConfigBtn" type="button">
           SAVE CONFIGURATION
         </button>
-        <button id="resetDraftBtn" type="button">
-          RESET DRAFT RESULTS
-        </button>
+     
         <button id="lockCommissionerBtn" type="button">
           LOCK PANEL
         </button>
@@ -1115,7 +1113,6 @@ raceStartTime = 0;
 revealedPicks = 0;
 draftSavePromise = null;
 draftSaveFailed = false;
-
 buildRunners();
 buildDraftOrder();
 buildPermanentLabels();
@@ -1219,21 +1216,18 @@ async function startRace() {
 }
     raceRunning = true;
     if (startDashBtn) startDashBtn.disabled = true;
-
     let finishingIndices = [];
-
     try {
         savedDraftOrder = await loadDraftOrderFromSupabase();
 
         if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
-         finishingIndices = savedDraftOrder.map(item =>
+finishingIndices = savedDraftOrder.map(item =>
     currentMembers.findIndex(member =>
         item.teamId !== null && item.teamId !== undefined
             ? String(member.id) === String(item.teamId)
             : member.name === item.teamName
     )
 );
-
             if (
                 finishingIndices.some(index => index === -1) ||
                 new Set(finishingIndices).size !== RUNNER_COUNT
@@ -1247,15 +1241,11 @@ async function startRace() {
         } else {
             finishingIndices = runWeightedLottery();
         }
-
         finishingIndices.forEach((originalIndex, placeIndex) => {
             runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
         });
-
         raceStartTime = performance.now();
-
         if (status) status.textContent = "The race is on!";
-
         runners.forEach(runner => {
             runner.progress = 0;
             runner.finished = false;
@@ -1314,50 +1304,52 @@ runner.element.style.left = `${Math.max(runner.startX, Math.min(FINISH_PERCENT, 
 }
 
 function checkFinish(runner) {
-if (runner.finished) return;
-const fieldRect = field.getBoundingClientRect();
-const runnerRect = runner.element.getBoundingClientRect();
-const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
+    if (runner.finished) return;
 
-if (runnerRect.right >= finishX) {
-revealRunner(runner);
-}
+    const fieldRect = field.getBoundingClientRect();
+    const runnerRect = runner.element.getBoundingClientRect();
+    const finishX = fieldRect.left + fieldRect.width * (FINISH_PERCENT / 100);
+
+    if (runnerRect.right >= finishX) {
+        revealRunner(runner);
+    }
 }
 
 function revealRunner(runner) {
-if (runner.finished) return;
+    const fieldRect = field.getBoundingClientRect();
+    const runnerRect = runner.element.getBoundingClientRect();
 
-const fieldRect = field.getBoundingClientRect();
-const runnerRect = runner.element.getBoundingClientRect();
+    runner.finished = true;
+    runner.element.style.transition = "none";
+    runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
+    runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
+    runner.element.classList.add("finished");
 
-runner.finished = true;
-runner.element.style.transition = "none";
-runner.element.style.left = `${runnerRect.left - fieldRect.left}px`;
-runner.element.style.top = `${runnerRect.top - fieldRect.top}px`;
-runner.element.classList.add("finished");
+    revealedPicks++;
+    const pick = revealedPicks;
+    const teamIndex = runner.index;
+    const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
 
-revealedPicks++;
-const pick = revealedPicks;
-const teamIndex = runner.index;
-const teamName = currentMembers[teamIndex]?.name || `Team ${teamIndex + 1}`;
+    const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
 
-const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-if (listItem) {
-const result = listItem.querySelector("span:last-child");
-if (result) {
-result.classList.remove("pending");
-result.textContent = teamName;
+    if (listItem) {
+        const result = listItem.querySelector("span:last-child");
+
+        if (result) {
+            result.classList.remove("pending");
+            result.textContent = teamName;
+        }
+
+        if (pick === 1) listItem.style.color = "var(--gold-bright)";
+    }
+
+    if (status) status.textContent = `Pick #${pick}: ${teamName}`;
+
+    if (revealedPicks === RUNNER_COUNT) {
+        draftSavePromise = saveCompletedDraft();
+    }
 }
-if (pick === 1) listItem.style.color = "var(--gold-bright)";
-}
-
-if (status) status.textContent = `Pick #${pick}: ${teamName}`;
-
-if (revealedPicks === RUNNER_COUNT) {
-    draftSavePromise = saveCompletedDraft();
-}
-}
-
+    
 async function saveCompletedDraft() {
     const finalOrderData = [];
 
@@ -1468,7 +1460,6 @@ showStatus("Could not load team settings from Supabase.");
 return false;
 }
 
-// Match the original lottery site's team ordering: highest weight first.
 const sortedRows = (data || []).sort(
 (a, b) => Number(b.members_data?.weight ?? 1) - Number(a.members_data?.weight ?? 1)
 );
@@ -1487,6 +1478,46 @@ buildPermanentLabels();
 return true;
 }
 
+    async function loadDraftOrderFromSupabase() {
+    const { data, error } = await supabase
+        .from(ORDERS_TABLE)
+        .select("order_data");
+
+    if (error) {
+        console.error("Could not load draft results:", error);
+        throw error;
+    }
+
+    if (!data || data.length === 0) return null;
+
+    const sorted = data
+        .map(row => row.order_data)
+        .filter(Boolean)
+        .map(item => ({
+            pick: Number(item.pick),
+            teamId: item.memberId ?? item.teamId ?? null,
+            teamName: item.teamName || item.member || ""
+        }))
+        .sort((a, b) => a.pick - b.pick);
+
+    const hasCompleteOrder =
+        sorted.length === RUNNER_COUNT &&
+        sorted.every(item =>
+            Number.isInteger(item.pick) &&
+            item.pick >= 1 &&
+            item.pick <= RUNNER_COUNT &&
+            item.teamName
+        ) &&
+        new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
+        new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
+
+    if (!hasCompleteOrder) {
+        throw new Error("Saved draft results are incomplete or invalid. Reset the draft before continuing.");
+    }
+
+    return sorted;
+}
+    
 function renderTeamSettings() {
 memberConfigInputs.replaceChildren();
 currentMembers.forEach((member, index) => {

@@ -1610,18 +1610,7 @@ async function saveDraftOrderToSupabase(finalOrderData) {
 
     return true;
 }
-
-const { error } = await supabase
-.from(ORDERS_TABLE)
-.upsert(formattedData, { onConflict: "id" });
-
-if (error) {
-console.error("Could not save completed draft:", error);
-throw error;
-}
-return true;
-}
-
+    
 async function loadDraftOrderFromSupabase() {
     const { data, error } = await supabase
         .from(ORDERS_TABLE)

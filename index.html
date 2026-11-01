@@ -921,9 +921,7 @@ h1 {
         <button id="saveConfigBtn" type="button">
           SAVE CONFIGURATION
         </button>
-        <button id="resetDraftBtn" type="button">
-          RESET DRAFT RESULTS
-        </button>
+
         <button id="lockCommissionerBtn" type="button">
           LOCK PANEL
         </button>
@@ -983,7 +981,6 @@ const cancelButton = document.getElementById("cancelCommissionerBtn");
 const commissionerPanel = document.getElementById("commissionerPanel");
 const memberConfigInputs = document.getElementById("memberConfigInputs");
 const saveConfigButton = document.getElementById("saveConfigBtn");
-const resetDraftButton = document.getElementById("resetDraftBtn");
 const lockButton = document.getElementById("lockCommissionerBtn");
 const commissionerStatusMessage = document.getElementById("commissionerStatus");
 
@@ -1630,22 +1627,6 @@ return false;
 return true;
 }
 
-async function resetDraftResults() {
-const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
-if (!confirmed) return false;
-const cleared = await clearSavedDraftInSupabase();
-if (!cleared) {
-showStatus("Could not reset saved draft results. Check the browser console.");
-return false;
-}
-
-savedDraftOrder = null;
-resetRace();
-
-showStatus("Draft results reset. Ready for a new race with updated odds!");
-return true;
-}
-
 /* =========================================================
 COMMISSIONER EVENT LISTENERS
 ========================================================= */
@@ -1726,38 +1707,6 @@ passwordInput.value = "";
   showStatus(error.message || "Could not save configuration.");
 } finally {
   saveConfigButton.disabled = false;
-}
-});
-
-resetDraftButton.addEventListener("click", async () => {
-if (!commissionerUnlocked) return;
-resetDraftButton.disabled = true;
-try {
-const editedMembers = readEditedMembers();
-const formattedData = editedMembers.map(member => ({
-id: member.id,
-members_data: {
-name: member.name,
-weight: member.weight,
-originalWeightDisplay: member.originalWeightDisplay,
-color: member.color,
-imageIndex: member.imageIndex
-}
-}));
-const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
-if (error) throw error;
-const resetSuccess = await resetDraftResults();
-if (!resetSuccess) return;
-commissionerUnlocked = false;
-commissionerPanel.classList.add("hidden");
-loginBox.classList.add("hidden");
-passwordInput.value = "";
-window.location.reload();
-
-} catch (error) {
-showStatus(error.message || "Could not save and reset draft.");
-} finally {
-resetDraftButton.disabled = false;
 }
 });
 

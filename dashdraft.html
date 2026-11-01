@@ -1006,6 +1006,8 @@ let currentMembers = [];
 let commissionerUnlocked = false;
 let activeDraftOrderMapping = [0, 1, 2, 3, 4, 5, 6, 7];
 let savedDraftOrder = null;
+let draftSavePromise = null;
+let draftSaveFailed = false;
 
 function showStatus(msg) {
 if (commissionerStatusMessage) commissionerStatusMessage.textContent = msg;
@@ -1111,6 +1113,8 @@ cancelAnimationFrame(animationFrame);
 raceRunning = false;
 raceStartTime = 0;
 revealedPicks = 0;
+draftSavePromise = null;
+draftSaveFailed = false;
 
 buildRunners();
 buildDraftOrder();
@@ -1209,22 +1213,26 @@ return lotteryOrder;
 
 async function startRace() {
     if (raceRunning) return;
-
-    // Lock immediately to prevent overlapping start requests.
+    if (draftSaveFailed) {
+    showStatus("Previous draft could not be saved. Reset draft results before starting again.");
+    return;
+}
     raceRunning = true;
     if (startDashBtn) startDashBtn.disabled = true;
 
     let finishingIndices = [];
 
     try {
-        // Retrieve the latest saved draft from Supabase.
         savedDraftOrder = await loadDraftOrderFromSupabase();
 
         if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
-            // Replay the existing saved draft order.
-            finishingIndices = savedDraftOrder.map(item =>
-                currentMembers.findIndex(member => member.name === item.teamName)
-            );
+         finishingIndices = savedDraftOrder.map(item =>
+    currentMembers.findIndex(member =>
+        item.teamId !== null && item.teamId !== undefined
+            ? String(member.id) === String(item.teamId)
+            : member.name === item.teamName
+    )
+);
 
             if (
                 finishingIndices.some(index => index === -1) ||
@@ -1237,7 +1245,6 @@ async function startRace() {
                 return;
             }
         } else {
-            // Generate a new weighted lottery only if no saved order exists.
             finishingIndices = runWeightedLottery();
         }
 
@@ -1347,37 +1354,56 @@ if (pick === 1) listItem.style.color = "var(--gold-bright)";
 if (status) status.textContent = `Pick #${pick}: ${teamName}`;
 
 if (revealedPicks === RUNNER_COUNT) {
-saveCompletedDraft();
+    draftSavePromise = saveCompletedDraft();
 }
 }
 
 async function saveCompletedDraft() {
-const finalOrderData = [];
-for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
-const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
-const teamName = listItem ? listItem.querySelector("span:last-child").textContent : "";
-finalOrderData.push({ pick, teamName });
+    const finalOrderData = [];
+
+    for (let pick = 1; pick <= RUNNER_COUNT; pick++) {
+        const listItem = draftOrder.querySelector(`li[data-pick="${pick}"]`);
+        const teamName = listItem
+            ? listItem.querySelector("span:last-child").textContent
+            : "";
+
+        finalOrderData.push({ pick, teamName });
+    }
+
+    try {
+        await saveDraftOrderToSupabase(finalOrderData);
+
+        savedDraftOrder = finalOrderData;
+        showStatus("Draft order saved successfully.");
+        fadeOutDraftMusic(2000);
+
+        return true;
+
+    } catch (err) {
+        console.error("Auto-saving draft order failed:", err);
+        draftSaveFailed = true;
+        showStatus("Draft finished, but saving failed. Reset the draft before trying again.");
+
+        return false;
+    }
 }
 
-try {
-await saveDraftOrderToSupabase(finalOrderData);
-savedDraftOrder = finalOrderData; // Lock in memory only after Supabase confirms the save.
-showStatus("Draft order saved successfully.");
-fadeOutDraftMusic(2000);
-} catch (err) {
-console.error("Auto-saving draft order failed:", err);
-showStatus("Draft finished, but saving failed. Check the browser console.");
+async function finishRace() {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    if (draftSavePromise) {
+        const saved = await draftSavePromise;
+       if (!saved) {
+    raceRunning = false;
+    if (startDashBtn) startDashBtn.disabled = true;
+    return;
 }
-}
+    }
 
-function finishRace() {
-raceRunning = false;
-cancelAnimationFrame(animationFrame);
-animationFrame = null;
-if (status) status.textContent = "Draft order complete.";
-if (startDashBtn) startDashBtn.disabled = false;
+    raceRunning = false;
+    if (status) status.textContent = "Draft order complete.";
+    if (startDashBtn) startDashBtn.disabled = false;
 }
-
 /* =========================================================
 AUDIO CONTROLS
 ========================================================= */
@@ -1524,14 +1550,35 @@ imageIndex: oldMember.imageIndex
 }
 
 async function saveDraftOrderToSupabase(finalOrderData) {
-const formattedData = finalOrderData.map(item => ({
-id: `pick_${item.pick}`,
-order_data: {
-pick: item.pick,
-member: item.teamName,
-teamName: item.teamName
+    const formattedData = finalOrderData.map(item => {
+        const member = currentMembers.find(m => m.name === item.teamName);
+
+        if (!member) {
+            throw new Error(`Could not find team: ${item.teamName}`);
+        }
+
+        return {
+            id: `pick_${item.pick}`,
+            order_data: {
+                pick: item.pick,
+                memberId: member.id,
+                member: item.teamName,
+                teamName: item.teamName
+            }
+        };
+    });
+
+    const { error } = await supabase
+        .from(ORDERS_TABLE)
+        .upsert(formattedData, { onConflict: "id" });
+
+    if (error) {
+        console.error("Could not save completed draft:", error);
+        throw error;
+    }
+
+    return true;
 }
-}));
 
 const { error } = await supabase
 .from(ORDERS_TABLE)
@@ -1545,29 +1592,43 @@ return true;
 }
 
 async function loadDraftOrderFromSupabase() {
-const { data, error } = await supabase.from(ORDERS_TABLE).select("order_data");
-if (error) {
-console.error("Could not load draft results:", error);
-throw error;
-}
-if (!data || data.length === 0) return null;
+    const { data, error } = await supabase
+        .from(ORDERS_TABLE)
+        .select("order_data");
 
-const sorted = data
-.map(row => row.order_data)
-.filter(Boolean)
-.map(item => ({
-pick: Number(item.pick),
-teamName: item.teamName || item.member || ""
-}))
-.sort((a, b) => a.pick - b.pick);
+    if (error) {
+        console.error("Could not load draft results:", error);
+        throw error;
+    }
 
-const hasCompleteOrder =
-sorted.length === RUNNER_COUNT &&
-sorted.every(item => item.pick >= 1 && item.pick <= RUNNER_COUNT && item.teamName) &&
-new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
-new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
+    if (!data || data.length === 0) return null;
 
-return hasCompleteOrder ? sorted : null;
+    const sorted = data
+        .map(row => row.order_data)
+        .filter(Boolean)
+        .map(item => ({
+            pick: Number(item.pick),
+            teamId: item.memberId ?? item.teamId ?? null,
+            teamName: item.teamName || item.member || ""
+        }))
+        .sort((a, b) => a.pick - b.pick);
+
+    const hasCompleteOrder =
+        sorted.length === RUNNER_COUNT &&
+        sorted.every(item =>
+            Number.isInteger(item.pick) &&
+            item.pick >= 1 &&
+            item.pick <= RUNNER_COUNT &&
+            item.teamName
+        ) &&
+        new Set(sorted.map(item => item.pick)).size === RUNNER_COUNT &&
+        new Set(sorted.map(item => item.teamName)).size === RUNNER_COUNT;
+
+    if (!hasCompleteOrder) {
+        throw new Error("Saved draft results are incomplete or invalid. Reset the draft before continuing.");
+    }
+
+    return sorted;
 }
 
 async function clearSavedDraftInSupabase() {
@@ -1662,13 +1723,11 @@ if (!cleared) {
 }
 
 savedDraftOrder = null;
-buildDraftOrder();
-resetRace();
-
 currentMembers = editedMembers;
+
+resetRace();
 renderTeamSettings();
 buildPermanentLabels();
-
 showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
 
 commissionerUnlocked = false;

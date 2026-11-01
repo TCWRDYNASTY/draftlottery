@@ -1710,7 +1710,6 @@ resetRace();
 renderTeamSettings();
 buildPermanentLabels();
 showStatus("Configuration saved! Old draft cleared—ready for a new race with updated odds.");
-
 commissionerUnlocked = false;
 commissionerPanel.classList.add("hidden");
 loginBox.classList.add("hidden");
@@ -1720,23 +1719,6 @@ passwordInput.value = "";
   showStatus(error.message || "Could not save configuration.");
 } finally {
   saveConfigButton.disabled = false;
-}
-});
-
-const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
-if (error) throw error;
-const resetSuccess = await resetDraftResults();
-if (!resetSuccess) return;
-commissionerUnlocked = false;
-commissionerPanel.classList.add("hidden");
-loginBox.classList.add("hidden");
-passwordInput.value = "";
-window.location.reload();
-
-} catch (error) {
-showStatus(error.message || "Could not save and reset draft.");
-} finally {
-resetDraftButton.disabled = false;
 }
 });
 

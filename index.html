@@ -1210,17 +1210,21 @@ return lotteryOrder;
 async function startRace() {
     if (raceRunning) return;
 
+    // Lock immediately to prevent overlapping start requests.
+    raceRunning = true;
+    if (startDashBtn) startDashBtn.disabled = true;
+
     let finishingIndices = [];
 
     try {
-        // Check Supabase for the latest saved draft order before starting.
+        // Retrieve the latest saved draft from Supabase.
         savedDraftOrder = await loadDraftOrderFromSupabase();
 
-        // If a saved draft exists, replay that exact outcome.
         if (savedDraftOrder && savedDraftOrder.length === RUNNER_COUNT) {
-            finishingIndices = savedDraftOrder.map(item => {
-                return currentMembers.findIndex(m => m.name === item.teamName);
-            });
+            // Replay the existing saved draft order.
+            finishingIndices = savedDraftOrder.map(item =>
+                currentMembers.findIndex(member => member.name === item.teamName)
+            );
 
             if (
                 finishingIndices.some(index => index === -1) ||
@@ -1228,11 +1232,12 @@ async function startRace() {
             ) {
                 showStatus("Saved draft results do not match the current team settings. Reset the draft before running a new race.");
 
+                raceRunning = false;
                 if (startDashBtn) startDashBtn.disabled = false;
                 return;
             }
         } else {
-            // No saved draft exists, so generate a new weighted lottery.
+            // Generate a new weighted lottery only if no saved order exists.
             finishingIndices = runWeightedLottery();
         }
 
@@ -1240,13 +1245,11 @@ async function startRace() {
             runners[originalIndex].finishTime = FINISH_TIMES[placeIndex];
         });
 
-        raceRunning = true;
         raceStartTime = performance.now();
 
         if (status) status.textContent = "The race is on!";
-        if (startDashBtn) startDashBtn.disabled = true;
 
-        runners.forEach((runner) => {
+        runners.forEach(runner => {
             runner.progress = 0;
             runner.finished = false;
             runner.previousLeft = runner.startX;
@@ -1260,9 +1263,11 @@ async function startRace() {
         console.error("Could not check saved draft order:", error);
         showStatus("Could not load the saved draft from Supabase. Please try again.");
 
+        raceRunning = false;
         if (startDashBtn) startDashBtn.disabled = false;
     }
 }
+    
 function animateRace(timestamp) {
 if (!raceRunning) return;
 const elapsed = timestamp - raceStartTime;
@@ -1519,8 +1524,6 @@ imageIndex: oldMember.imageIndex
 }
 
 async function saveDraftOrderToSupabase(finalOrderData) {
-// Store the original site's "member" field, while also retaining
-// "teamName" for the Draft Dash site's own race replay.
 const formattedData = finalOrderData.map(item => ({
 id: `pick_${item.pick}`,
 order_data: {
@@ -1549,8 +1552,6 @@ throw error;
 }
 if (!data || data.length === 0) return null;
 
-// Accept both the original lottery site's "member" field and the
-// Draft Dash site's "teamName" field.
 const sorted = data
 .map(row => row.order_data)
 .filter(Boolean)
@@ -1570,7 +1571,6 @@ return hasCompleteOrder ? sorted : null;
 }
 
 async function clearSavedDraftInSupabase() {
-// Match the original site's reset behavior: remove saved result rows.
 const { error } = await supabase
 .from(ORDERS_TABLE)
 .delete()
@@ -1586,7 +1586,6 @@ return true;
 async function resetDraftResults() {
 const confirmed = confirm("Reset the saved draft results? Team names and weights will be preserved.");
 if (!confirmed) return false;
-
 const cleared = await clearSavedDraftInSupabase();
 if (!cleared) {
 showStatus("Could not reset saved draft results. Check the browser console.");
@@ -1655,13 +1654,9 @@ imageIndex: member.imageIndex
 }
 }));
 
-// 1. Save new configuration / weights to Supabase
 const { error } = await supabase.from(CONFIG_TABLE).upsert(formattedData, { onConflict: "id" });
 if (error) throw error;
-
-// 2. Clear old saved draft order before generating a new race
 const cleared = await clearSavedDraftInSupabase();
-
 if (!cleared) {
   throw new Error("Configuration saved, but old draft results could not be cleared. Please try again.");
 }
